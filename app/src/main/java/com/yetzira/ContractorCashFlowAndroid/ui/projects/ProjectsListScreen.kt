@@ -6,22 +6,28 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -43,11 +49,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
@@ -211,166 +217,186 @@ private fun ProjectCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val IncomeGreen = Color(0xFF34C759)
+    val ExpenseRed  = Color(0xFFFF3B30)
+    val balanceColor = if (item.balance >= 0) IncomeGreen else ExpenseRed
+
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(start = 4.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Header: Project name with status badge and client icon
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.project.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = item.project.clientName,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
+            // Chevron — auto-mirrors to ‹ in RTL languages (e.g. Hebrew)
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                modifier = Modifier.size(20.dp)
+            )
 
-                Column(horizontalAlignment = Alignment.End) {
-                    // Status badge
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Main content
+            Column(modifier = Modifier.weight(1f)) {
+
+                // ── Row 1: project name (bold) + status badge ──────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Status badge (start side)
                     if (item.project.isActive) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFFD4EDDA))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(Color(0xFFD4F5DC))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
                                 text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_active),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF155724),
+                                color = Color(0xFF1B7A35),
+                                fontWeight = FontWeight.SemiBold,
                                 fontSize = 11.sp
+                            )
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp))
+                    }
+
+                    // Project name (end side)
+                    Text(
+                        text = item.project.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                // ── Row 2: client name with person icon ────────────────────
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = item.project.clientName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                // ── Row 3: income | expenses ───────────────────────────────
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Income (start/left)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Green circle with TrendingUp icon
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(IncomeGreen),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.TrendingUp,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = formatCurrency(item.totalIncome),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    // Expenses (end/right)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = formatCurrency(item.totalExpenses),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        // Red circle with TrendingDown icon
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(ExpenseRed),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.TrendingDown,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
                 }
+
+                // ── Divider ────────────────────────────────────────────────
+                HorizontalDivider(
+                    modifier = Modifier.padding(top = 10.dp, bottom = 6.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    thickness = 0.5.dp
+                )
+
+                // ── Row 4: balance ─────────────────────────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Balance amount (start/left, color-coded)
+                    Text(
+                        text = formatCurrency(item.balance),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = balanceColor,
+                        fontSize = 15.sp
+                    )
+                    // "יתרה" / "Balance" label (end/right)
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_balance),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-
-            // Budget and Income/Expenses metrics
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Budget (left side)
-                MetricBox(
-                    label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget),
-                    value = formatCurrency(item.project.budget),
-                    modifier = Modifier.weight(1f)
-                )
-
-                // Income (right side with up arrow)
-                MetricBox(
-                    label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_income),
-                    value = formatCurrency(item.totalIncome),
-                    arrowIcon = Icons.Default.KeyboardArrowUp,
-                    arrowColor = Color(0xFF34C759),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            // Expenses metric
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                MetricBox(
-                    label = "",
-                    value = "",
-                    modifier = Modifier.weight(1f)
-                )
-
-                // Expenses (right side with down arrow)
-                MetricBox(
-                    label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expenses),
-                    value = formatCurrency(item.totalExpenses),
-                    arrowIcon = Icons.Default.KeyboardArrowDown,
-                    arrowColor = Color(0xFFFF3B30),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            // Balance (full width at bottom)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_balance),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = formatCurrency(item.balance),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = if (item.balance >= 0) Color(0xFF34C759) else Color(0xFFFF3B30)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun MetricBox(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    arrowIcon: ImageVector? = null,
-    arrowColor: Color = Color.Gray
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            if (label.isNotEmpty()) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
-        }
-
-        if (arrowIcon != null) {
-            Icon(
-                imageVector = arrowIcon,
-                contentDescription = null,
-                tint = arrowColor,
-                modifier = Modifier.size(20.dp)
-            )
         }
     }
 }
