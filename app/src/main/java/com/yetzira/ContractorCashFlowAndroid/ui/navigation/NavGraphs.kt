@@ -95,7 +95,9 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onEdit = { id -> navController.navigate(ProjectRoutes.edit(id)) },
-                onOpenClient = { clientName -> navController.navigate(ProjectRoutes.clientDetail(clientName)) }
+                onOpenClient = { clientName -> navController.navigate(ProjectRoutes.clientDetail(clientName)) },
+                onAddExpense = { navController.navigate(ExpenseRoutes.NEW) },
+                onAddInvoice = { navController.navigate(InvoiceRoutes.NEW) }
             )
         }
 

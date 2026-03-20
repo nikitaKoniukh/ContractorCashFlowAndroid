@@ -2,9 +2,9 @@ package com.yetzira.ContractorCashFlowAndroid.ui.projects
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,7 +42,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -65,7 +67,9 @@ fun ProjectDetailScreen(
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
     onOpenClient: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAddExpense: () -> Unit = {},
+    onAddInvoice: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
@@ -108,11 +112,17 @@ fun ProjectDetailScreen(
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_expense)) },
-                            onClick = { showMenu = false }
+                            onClick = {
+                                showMenu = false
+                                onAddExpense()
+                            }
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_invoice)) },
-                            onClick = { showMenu = false }
+                            onClick = {
+                                showMenu = false
+                                onAddInvoice()
+                            }
                         )
                     }
                 }
@@ -136,7 +146,7 @@ fun ProjectDetailScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
                 FinancialSummaryCard(
@@ -169,13 +179,17 @@ fun ProjectDetailScreen(
             }
 
             item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expenses_section),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TextButton(onClick = { showMenu = true }) {
+                    TextButton(onClick = onAddExpense) {
                         Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_expense))
                     }
                 }
@@ -203,10 +217,21 @@ fun ProjectDetailScreen(
                 }
                 SwipeToDismissBox(
                     state = dismissState,
-                    backgroundContent = {},
+                    backgroundContent = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.errorContainer)
+                                .padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            val deleteText = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete)
+                            Text(text = deleteText)
+                        }
+                    },
                     content = {
                         ExpenseRow(expense = expense, currency = currency, onClick = { showMenu = true })
-                        
                     }
                 )
             }
@@ -215,15 +240,16 @@ fun ProjectDetailScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_invoices_section),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TextButton(onClick = { showMenu = true }) {
+                    TextButton(onClick = onAddInvoice) {
                         Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_invoice))
                     }
                 }
@@ -251,7 +277,19 @@ fun ProjectDetailScreen(
                 }
                 SwipeToDismissBox(
                     state = dismissState,
-                    backgroundContent = {},
+                    backgroundContent = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.errorContainer)
+                                .padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            val deleteText = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete)
+                            Text(text = deleteText)
+                        }
+                    },
                     content = {
                         InvoiceRow(invoice = invoice, currency = currency, onClick = { showMenu = true })
                     }
@@ -270,28 +308,78 @@ private fun FinancialSummaryCard(
     profitMargin: Double,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium)
-            .padding(16.dp)
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_net_balance), style = MaterialTheme.typography.labelLarge)
-        Text(
-            text = formatCurrencyAmount(balance, currency),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = if (balance >= 0) Color(0xFF34C759) else Color(0xFFFF3B30)
-        )
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_income)}: ${formatCurrencyAmount(income, currency)}", color = Color(0xFF34C759))
-            Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expenses)}: ${formatCurrencyAmount(expenses, currency)}", color = Color(0xFFFF3B30))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_net_balance),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = formatCurrencyAmount(balance, currency),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (balance >= 0) Color(0xFF34C759) else Color(0xFFFF3B30)
+            )
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_income),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = formatCurrencyAmount(income, currency),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF34C759)
+                    )
+                }
+                Column {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expenses),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = formatCurrencyAmount(expenses, currency),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFFFF3B30)
+                    )
+                }
+                Column {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_profit_margin),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${String.format(Locale.US, "%.1f", profitMargin)}%",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
-        Text(
-            text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_profit_margin)}: ${String.format(Locale.US, "%.1f", profitMargin)}%",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 8.dp)
-        )
     }
 }
 
@@ -306,16 +394,91 @@ private fun ProjectInfoSection(
     onClientClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(text = projectName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 6.dp)) {
-            TextButton(onClick = onClientClick) {
-                Text(text = clientName)
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = projectName,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                StatusBadge(active = isActive)
             }
-            StatusBadge(active = isActive)
+
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .width(18.dp)
+                        .height(18.dp)
+                )
+                TextButton(
+                    onClick = onClientClick,
+                    modifier = Modifier.padding(0.dp)
+                ) {
+                    Text(
+                        text = clientName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = formatCurrencyAmount(budget, currency),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Column {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_created_date),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = formatDate(createdDate),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
-        Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget)}: ${formatCurrencyAmount(budget, currency)}")
-        Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_created_date)}: ${formatDate(createdDate)}")
     }
 }
 
@@ -326,15 +489,44 @@ private fun BudgetUsageBar(utilization: Double, modifier: Modifier = Modifier) {
         utilization <= 80 -> Color(0xFFFF9500)
         else -> Color(0xFFFF3B30)
     }
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget_usage)}: ${String.format(Locale.US, "%.1f", utilization)}%")
-        LinearProgressIndicator(
-            progress = { (utilization / 100.0).coerceIn(0.0, 1.0).toFloat() },
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(10.dp),
-            color = color
-        )
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget_usage),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "${String.format(Locale.US, "%.1f", utilization)}%",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = color
+                )
+            }
+            LinearProgressIndicator(
+                progress = { (utilization / 100.0).coerceIn(0.0, 1.0).toFloat() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(5.dp)),
+                color = color
+            )
+        }
     }
 }
 
@@ -343,18 +535,50 @@ private fun CategoryBreakdownSection(
     categories: List<CategoryBreakdownUi>,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_category_breakdown), style = MaterialTheme.typography.titleMedium)
-        categories.forEach { category ->
-            Column {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = category.category)
-                    Text(text = "${String.format(Locale.US, "%.1f", category.percent)}%")
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_category_breakdown),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                categories.forEach { category ->
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = category.category,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "${String.format(Locale.US, "%.1f", category.percent)}%",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        LinearProgressIndicator(
+                            progress = { (category.percent / 100f).coerceIn(0f, 1f) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                        )
+                    }
                 }
-                LinearProgressIndicator(
-                    progress = { (category.percent / 100f).coerceIn(0f, 1f) },
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
     }
@@ -364,27 +588,62 @@ private fun CategoryBreakdownSection(
 private fun ExpenseRow(expense: ExpenseEntity, currency: CurrencyOption, onClick: () -> Unit) {
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = expense.descriptionText, fontWeight = FontWeight.SemiBold)
-                Text(text = formatCurrencyAmount(expense.amount, currency), color = Color(0xFFFF3B30), fontWeight = FontWeight.SemiBold)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = expense.descriptionText,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = formatCurrencyAmount(expense.amount, currency),
+                    color = Color(0xFFFF3B30),
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = 6.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
             )
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Row {
-                    Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.padding(top = 2.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = formatDate(expense.date), style = MaterialTheme.typography.bodySmall)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(16.dp)
+                    )
+                    Text(
+                        text = formatDate(expense.date),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -400,35 +659,81 @@ private fun ExpenseRow(expense: ExpenseEntity, currency: CurrencyOption, onClick
 private fun InvoiceRow(invoice: InvoiceEntity, currency: CurrencyOption, onClick: () -> Unit) {
     Card(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Row {
-                    Icon(imageVector = Icons.Default.Person, contentDescription = null, modifier = Modifier.padding(top = 2.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = invoice.clientName, fontWeight = FontWeight.SemiBold)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .width(18.dp)
+                            .height(18.dp)
+                    )
+                    Text(
+                        text = invoice.clientName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
                 Text(
                     text = formatCurrencyAmount(invoice.amount, currency),
                     color = if (invoice.isPaid) Color(0xFF34C759) else Color(0xFFFF9500),
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
 
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = 6.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
             )
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = formatDate(invoice.dueDate), style = MaterialTheme.typography.bodySmall)
-                Row {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(16.dp)
+                    )
+                    Text(
+                        text = formatDate(invoice.dueDate),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     InvoiceStatusBadge(invoice = invoice)
-                    Spacer(modifier = Modifier.width(6.dp))
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
