@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -56,12 +57,11 @@ fun ExpensesListScreen(
                     .padding(top = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                TextField(
+                ModernSearchBar(
                     value = state.query,
                     onValueChange = viewModel::setSearchQuery,
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text(stringResource(R.string.expenses_list_search)) },
-                    singleLine = true
+                    placeholder = stringResource(R.string.expenses_list_search)
                 )
                 TextButton(
                     onClick = { showFilters = true },

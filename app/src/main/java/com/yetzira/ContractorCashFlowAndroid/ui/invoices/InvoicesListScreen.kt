@@ -23,7 +23,6 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -82,12 +82,11 @@ fun InvoicesListScreen(
                     .padding(top = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                TextField(
+                ModernSearchBar(
                     value = state.query,
                     onValueChange = viewModel::setSearchQuery,
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text(stringResource(R.string.invoices_list_search)) },
-                    singleLine = true
+                    placeholder = stringResource(R.string.invoices_list_search)
                 )
                 Box {
                     TextButton(onClick = { showFilterMenu = true }) {

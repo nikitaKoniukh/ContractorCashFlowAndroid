@@ -21,7 +21,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,14 +70,13 @@ fun ClientsListScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
-            TextField(
+            ModernSearchBar(
                 value = state.query,
                 onValueChange = viewModel::setSearchQuery,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),
-                placeholder = { Text(stringResource(R.string.clients_list_search)) },
-                singleLine = true
+                placeholder = stringResource(R.string.clients_list_search)
             )
 
             if (state.clients.isEmpty()) {

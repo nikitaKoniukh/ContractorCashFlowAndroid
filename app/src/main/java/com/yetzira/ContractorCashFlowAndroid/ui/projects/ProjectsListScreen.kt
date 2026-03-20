@@ -30,7 +30,6 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
@@ -51,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import java.util.Locale
 import kotlinx.coroutines.launch
 
@@ -87,14 +87,13 @@ fun ProjectsListScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
-            TextField(
+            ModernSearchBar(
                 value = uiState.query,
                 onValueChange = viewModel::setSearchQuery,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),
-                placeholder = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_search_placeholder)) },
-                singleLine = true
+                placeholder = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_search_placeholder)
             )
 
             if (uiState.projects.isEmpty()) {
