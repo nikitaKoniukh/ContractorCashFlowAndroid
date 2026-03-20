@@ -10,7 +10,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +30,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRep
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -100,25 +100,25 @@ fun EditProjectScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            TextField(
+            ModernTextField(
                 value = name,
                 onValueChange = { name = it },
+                label = stringResource(R.string.projects_name),
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.projects_name)) },
                 singleLine = true
             )
-            TextField(
+            ModernTextField(
                 value = clientName,
                 onValueChange = { clientName = it },
+                label = stringResource(R.string.projects_client_name),
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.projects_client_name)) },
                 singleLine = true
             )
-            TextField(
+            ModernTextField(
                 value = budget,
                 onValueChange = { budget = formatAmountInput(it) },
+                label = stringResource(R.string.projects_budget),
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.projects_budget)) },
                 prefix = { Text(currency.symbol) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true

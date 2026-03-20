@@ -37,6 +37,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,19 +105,19 @@ fun NewProjectScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            TextField(
+            ModernTextField(
                 value = name,
                 onValueChange = { name = it },
+                label = stringResource(R.string.projects_name),
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.projects_name)) },
                 singleLine = true
             )
 
-            TextField(
+            ModernTextField(
                 value = budget,
                 onValueChange = { budget = formatAmountInput(it) },
+                label = stringResource(R.string.projects_budget),
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.projects_budget)) },
                 prefix = { Text(currency.symbol) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
@@ -134,11 +135,11 @@ fun NewProjectScreen(
                     onSelect = { selectedClientName = it }
                 )
             } else {
-                TextField(
+                ModernTextField(
                     value = newClientName,
                     onValueChange = { newClientName = it },
+                    label = stringResource(R.string.projects_client_name),
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.projects_client_name)) },
                     singleLine = true
                 )
 
@@ -152,32 +153,32 @@ fun NewProjectScreen(
 
                 AnimatedVisibility(visible = true) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextField(
+                        ModernTextField(
                             value = newClientEmail,
                             onValueChange = { newClientEmail = it },
+                            label = stringResource(R.string.projects_client_email),
                             modifier = Modifier.fillMaxWidth(),
-                            label = { Text(stringResource(R.string.projects_client_email)) },
                             singleLine = true
                         )
-                        TextField(
+                        ModernTextField(
                             value = newClientPhone,
                             onValueChange = { newClientPhone = it },
+                            label = stringResource(R.string.projects_client_phone),
                             modifier = Modifier.fillMaxWidth(),
-                            label = { Text(stringResource(R.string.projects_client_phone)) },
                             singleLine = true
                         )
-                        TextField(
+                        ModernTextField(
                             value = newClientAddress,
                             onValueChange = { newClientAddress = it },
+                            label = stringResource(R.string.projects_client_address),
                             modifier = Modifier.fillMaxWidth(),
-                            label = { Text(stringResource(R.string.projects_client_address)) },
                             singleLine = true
                         )
-                        TextField(
+                        ModernTextField(
                             value = newClientNotes,
                             onValueChange = { newClientNotes = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text(stringResource(R.string.projects_client_notes)) }
+                            label = stringResource(R.string.projects_client_notes),
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }

@@ -8,7 +8,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,42 +73,42 @@ internal fun ClientForm(
         modifier = modifier,
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)
     ) {
-        TextField(
+        ModernTextField(
             value = state.name,
             onValueChange = { onChange(state.copy(name = it)) },
+            label = stringResource(R.string.clients_name),
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.clients_name)) },
             singleLine = true
         )
-        TextField(
+        ModernTextField(
             value = state.email,
             onValueChange = { onChange(state.copy(email = it)) },
+            label = stringResource(R.string.clients_email),
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.clients_email)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true
         )
-        TextField(
+        ModernTextField(
             value = state.phone,
             onValueChange = { onChange(state.copy(phone = it)) },
+            label = stringResource(R.string.clients_phone),
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.clients_phone)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             singleLine = true
         )
-        TextField(
+        ModernTextField(
             value = state.address,
             onValueChange = { onChange(state.copy(address = it)) },
+            label = stringResource(R.string.clients_address),
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.clients_address)) },
             minLines = 3,
             maxLines = 5
         )
-        TextField(
+        ModernTextField(
             value = state.notes,
             onValueChange = { onChange(state.copy(notes = it)) },
+            label = stringResource(R.string.clients_notes),
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.clients_notes)) },
             minLines = 4,
             maxLines = 8
         )
