@@ -15,8 +15,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 
 @Composable
@@ -33,12 +35,12 @@ fun LaborFormContent(
             value = state.workerName,
             onValueChange = { onChange(state.copy(workerName = it)) },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Worker Name") },
+            label = { Text(stringResource(R.string.labor_form_worker_name_label)) },
             singleLine = true
         )
 
         if (state.duplicateWarning) {
-            Text(text = "A worker with this name already exists.")
+            Text(text = stringResource(R.string.labor_form_duplicate_warning))
         }
 
         LaborTypePicker(
@@ -51,7 +53,7 @@ fun LaborFormContent(
                 value = state.hourlyRate,
                 onValueChange = { onChange(state.copy(hourlyRate = it)) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Rate per Hour") },
+                label = { Text(stringResource(R.string.labor_form_rate_per_hour_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
             )
@@ -59,7 +61,7 @@ fun LaborFormContent(
                 value = state.dailyRate,
                 onValueChange = { onChange(state.copy(dailyRate = it)) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Rate per Day") },
+                label = { Text(stringResource(R.string.labor_form_rate_per_day_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
             )
@@ -70,7 +72,7 @@ fun LaborFormContent(
                 value = state.contractPrice,
                 onValueChange = { onChange(state.copy(contractPrice = it)) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Contract Price") },
+                label = { Text(stringResource(R.string.labor_form_contract_price_label)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
             )
@@ -80,7 +82,7 @@ fun LaborFormContent(
             value = state.notes,
             onValueChange = { onChange(state.copy(notes = it)) },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Notes") },
+            label = { Text(stringResource(R.string.labor_form_notes_label)) },
             minLines = 3,
             maxLines = 6
         )
@@ -94,7 +96,7 @@ private fun LaborTypePicker(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Column {
-        Text(text = "Labor Type")
+        Text(text = stringResource(R.string.labor_form_type_label))
         TextButton(onClick = { expanded = true }) {
             Text(selected.name)
         }

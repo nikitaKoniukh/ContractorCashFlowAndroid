@@ -105,6 +105,7 @@ class SettingsViewModel(
     fun setLanguage(language: AppLanguageOption) {
         viewModelScope.launch {
             preferencesRepository.setAppLanguage(language)
+            Log.d(SETTINGS_AUTH_LOG_TAG, "Applying app locale code=${language.code}")
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.code))
             statusMessage.value = "Language updated"
         }

@@ -125,4 +125,134 @@
     <string name="clients_address">Address</string>
     <string name="clients_notes">Notes</string>
     <string name="clients_notes_title">Notes</string>
+
+    <!-- Analytics Strings -->
+    <string name="analytics_net_balance">Net Balance</string>
+    <string name="analytics_overdue">Overdue</string>
+    <string name="analytics_monthly_trend">Monthly Trend</string>
+    <string name="analytics_invoice_status">Invoice Status</string>
+    <string name="analytics_top_projects">Top Projects</string>
+    <string name="analytics_period_7d">Last 7 days</string>
+    <string name="analytics_period_30d">Last 30 days</string>
+    <string name="analytics_period_90d">Last 90 days</string>
+    <string name="analytics_period_1y">Last year</string>
+    <string name="analytics_period_all">All time</string>
+    <string name="analytics_paid">Paid</string>
+    <string name="analytics_unpaid">Unpaid</string>
+
+    <!-- Labor Strings -->
+    <string name="labor_list">Labor</string>
+    <string name="labor_add">Add Worker</string>
+    <string name="labor_edit">Edit Worker</string>
+    <string name="labor_deleted">Worker deleted</string>
+    <string name="labor_empty_title">No workers yet</string>
+    <string name="labor_empty_body">Add your first worker to track labor costs.</string>
+    <string name="labor_search_placeholder">Search by worker name</string>
+    <string name="labor_worker_name">Worker name</string>
+    <string name="labor_labor_type">Labor type</string>
+    <string name="labor_hourly_rate">Hourly rate</string>
+    <string name="labor_daily_rate">Daily rate</string>
+    <string name="labor_contract_price">Contract price</string>
+    <string name="labor_notes">Notes</string>
+
+    <!-- Settings Strings -->
+    <string name="settings_account">Account</string>
+    <string name="settings_sign_in_prompt">Sign in to enable user-scoped cloud sync.</string>
+    <string name="settings_sign_in_button">Sign in with Google</string>
+    <string name="settings_sign_out_button">Sign out</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_currency">Currency</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_invoice_reminders">Invoice Reminders</string>
+    <string name="settings_overdue_alerts">Overdue Alerts</string>
+    <string name="settings_budget_warnings">Budget Warnings</string>
+    <string name="settings_subscription">Subscription</string>
+    <string name="settings_upgrade_to_pro">Upgrade to Pro</string>
+    <string name="settings_cloud_sync">Cloud Sync</string>
+    <string name="settings_sync_now">Sync Now</string>
+    <string name="settings_syncing">Syncing...</string>
+    <string name="settings_sync_done">Cloud sync completed</string>
+    <string name="settings_sync_failed">Sync failed</string>
+    <string name="settings_export_data">Export Data</string>
+    <string name="settings_export_description">Create a JSON snapshot of all local KablanPro data.</string>
+    <string name="settings_export_button">Export Data</string>
+    <string name="settings_about">About</string>
+
+    <!-- Common Actions -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_done">Done</string>
+    <string name="action_add">Add</string>
+    <string name="action_back">Back</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_more">More</string>
+    <string name="menu_open">Open Navigation Menu</string>
+    <string name="settings_section_account">Account</string>
+    <string name="settings_signed_in">Signed in</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_sign_in_with_google">Sign in with Google</string>
+    <string name="settings_section_language">Language</string>
+    <string name="settings_section_currency">Currency</string>
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_section_subscription">Subscription</string>
+    <string name="settings_subscription_pro_badge">👑</string>
+    <string name="settings_subscription_renews">Renews %s</string>
+    <string name="settings_manage_subscription">Manage Subscription</string>
+    <string name="settings_subscription_free">Free Plan</string>
+    <string name="settings_subscription_upgrade_text">Upgrade to KablanPro Pro to unlock premium features.</string>
+    <string name="settings_upgrade_pro">Upgrade to Pro</string>
+    <string name="settings_section_cloud_sync">Cloud Sync</string>
+    <string name="settings_sync_button_idle">Sync Now</string>
+    <string name="settings_sync_button_syncing">Syncing...</string>
+    <string name="settings_sync_button_done">Synced</string>
+    <string name="settings_sync_button_failed">Sync Failed</string>
+    <string name="settings_section_export">Export Data</string>
+    <string name="settings_section_about">About</string>
+
+    <!-- Labor Form Strings -->
+    <string name="labor_form_worker_name_label">Worker Name</string>
+    <string name="labor_form_duplicate_warning">A worker with this name already exists.</string>
+    <string name="labor_form_rate_per_hour_label">Rate per Hour</string>
+    <string name="labor_form_rate_per_day_label">Rate per Day</string>
+    <string name="labor_form_contract_price_label">Contract Price</string>
+    <string name="labor_form_notes_label">Notes</string>
+    <string name="labor_form_type_label">Labor Type</string>
+    <string name="labor_filters_title">Labor type</string>
+    <string name="labor_filters_all">All</string>
+    <string name="labor_filters_all_projects">All Projects</string>
+    <string name="labor_filters_by_month">Filter by month</string>
+    <string name="labor_filters_clear">Clear All</string>
+    <string name="labor_filters_done">Done</string>
+    <string name="labor_screen_add_title">Add Worker</string>
+    <string name="labor_screen_edit_title">Edit Worker</string>
+
+    <!-- Expense Form Strings -->
+    <string name="expenses_form_units_label">Units worked</string>
+    <string name="expenses_form_description_label">Description</string>
+    <string name="expenses_form_amount_label">Amount</string>
+    <string name="expenses_form_category_label">Category</string>
+    <string name="expenses_form_worker_label">Worker</string>
+    <string name="expenses_form_date_label">Date</string>
+    <string name="expenses_form_project_label">Project (optional)</string>
+    <string name="expenses_form_no_project">No project</string>
+    <string name="expenses_filters_category_label">Category</string>
+    <string name="expenses_filters_all">All</string>
+    <string name="expenses_filters_clear">Clear All</string>
+    <string name="expenses_filters_apply">Apply</string>
+    <string name="expenses_list_search">Search by description</string>
+    <string name="expenses_list_filter_button">Filter</string>
+    <string name="expenses_screen_edit_title">Edit Expense</string>
+
+    <!-- Invoice Form Strings -->
+    <string name="invoices_screen_new_title">New Invoice</string>
+    <string name="invoices_screen_edit_title">Edit Invoice</string>
+    <string name="invoices_list_search">Search by client name</string>
+    <string name="invoices_form_no_project">No project</string>
+
+    <!-- Clients Form Strings -->
+    <string name="clients_screen_detail_title">Client Details</string>
+    <string name="clients_screen_edit_title">Edit Client</string>
+    <string name="clients_list_search">Search by name, email, or phone</string>
 </resources>

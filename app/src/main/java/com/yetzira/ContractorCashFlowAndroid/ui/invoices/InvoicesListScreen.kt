@@ -86,7 +86,7 @@ fun InvoicesListScreen(
                     value = state.query,
                     onValueChange = viewModel::setSearchQuery,
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Search by client name") },
+                    placeholder = { Text(stringResource(R.string.invoices_list_search)) },
                     singleLine = true
                 )
                 Box {
@@ -209,7 +209,7 @@ private fun InvoiceRow(item: InvoiceListItemUi, onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 InvoiceStatusBadge(isPaid = item.invoice.isPaid, isOverdue = item.isOverdue)
-                Text(text = item.projectName ?: "No project")
+                Text(text = item.projectName ?: stringResource(R.string.invoices_form_no_project))
                 Text(text = formatDate(item.invoice.dueDate))
             }
         }

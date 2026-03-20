@@ -21,7 +21,7 @@ fun KablanProTopBar(
             IconButton(onClick = onMenuClick) {
                 Icon(
                     imageVector = Icons.Default.Menu,
-                    contentDescription = "Open Navigation Menu"
+                    contentDescription = stringResource(id = com.yetzira.ContractorCashFlowAndroid.R.string.menu_open)
                 )
             }
         }

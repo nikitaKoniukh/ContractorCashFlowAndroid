@@ -18,7 +18,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.yetzira.ContractorCashFlowAndroid.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,13 +54,13 @@ fun EditLaborScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Edit Worker") },
-                navigationIcon = { TextButton(onClick = onBack) { Text("Back") } },
+                title = { Text(stringResource(R.string.labor_screen_edit_title)) },
+                navigationIcon = { TextButton(onClick = onBack) { Text(stringResource(R.string.action_back)) } },
                 actions = {
                     TextButton(
                         onClick = { viewModel.saveWorker(formState, onDone = onBack) },
                         enabled = formState.canSave
-                    ) { Text("Save") }
+                    ) { Text(stringResource(R.string.action_save)) }
                 }
             )
         },
@@ -66,7 +68,7 @@ fun EditLaborScreen(
             TextButton(
                 onClick = { showDeleteDialog = true },
                 modifier = Modifier.padding(8.dp)
-            ) { Text("Delete") }
+            ) { Text(stringResource(R.string.action_delete)) }
         }
     ) { innerPadding ->
         if (worker == null) {

@@ -4,6 +4,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.settings
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -44,10 +45,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
-import androidx.core.net.toUri
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
@@ -55,8 +56,8 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
-import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -77,7 +78,6 @@ fun SettingsScreen(
                 android.content.pm.PackageManager.PackageInfoFlags.of(0)
             )
         } else {
-            @Suppress("DEPRECATION")
             context.packageManager.getPackageInfo(context.packageName, 0)
         }
     }
@@ -85,6 +85,7 @@ fun SettingsScreen(
         "KablanPro ${packageInfo.versionName}.${PackageInfoCompat.getLongVersionCode(packageInfo)}"
     }
     val webClientId = remember {
+        @Suppress("DiscouragedApi")
         val id = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
         if (id != 0) context.getString(id) else null
     }
@@ -119,7 +120,7 @@ fun SettingsScreen(
 
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         runCatching { task.getResult(ApiException::class.java) }
-            .onSuccess { account ->
+            .onSuccess { account: com.google.android.gms.auth.api.signin.GoogleSignInAccount ->
                 val idToken = account.idToken
                 Log.d(
                     SETTINGS_AUTH_LOG_TAG,
@@ -131,7 +132,7 @@ fun SettingsScreen(
                     viewModel.onGoogleSignInFailed("Google sign-in is missing ID token. Check Firebase OAuth client setup.")
                 }
             }
-            .onFailure { throwable ->
+            .onFailure { throwable: Throwable ->
                 val message = googleSignInErrorMessage(throwable, fallbackMessage)
                 Log.w(SETTINGS_AUTH_LOG_TAG, "Google account task failed: $message", throwable)
                 viewModel.onGoogleSignInFailed(message)
@@ -163,10 +164,10 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             AnalyticsCard {
-                SectionTitle("Account")
+                SectionTitle(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_account))
                 if (state.isAuthenticated) {
                     Text(
-                        text = state.userEmail ?: "Signed in",
+                        text = state.userEmail ?: stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_signed_in),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(top = 8.dp)
                     )
@@ -176,11 +177,11 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .padding(top = 12.dp)
                     ) {
-                        Text("Sign out")
+                        Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_sign_out))
                     }
                 } else {
                     Text(
-                        text = "Sign in to enable user-scoped cloud sync.",
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_sign_in_prompt),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 8.dp)
@@ -200,21 +201,29 @@ fun SettingsScreen(
                             .padding(top = 12.dp),
                         enabled = googleSignInSetupError == null
                     ) {
-                        Text("Sign in with Google")
+                        Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_sign_in_with_google))
                     }
                 }
             }
 
             SettingsDropdownCard(
-                title = "Language",
+                title = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_language),
                 selectedLabel = state.selectedLanguage.displayName,
                 options = AppLanguageOption.entries.toList(),
                 optionLabel = { it.displayName },
-                onOptionSelected = viewModel::setLanguage
+                onOptionSelected = { language ->
+                    // 1. Persist to SharedPreferences synchronously (commit())
+                    //    so attachBaseContext reads the new code on recreate.
+                    LocaleHelper.saveLanguage(context, language.code)
+                    // 2. Persist to DataStore + notify ViewModel (async is fine here).
+                    viewModel.setLanguage(language)
+                    // 3. Recreate Activity — attachBaseContext will now apply new locale.
+                    (context as? Activity)?.recreate()
+                }
             )
 
             SettingsDropdownCard(
-                title = "Currency",
+                title = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_currency),
                 selectedLabel = "${state.selectedCurrency.code} (${state.selectedCurrency.symbol})",
                 options = CurrencyOption.entries.toList(),
                 optionLabel = { "${it.code} (${it.symbol})" },
@@ -222,29 +231,29 @@ fun SettingsScreen(
             )
 
             AnalyticsCard {
-                SectionTitle("Notifications")
+                SectionTitle(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_notifications))
                 SettingsSwitchRow(
-                    title = "Invoice Reminders",
+                    title = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_invoice_reminders),
                     checked = state.invoiceRemindersEnabled,
                     onCheckedChange = viewModel::setInvoiceRemindersEnabled
                 )
                 SettingsSwitchRow(
-                    title = "Overdue Alerts",
+                    title = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_overdue_alerts),
                     checked = state.overdueAlertsEnabled,
                     onCheckedChange = viewModel::setOverdueAlertsEnabled
                 )
                 SettingsSwitchRow(
-                    title = "Budget Warnings",
+                    title = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_budget_warnings),
                     checked = state.budgetWarningsEnabled,
                     onCheckedChange = viewModel::setBudgetWarningsEnabled
                 )
             }
 
             AnalyticsCard {
-                SectionTitle("Subscription")
+                SectionTitle(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_subscription))
                 if (state.subscription.isPro) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "👑", style = MaterialTheme.typography.headlineSmall)
+                        Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_subscription_pro_badge), style = MaterialTheme.typography.headlineSmall)
                         Spacer(modifier = Modifier.width(10.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
@@ -253,7 +262,7 @@ fun SettingsScreen(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Renews ${formatDate(state.subscription.renewalDate)}",
+                                text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_subscription_renews, formatDate(state.subscription.renewalDate)),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -264,22 +273,22 @@ fun SettingsScreen(
                         onClick = {
                             val intent = Intent(
                                 Intent.ACTION_VIEW,
-                                "https://play.google.com/store/account/subscriptions".toUri()
+                                Uri.parse("https://play.google.com/store/account/subscriptions")
                             )
                             context.startActivity(intent)
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Manage Subscription")
+                        Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_manage_subscription))
                     }
                 } else {
                     Text(
-                        text = "Free Plan",
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_subscription_free),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Upgrade to KablanPro Pro to unlock premium features.",
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_subscription_upgrade_text),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)
@@ -289,13 +298,13 @@ fun SettingsScreen(
                         onClick = onOpenPaywall,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Upgrade to Pro")
+                        Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_upgrade_pro))
                     }
                 }
             }
 
             AnalyticsCard {
-                SectionTitle("Cloud Sync")
+                SectionTitle(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_cloud_sync))
                 SyncActionButton(
                     state = state.cloudSyncState,
                     onClick = viewModel::runCloudSync,
@@ -304,9 +313,9 @@ fun SettingsScreen(
             }
 
             AnalyticsCard {
-                SectionTitle("Export Data")
+                SectionTitle(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_export))
                 Text(
-                    text = "Create a JSON snapshot of all local KablanPro data.",
+                    text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_export_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -315,12 +324,12 @@ fun SettingsScreen(
                     onClick = { exportLauncher.launch(viewModel.suggestedExportFileName()) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Export Data")
+                    Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_export_button))
                 }
             }
 
             AnalyticsCard {
-                SectionTitle("About")
+                SectionTitle(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_about))
                 Text(
                     text = appVersionLabel,
                     style = MaterialTheme.typography.bodyLarge,
@@ -332,7 +341,6 @@ fun SettingsScreen(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("DEPRECATION")
 @Composable
 private fun <T> SettingsDropdownCard(
     title: String,
@@ -405,16 +413,10 @@ private fun SyncActionButton(
     modifier: Modifier = Modifier
 ) {
     val label = when (state) {
-        CloudSyncState.IDLE -> "Sync Now"
-        CloudSyncState.SYNCING -> "Syncing..."
-        CloudSyncState.DONE -> "Synced"
-        CloudSyncState.FAILED -> "Sync Failed"
-    }
-    val color = when (state) {
-        CloudSyncState.IDLE -> MaterialTheme.colorScheme.primary
-        CloudSyncState.SYNCING -> MaterialTheme.colorScheme.primary
-        CloudSyncState.DONE -> KablanProColors.IncomeGreen
-        CloudSyncState.FAILED -> KablanProColors.ExpenseRed
+        CloudSyncState.IDLE -> stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_sync_button_idle)
+        CloudSyncState.SYNCING -> stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_sync_button_syncing)
+        CloudSyncState.DONE -> stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_sync_button_done)
+        CloudSyncState.FAILED -> stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_sync_button_failed)
     }
 
     Button(
@@ -434,7 +436,7 @@ private fun SyncActionButton(
             androidx.compose.material3.Icon(
                 painter = painterResource(android.R.drawable.stat_notify_sync),
                 contentDescription = label,
-                tint = color
+                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
         Spacer(modifier = Modifier.width(8.dp))

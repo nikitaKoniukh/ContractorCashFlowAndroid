@@ -74,7 +74,7 @@ fun EditExpenseScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Edit Expense") },
+                title = { Text(stringResource(R.string.expenses_screen_edit_title)) },
                 navigationIcon = { TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) } },
                 actions = {
                     TextButton(onClick = { viewModel.saveExpense(formState) }, enabled = formState.canSave) {

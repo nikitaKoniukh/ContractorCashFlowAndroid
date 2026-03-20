@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">КабланПро</string>
+
+    <!-- Navigation Tab Labels -->
+    <string name="tab_projects">Проекты</string>
+    <string name="tab_expenses">Расходы</string>
+    <string name="tab_invoices">Счета</string>
+    <string name="tab_labor">Рабочие</string>
+    <string name="tab_clients">Клиенты</string>
+    <string name="tab_analytics">Аналитика</string>
+    <string name="tab_settings">Параметры</string>
+
+    <!-- Tab descriptions for accessibility -->
+    <string name="tab_projects_description">Вкладка проектов</string>
+    <string name="tab_expenses_description">Вкладка расходов</string>
+    <string name="tab_invoices_description">Вкладка счетов</string>
+    <string name="tab_labor_description">Вкладка рабочих</string>
+    <string name="tab_clients_description">Вкладка клиентов</string>
+    <string name="tab_analytics_description">Вкладка аналитики</string>
+    <string name="tab_settings_description">Вкладка параметров</string>
+
+    <string name="common_back">Назад</string>
+    <string name="common_save">Сохранить</string>
+    <string name="common_delete">Удалить</string>
+    <string name="common_undo">Отменить</string>
+    <string name="common_edit">Редактировать</string>
+    <string name="common_more">Ещё</string>
+
+    <string name="projects_new_project">Новый проект</string>
+    <string name="projects_search_placeholder">Поиск по проекту или клиенту</string>
+    <string name="projects_empty_title">Проектов не найдено</string>
+    <string name="projects_empty_body">Создайте свой первый проект, чтобы начать отслеживать доходы и расходы.</string>
+    <string name="projects_deleted">удалено</string>
+    <string name="projects_name">Название проекта</string>
+    <string name="projects_client_name">Имя клиента</string>
+    <string name="projects_select_client">Выберите существующего клиента</string>
+    <string name="projects_use_existing_client">Использовать существующего клиента</string>
+    <string name="projects_budget">Бюджет</string>
+    <string name="projects_client_email">Электронная почта клиента</string>
+    <string name="projects_client_phone">Телефон клиента</string>
+    <string name="projects_client_address">Адрес клиента</string>
+    <string name="projects_client_notes">Заметки клиента</string>
+    <string name="projects_duplicate_client_warning">Клиент с этим именем уже существует.</string>
+    <string name="projects_expenses">Расходы</string>
+    <string name="projects_income">Доход</string>
+    <string name="projects_balance">Баланс</string>
+    <string name="projects_detail_title">Детали проекта</string>
+    <string name="projects_not_found">Проект не найден</string>
+    <string name="projects_export">Экспорт</string>
+    <string name="projects_add_expense">Добавить расход</string>
+    <string name="projects_add_invoice">Добавить счет</string>
+    <string name="projects_net_balance">Чистый баланс</string>
+    <string name="projects_profit_margin">Маржа прибыли</string>
+    <string name="projects_created_date">Создано</string>
+    <string name="projects_budget_usage">Использование бюджета</string>
+    <string name="projects_category_breakdown">Категории расходов</string>
+    <string name="projects_expenses_section">Расходы</string>
+    <string name="projects_invoices_section">Счета</string>
+    <string name="projects_expense_deleted">Расход удален</string>
+    <string name="projects_invoice_deleted">Счет удален</string>
+    <string name="projects_active">Активный</string>
+    <string name="projects_inactive">Неактивный</string>
+    <string name="projects_invoice_paid">Оплачено</string>
+    <string name="projects_invoice_overdue">Просрочено</string>
+    <string name="projects_invoice_pending">В ожидании</string>
+    <string name="projects_budget_reduction_warning">Предупреждение: новый бюджет ниже текущих расходов.</string>
+    <string name="projects_client_detail_placeholder">Экран деталей клиента</string>
+
+    <string name="expenses_new">Новый расход</string>
+    <string name="expenses_edit">Редактировать расход</string>
+    <string name="expenses_deleted">Расход удален</string>
+    <string name="expenses_search_placeholder">Поиск по описанию</string>
+    <string name="expenses_filter_button">Фильтр</string>
+    <string name="expenses_empty_title">Расходов не найдено</string>
+    <string name="expenses_empty_body">Добавьте свой первый расход, чтобы начать отслеживать затраты.</string>
+    <string name="expenses_description">Описание</string>
+    <string name="expenses_amount">Сумма</string>
+    <string name="expenses_date">Дата</string>
+    <string name="expenses_category">Категория</string>
+    <string name="expenses_worker">Рабочий</string>
+    <string name="expenses_units_worked">Отработанные единицы</string>
+    <string name="expenses_no_project">Нет проекта</string>
+    <string name="expenses_project_optional">Проект (опционально)</string>
+
+    <string name="expenses_filters_title">Фильтры расходов</string>
+    <string name="expenses_filter_category">Категория</string>
+    <string name="expenses_category_all">Все</string>
+    <string name="expenses_filter_start_date">Дата начала</string>
+    <string name="expenses_filter_end_date">Дата окончания</string>
+    <string name="expenses_filter_pick_date">Выберите дату</string>
+    <string name="expenses_filter_clear_all">Очистить всё</string>
+    <string name="expenses_filter_apply">Применить</string>
+
+    <string name="expenses_budget_warning_title">Предупреждение бюджета</string>
+    <string name="expenses_budget_warning_channel">Предупреждения бюджета</string>
+    <string name="expenses_budget_warning_high">Бюджет проекта достиг 80% использования.</string>
+    <string name="expenses_budget_warning_critical">Бюджет проекта достиг 100% использования.</string>
+
+    <string name="invoices_new">Новый счет</string>
+    <string name="invoices_edit">Редактировать счет</string>
+    <string name="invoices_deleted">Счет удален</string>
+    <string name="invoices_search_placeholder">Поиск по имени клиента</string>
+    <string name="invoices_empty_title">Счетов не найдено</string>
+    <string name="invoices_empty_body">Создайте свой первый счет, чтобы начать отслеживать доход.</string>
+    <string name="invoices_no_project">Нет проекта</string>
+    <string name="invoices_client_name">Имя клиента</string>
+    <string name="invoices_client_mode_existing">Выберите существующего клиента</string>
+    <string name="invoices_select_existing_client">Существующий клиент</string>
+    <string name="invoices_amount">Сумма</string>
+    <string name="invoices_due_date">Срок платежа</string>
+    <string name="invoices_project_optional">Проект (опционально)</string>
+    <string name="invoices_paid_toggle">Отметить как оплачено</string>
+
+    <string name="clients_new">Новый клиент</string>
+    <string name="clients_edit">Редактировать клиента</string>
+    <string name="clients_deleted">Клиент удален</string>
+    <string name="clients_search_placeholder">Поиск по имени, электронной почте или телефону</string>
+    <string name="clients_empty_title">Клиентов не найдено</string>
+    <string name="clients_empty_body">Добавьте своего первого клиента для управления контактами.</string>
+    <string name="clients_detail_title">Детали клиента</string>
+    <string name="clients_not_found">Клиент не найден</string>
+    <string name="clients_name">Имя</string>
+    <string name="clients_email">Электронная почта</string>
+    <string name="clients_phone">Телефон</string>
+    <string name="clients_address">Адрес</string>
+    <string name="clients_notes">Заметки</string>
+    <string name="clients_notes_title">Заметки</string>
+
+    <!-- Analytics Strings -->
+    <string name="analytics_net_balance">Чистый баланс</string>
+    <string name="analytics_overdue">Просрочено</string>
+    <string name="analytics_monthly_trend">Месячный тренд</string>
+    <string name="analytics_invoice_status">Статус счета</string>
+    <string name="analytics_top_projects">Лучшие проекты</string>
+    <string name="analytics_period_7d">Последние 7 дней</string>
+    <string name="analytics_period_30d">Последние 30 дней</string>
+    <string name="analytics_period_90d">Последние 90 дней</string>
+    <string name="analytics_period_1y">Прошлый год</string>
+    <string name="analytics_period_all">Все время</string>
+    <string name="analytics_paid">Оплачено</string>
+    <string name="analytics_unpaid">Не оплачено</string>
+
+    <!-- Labor Strings -->
+    <string name="labor_list">Рабочие</string>
+    <string name="labor_add">Добавить рабочего</string>
+    <string name="labor_edit">Редактировать рабочего</string>
+    <string name="labor_deleted">Рабочий удален</string>
+    <string name="labor_empty_title">Рабочих не найдено</string>
+    <string name="labor_empty_body">Добавьте своего первого рабочего, чтобы отслеживать затраты на рабочую силу.</string>
+    <string name="labor_search_placeholder">Поиск по имени рабочего</string>
+    <string name="labor_worker_name">Имя рабочего</string>
+    <string name="labor_labor_type">Тип работы</string>
+    <string name="labor_hourly_rate">Почасовая ставка</string>
+    <string name="labor_daily_rate">Дневная ставка</string>
+    <string name="labor_contract_price">Цена контракта</string>
+    <string name="labor_notes">Заметки</string>
+
+    <!-- Settings Strings -->
+    <string name="settings_account">Учётная запись</string>
+    <string name="settings_sign_in_prompt">Войдите, чтобы включить синхронизацию облака с охватом пользователя.</string>
+    <string name="settings_sign_in_button">Войти с Google</string>
+    <string name="settings_sign_out_button">Выйти</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_currency">Валюта</string>
+    <string name="settings_notifications">Уведомления</string>
+    <string name="settings_invoice_reminders">Напоминания о счетах</string>
+    <string name="settings_overdue_alerts">Уведомления об истечении сроков</string>
+    <string name="settings_budget_warnings">Предупреждения бюджета</string>
+    <string name="settings_subscription">Подписка</string>
+    <string name="settings_upgrade_to_pro">Перейти на Pro</string>
+    <string name="settings_cloud_sync">Синхронизация облака</string>
+    <string name="settings_sync_now">Синхронизировать сейчас</string>
+    <string name="settings_syncing">Синхронизация...</string>
+    <string name="settings_sync_done">Синхронизация облака завершена</string>
+    <string name="settings_sync_failed">Синхронизация не удалась</string>
+    <string name="settings_export_data">Экспортировать данные</string>
+    <string name="settings_export_description">Создайте снимок JSON всех локальных данных KablanPro.</string>
+    <string name="settings_export_button">Экспортировать данные</string>
+    <string name="settings_about">О программе</string>
+
+    <!-- Common Actions -->
+    <string name="action_save">Сохранить</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_delete">Удалить</string>
+    <string name="action_edit">Редактировать</string>
+    <string name="action_done">Готово</string>
+    <string name="action_add">Добавить</string>
+    <string name="action_back">Назад</string>
+    <string name="action_undo">Отменить</string>
+    <string name="action_more">Ещё</string>
+    <string name="menu_open">Открыть меню навигации</string>
+    <string name="settings_section_account">Учётная запись</string>
+    <string name="settings_signed_in">Вы вошли</string>
+    <string name="settings_sign_out">Выйти</string>
+    <string name="settings_sign_in_with_google">Войти с Google</string>
+    <string name="settings_section_language">Язык</string>
+    <string name="settings_section_currency">Валюта</string>
+    <string name="settings_section_notifications">Уведомления</string>
+    <string name="settings_section_subscription">Подписка</string>
+    <string name="settings_subscription_pro_badge">👑</string>
+    <string name="settings_subscription_renews">Обновляется %s</string>
+    <string name="settings_manage_subscription">Управление подпиской</string>
+    <string name="settings_subscription_free">Бесплатный план</string>
+    <string name="settings_subscription_upgrade_text">Перейдите на KablanPro Pro, чтобы разблокировать премиум-функции.</string>
+    <string name="settings_upgrade_pro">Перейти на Pro</string>
+    <string name="settings_section_cloud_sync">Синхронизация облака</string>
+    <string name="settings_sync_button_idle">Синхронизировать сейчас</string>
+    <string name="settings_sync_button_syncing">Синхронизация...</string>
+    <string name="settings_sync_button_done">Синхронизировано</string>
+    <string name="settings_sync_button_failed">Синхронизация не удалась</string>
+    <string name="settings_section_export">Экспортировать данные</string>
+    <string name="settings_section_about">О программе</string>
+
+    <!-- Labor Form Strings -->
+    <string name="labor_form_worker_name_label">Имя рабочего</string>
+    <string name="labor_form_duplicate_warning">Рабочий с этим именем уже существует.</string>
+    <string name="labor_form_rate_per_hour_label">Ставка в час</string>
+    <string name="labor_form_rate_per_day_label">Ставка в день</string>
+    <string name="labor_form_contract_price_label">Цена контракта</string>
+    <string name="labor_form_notes_label">Заметки</string>
+    <string name="labor_form_type_label">Тип работы</string>
+    <string name="labor_filters_title">Тип работы</string>
+    <string name="labor_filters_all">Все</string>
+    <string name="labor_filters_all_projects">Все проекты</string>
+    <string name="labor_filters_by_month">Фильтровать по месяцам</string>
+    <string name="labor_filters_clear">Очистить все</string>
+    <string name="labor_filters_done">Готово</string>
+    <string name="labor_screen_add_title">Добавить рабочего</string>
+    <string name="labor_screen_edit_title">Изменить рабочего</string>
+
+    <!-- Expense Form Strings -->
+    <string name="expenses_form_units_label">Отработанные единицы</string>
+    <string name="expenses_form_description_label">Описание</string>
+    <string name="expenses_form_amount_label">Сумма</string>
+    <string name="expenses_form_category_label">Категория</string>
+    <string name="expenses_form_worker_label">Рабочий</string>
+    <string name="expenses_form_date_label">Дата</string>
+    <string name="expenses_form_project_label">Проект (необязательно)</string>
+    <string name="expenses_form_no_project">Нет проекта</string>
+    <string name="expenses_filters_category_label">Категория</string>
+    <string name="expenses_filters_all">Все</string>
+    <string name="expenses_filters_clear">Очистить все</string>
+    <string name="expenses_filters_apply">Применить</string>
+    <string name="expenses_list_search">Поиск по описанию</string>
+    <string name="expenses_list_filter_button">Фильтр</string>
+    <string name="expenses_screen_edit_title">Изменить расход</string>
+
+    <!-- Invoice Form Strings -->
+    <string name="invoices_screen_new_title">Новая накладная</string>
+    <string name="invoices_screen_edit_title">Изменить накладную</string>
+    <string name="invoices_list_search">Поиск по имени клиента</string>
+    <string name="invoices_form_no_project">Нет проекта</string>
+
+    <!-- Clients Form Strings -->
+    <string name="clients_screen_detail_title">Сведения о клиенте</string>
+    <string name="clients_screen_edit_title">Изменить клиента</string>
+    <string name="clients_list_search">Поиск по имени, электронной почте или телефону</string>
+</resources>
+
+

@@ -46,7 +46,7 @@ fun EditClientScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Edit Client") },
+                title = { Text(stringResource(R.string.clients_screen_edit_title)) },
                 navigationIcon = { TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) } },
                 actions = {
                     TextButton(

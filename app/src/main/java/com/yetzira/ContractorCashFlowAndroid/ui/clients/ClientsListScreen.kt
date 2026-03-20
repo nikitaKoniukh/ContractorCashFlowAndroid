@@ -76,7 +76,7 @@ fun ClientsListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 12.dp),
-                placeholder = { Text("Search by name, email, or phone") },
+                placeholder = { Text(stringResource(R.string.clients_list_search)) },
                 singleLine = true
             )
 

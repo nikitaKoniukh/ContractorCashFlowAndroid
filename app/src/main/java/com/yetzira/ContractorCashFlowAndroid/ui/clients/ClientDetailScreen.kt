@@ -44,7 +44,7 @@ fun ClientDetailScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Client Details") },
+                title = { Text(stringResource(R.string.clients_screen_detail_title)) },
                 navigationIcon = {
                     TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) }
                 },

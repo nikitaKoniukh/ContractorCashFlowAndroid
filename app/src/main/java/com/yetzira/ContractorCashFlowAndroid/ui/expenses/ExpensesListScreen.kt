@@ -31,7 +31,7 @@ fun ExpensesListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showFilters by remember { mutableStateOf(false) }
 
-    val deletedMessage = "Expense deleted"
+    val deletedMessage = stringResource(R.string.expenses_deleted)
     val undoLabel = stringResource(R.string.common_undo)
 
     Scaffold(
@@ -62,7 +62,7 @@ fun ExpensesListScreen(
                     value = state.query,
                     onValueChange = viewModel::setSearchQuery,
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Search by description") },
+                    placeholder = { Text(stringResource(R.string.expenses_list_search)) },
                     singleLine = true
                 )
                 TextButton(
@@ -74,7 +74,7 @@ fun ExpensesListScreen(
                             else MaterialTheme.colorScheme.surfaceVariant
                         )
                 ) {
-                    Text(text = "Filter")
+                    Text(text = stringResource(R.string.expenses_list_filter_button))
                 }
             }
 
@@ -189,7 +189,7 @@ private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
             }
             Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Badge { Text(item.expense.category) }
-                Text(text = item.projectName ?: "No project")
+                Text(text = item.projectName ?: stringResource(R.string.expenses_form_no_project))
                 Text(text = formatDate(item.expense.date))
             }
         }

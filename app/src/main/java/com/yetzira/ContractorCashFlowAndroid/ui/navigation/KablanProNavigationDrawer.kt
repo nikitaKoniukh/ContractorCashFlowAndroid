@@ -24,7 +24,7 @@ fun KablanProNavigationDrawer(
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(id = com.yetzira.ContractorCashFlowAndroid.R.string.app_name),
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp),
             style = androidx.compose.material3.MaterialTheme.typography.headlineSmall
         )
         Spacer(modifier = Modifier.height(24.dp))
@@ -42,7 +42,7 @@ fun KablanProNavigationDrawer(
                 onClick = { onTabSelected(tab) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
+                    .padding(start = 12.dp, end = 12.dp)
             )
         }
     }

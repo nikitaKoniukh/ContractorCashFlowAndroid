@@ -42,7 +42,7 @@ fun EditInvoiceScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Edit Invoice") },
+                title = { Text(stringResource(R.string.invoices_screen_edit_title)) },
                 navigationIcon = { TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) } },
                 actions = {
                     TextButton(

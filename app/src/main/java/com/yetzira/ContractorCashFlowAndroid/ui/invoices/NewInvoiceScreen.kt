@@ -41,7 +41,7 @@ fun NewInvoiceScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("New Invoice") },
+                title = { Text(stringResource(R.string.invoices_screen_new_title)) },
                 navigationIcon = { TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) } },
                 actions = {
                     TextButton(

@@ -44,14 +44,14 @@ fun ExpenseFiltersBottomSheet(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = "Expense Filters", style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.expenses_filters_title), style = MaterialTheme.typography.titleMedium)
 
-            Text(text = "Category")
+            Text(text = stringResource(R.string.expenses_filters_category_label))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(
                     selected = state.category == null,
                     onClick = { state = state.copy(category = null) },
-                    label = { Text("All") }
+                    label = { Text(stringResource(R.string.expenses_filters_all)) }
                 )
                 ExpenseCategory.values().forEach { category ->
                     FilterChip(
@@ -63,7 +63,7 @@ fun ExpenseFiltersBottomSheet(
             }
 
             DateFilterRow(
-                title = "Start date",
+                title = stringResource(R.string.expenses_filter_start_date),
                 enabled = state.hasStartDate,
                 currentDate = state.startDate,
                 onEnabledChange = { enabled ->
@@ -76,7 +76,7 @@ fun ExpenseFiltersBottomSheet(
             )
 
             DateFilterRow(
-                title = "End date",
+                title = stringResource(R.string.expenses_filter_end_date),
                 enabled = state.hasEndDate,
                 currentDate = state.endDate,
                 onEnabledChange = { enabled ->
@@ -92,9 +92,9 @@ fun ExpenseFiltersBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TextButton(onClick = onClearAll) { Text(text = "Clear All") }
+                TextButton(onClick = onClearAll) { Text(text = stringResource(R.string.expenses_filters_clear)) }
                 TextButton(onClick = { onApply(state) }) {
-                    Text(text = "Apply")
+                    Text(text = stringResource(R.string.expenses_filters_apply))
                 }
             }
         }

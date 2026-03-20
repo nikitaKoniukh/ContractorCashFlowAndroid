@@ -73,7 +73,7 @@ fun ExpenseFormContent(
                         value = state.unitsWorked,
                         onValueChange = { onStateChange(state.copy(unitsWorked = it)) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Units worked") },
+                        label = { Text(stringResource(R.string.expenses_form_units_label)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true
                     )
@@ -85,7 +85,7 @@ fun ExpenseFormContent(
             value = state.description,
             onValueChange = { onStateChange(state.copy(description = it)) },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Description") },
+            label = { Text(stringResource(R.string.expenses_form_description_label)) },
             singleLine = true
         )
 
@@ -93,7 +93,7 @@ fun ExpenseFormContent(
             value = state.amount,
             onValueChange = { if (!state.isAmountReadOnly) onStateChange(state.copy(amount = it)) },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Amount") },
+            label = { Text(stringResource(R.string.expenses_form_amount_label)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             readOnly = state.isAmountReadOnly
@@ -125,7 +125,7 @@ private fun CategoryPicker(
             onValueChange = {},
             readOnly = true,
             modifier = Modifier.fillMaxWidth().menuAnchor(),
-            label = { Text("Category") },
+            label = { Text(stringResource(R.string.expenses_form_category_label)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -158,7 +158,7 @@ private fun WorkerPicker(
             onValueChange = {},
             readOnly = true,
             modifier = Modifier.fillMaxWidth().menuAnchor(),
-            label = { Text("Worker") },
+            label = { Text(stringResource(R.string.expenses_form_worker_label)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -180,7 +180,7 @@ private fun WorkerPicker(
 private fun DatePickerField(date: Long, onDateSelected: (Long) -> Unit) {
     val context = LocalContext.current
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = "Date")
+        Text(text = stringResource(R.string.expenses_form_date_label))
         TextButton(onClick = {
             val cal = Calendar.getInstance().apply { timeInMillis = date }
             DatePickerDialog(
@@ -214,16 +214,16 @@ private fun ProjectPicker(
 
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
         TextField(
-            value = selected?.name ?: "No project",
+            value = selected?.name ?: stringResource(R.string.expenses_form_no_project),
             onValueChange = {},
             readOnly = true,
             modifier = Modifier.fillMaxWidth().menuAnchor(),
-            label = { Text("Project (optional)") },
+            label = { Text(stringResource(R.string.expenses_form_project_label)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
-                text = { Text("No project") },
+                text = { Text(stringResource(R.string.expenses_form_no_project)) },
                 onClick = {
                     onSelected(null)
                     expanded = false
