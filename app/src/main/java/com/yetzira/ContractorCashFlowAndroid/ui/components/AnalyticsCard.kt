@@ -1,45 +1,34 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
-import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProShapes
-import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProSpacing
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
 
-/**
- * AnalyticsCard - Card for displaying analytics data
- * Usage: AnalyticsCard(title = "Total Expenses", content = "₪15,000", backgroundColor = Color.Blue)
- */
 @Composable
 fun AnalyticsCard(
-    title: String,
-    content: String,
-    backgroundColor: Color,
-    textColor: Color = Color.White,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(backgroundColor, shape = KablanProShapes.medium)
-            .padding(KablanProSpacing.lg)
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        )
     ) {
-        Text(
-            text = title,
-            color = textColor,
-            fontSize = 12.sp
-        )
-        Text(
-            text = content,
-            color = textColor,
-            fontSize = 20.sp
-        )
+        Column(modifier = Modifier.padding(12.dp), content = content)
     }
 }
 

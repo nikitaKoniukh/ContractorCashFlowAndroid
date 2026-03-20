@@ -10,6 +10,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsViewModel
+import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientDetailScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientViewModel
@@ -322,7 +324,11 @@ fun NavGraphBuilder.analyticsGraph(navController: NavController) {
         route = "analytics_graph"
     ) {
         composable(TabDestination.ANALYTICS.route) {
-            AnalyticsScreen()
+            val context = LocalContext.current
+            val factory = remember { AnalyticsViewModelFactory(context, AppDatabase.getInstance(context)) }
+            val viewModel: AnalyticsViewModel = viewModel(factory = factory)
+
+            AnalyticsScreen(viewModel = viewModel)
         }
     }
 }
