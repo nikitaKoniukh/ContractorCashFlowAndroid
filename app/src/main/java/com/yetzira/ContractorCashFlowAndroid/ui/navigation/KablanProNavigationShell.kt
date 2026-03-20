@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseRoutes
+import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectRoutes
 
 @Composable
@@ -63,7 +64,7 @@ fun KablanProNavigationShell(
 private fun getGraphRoute(tab: TabDestination): String = when (tab) {
     TabDestination.PROJECTS -> ProjectRoutes.GRAPH
     TabDestination.EXPENSES -> ExpenseRoutes.GRAPH
-    TabDestination.INVOICES -> "invoices_graph"
+    TabDestination.INVOICES -> InvoiceRoutes.GRAPH
     TabDestination.LABOR -> "labor_graph"
     TabDestination.CLIENTS -> "clients_graph"
     TabDestination.ANALYTICS -> "analytics_graph"
@@ -73,6 +74,7 @@ private fun getGraphRoute(tab: TabDestination): String = when (tab) {
 private fun getTabRootRoute(tab: TabDestination): String = when (tab) {
     TabDestination.PROJECTS -> ProjectRoutes.LIST
     TabDestination.EXPENSES -> ExpenseRoutes.LIST
+    TabDestination.INVOICES -> InvoiceRoutes.LIST
     else -> tab.route
 }
 

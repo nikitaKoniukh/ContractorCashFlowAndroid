@@ -95,4 +95,19 @@
     <string name="expenses_budget_warning_channel">Budget Warnings</string>
     <string name="expenses_budget_warning_high">Project budget reached 80% utilization.</string>
     <string name="expenses_budget_warning_critical">Project budget reached 100% utilization.</string>
+
+    <string name="invoices_new">New Invoice</string>
+    <string name="invoices_edit">Edit Invoice</string>
+    <string name="invoices_deleted">Invoice deleted</string>
+    <string name="invoices_search_placeholder">Search by client name</string>
+    <string name="invoices_empty_title">No invoices yet</string>
+    <string name="invoices_empty_body">Create your first invoice to start tracking income.</string>
+    <string name="invoices_no_project">No project</string>
+    <string name="invoices_client_name">Client name</string>
+    <string name="invoices_client_mode_existing">Select existing client</string>
+    <string name="invoices_select_existing_client">Existing client</string>
+    <string name="invoices_amount">Amount</string>
+    <string name="invoices_due_date">Due date</string>
+    <string name="invoices_project_optional">Project (optional)</string>
+    <string name="invoices_paid_toggle">Mark as paid</string>
 </resources>

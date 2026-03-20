@@ -18,7 +18,12 @@ import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpensesListScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.NewExpenseScreen
-import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoicesScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.invoices.EditInvoiceScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceRoutes
+import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceViewModel
+import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceViewModelFactory
+import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoicesListScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.invoices.NewInvoiceScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.EditProjectScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.NewProjectScreen
@@ -150,11 +155,45 @@ fun NavGraphBuilder.expensesGraph(navController: NavController) {
 
 fun NavGraphBuilder.invoicesGraph(navController: NavController) {
     navigation(
-        startDestination = TabDestination.INVOICES.route,
-        route = "invoices_graph"
+        startDestination = InvoiceRoutes.LIST,
+        route = InvoiceRoutes.GRAPH
     ) {
-        composable(TabDestination.INVOICES.route) {
-            InvoicesScreen()
+        composable(InvoiceRoutes.LIST) {
+            val context = LocalContext.current
+            val factory = remember { InvoiceViewModelFactory(context, AppDatabase.getInstance(context)) }
+            val viewModel: InvoiceViewModel = viewModel(factory = factory)
+
+            InvoicesListScreen(
+                viewModel = viewModel,
+                onCreate = { navController.navigate(InvoiceRoutes.NEW) },
+                onEdit = { invoiceId -> navController.navigate(InvoiceRoutes.edit(invoiceId)) }
+            )
+        }
+
+        composable(InvoiceRoutes.NEW) {
+            val context = LocalContext.current
+            val factory = remember { InvoiceViewModelFactory(context, AppDatabase.getInstance(context)) }
+            val viewModel: InvoiceViewModel = viewModel(factory = factory)
+            NewInvoiceScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = InvoiceRoutes.EDIT,
+            arguments = listOf(navArgument("invoiceId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { InvoiceViewModelFactory(context, AppDatabase.getInstance(context)) }
+            val viewModel: InvoiceViewModel = viewModel(factory = factory)
+            val invoiceId = backStackEntry.arguments?.getString("invoiceId").orEmpty()
+
+            EditInvoiceScreen(
+                invoiceId = invoiceId,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
