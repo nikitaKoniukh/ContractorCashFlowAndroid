@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceRoutes
+import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectRoutes
 
 @Composable
@@ -66,7 +67,7 @@ private fun getGraphRoute(tab: TabDestination): String = when (tab) {
     TabDestination.PROJECTS -> ProjectRoutes.GRAPH
     TabDestination.EXPENSES -> ExpenseRoutes.GRAPH
     TabDestination.INVOICES -> InvoiceRoutes.GRAPH
-    TabDestination.LABOR -> "labor_graph"
+    TabDestination.LABOR -> LaborRoutes.GRAPH
     TabDestination.CLIENTS -> ClientRoutes.GRAPH
     TabDestination.ANALYTICS -> "analytics_graph"
     TabDestination.SETTINGS -> "settings_graph"
@@ -76,6 +77,7 @@ private fun getTabRootRoute(tab: TabDestination): String = when (tab) {
     TabDestination.PROJECTS -> ProjectRoutes.LIST
     TabDestination.EXPENSES -> ExpenseRoutes.LIST
     TabDestination.INVOICES -> InvoiceRoutes.LIST
+    TabDestination.LABOR -> LaborRoutes.LIST
     TabDestination.CLIENTS -> ClientRoutes.LIST
     else -> tab.route
 }

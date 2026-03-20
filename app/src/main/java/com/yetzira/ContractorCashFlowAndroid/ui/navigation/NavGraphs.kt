@@ -29,7 +29,12 @@ import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoicesListScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.NewInvoiceScreen
-import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.labor.AddLaborScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.labor.EditLaborScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborListScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborRoutes
+import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborViewModel
+import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.EditProjectScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.NewProjectScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectDetailScreen
@@ -205,11 +210,45 @@ fun NavGraphBuilder.invoicesGraph(navController: NavController) {
 
 fun NavGraphBuilder.laborGraph(navController: NavController) {
     navigation(
-        startDestination = TabDestination.LABOR.route,
-        route = "labor_graph"
+        startDestination = LaborRoutes.LIST,
+        route = LaborRoutes.GRAPH
     ) {
-        composable(TabDestination.LABOR.route) {
-            LaborScreen()
+        composable(LaborRoutes.LIST) {
+            val context = LocalContext.current
+            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: LaborViewModel = viewModel(factory = factory)
+
+            LaborListScreen(
+                viewModel = viewModel,
+                onAdd = { navController.navigate(LaborRoutes.ADD) },
+                onEdit = { workerId -> navController.navigate(LaborRoutes.edit(workerId)) }
+            )
+        }
+
+        composable(LaborRoutes.ADD) {
+            val context = LocalContext.current
+            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: LaborViewModel = viewModel(factory = factory)
+            AddLaborScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = LaborRoutes.EDIT,
+            arguments = listOf(navArgument("workerId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: LaborViewModel = viewModel(factory = factory)
+            val workerId = backStackEntry.arguments?.getString("workerId").orEmpty()
+
+            EditLaborScreen(
+                workerId = workerId,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
