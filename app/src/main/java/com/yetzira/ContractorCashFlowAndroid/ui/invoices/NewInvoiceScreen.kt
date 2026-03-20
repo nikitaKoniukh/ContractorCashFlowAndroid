@@ -33,8 +33,15 @@ fun NewInvoiceScreen(
         viewModel.startCreate()
     }
 
-    LaunchedEffect(vmState.invoiceId, vmState.existingClients, vmState.projects, vmState.dueDate) {
-        formState = viewModel.updateForm(vmState)
+    // When server-fetched lists change, refresh only those fields in formState —
+    // do NOT reset user's entered client name, amount, or date.
+    LaunchedEffect(vmState.existingClients, vmState.projects) {
+        formState = viewModel.updateForm(
+            formState.copy(
+                existingClients = vmState.existingClients,
+                projects = vmState.projects
+            )
+        )
     }
 
     Scaffold(

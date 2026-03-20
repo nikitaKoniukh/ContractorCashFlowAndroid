@@ -34,8 +34,21 @@ fun EditInvoiceScreen(
         viewModel.startEdit(invoiceId)
     }
 
-    LaunchedEffect(vmState.invoiceId, vmState.existingClients, vmState.projects, vmState.dueDate, vmState.isPaid) {
-        formState = viewModel.updateForm(vmState)
+    // Full reset when the invoice data first loads (invoiceId or core fields change).
+    LaunchedEffect(vmState.invoiceId, vmState.dueDate, vmState.isPaid) {
+        if (vmState.invoiceId != null) {
+            formState = viewModel.updateForm(vmState)
+        }
+    }
+
+    // Only refresh server-fetched lists; preserve any edits the user has made.
+    LaunchedEffect(vmState.existingClients, vmState.projects) {
+        formState = viewModel.updateForm(
+            formState.copy(
+                existingClients = vmState.existingClients,
+                projects = vmState.projects
+            )
+        )
     }
 
     Scaffold(

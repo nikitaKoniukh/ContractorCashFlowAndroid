@@ -73,11 +73,17 @@ class InvoiceNotificationScheduler(
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = createPendingIntent(requestCode, title, message)
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAtMillis,
-            pendingIntent
-        )
+        try {
+            // Requires SCHEDULE_EXACT_ALARM permission on API 31+.
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMillis,
+                pendingIntent
+            )
+        } catch (e: SecurityException) {
+            // Permission not granted — fall back to inexact alarm so the app doesn't crash.
+            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+        }
     }
 
     private fun createPendingIntent(requestCode: Int, title: String, message: String): PendingIntent {

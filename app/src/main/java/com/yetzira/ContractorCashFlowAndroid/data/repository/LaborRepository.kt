@@ -1,5 +1,6 @@
 package com.yetzira.ContractorCashFlowAndroid.data.repository
 
+import android.util.Log
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ExpenseDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.LaborDetailsDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ProjectDao
@@ -7,7 +8,13 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
 import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+
+private const val TAG = "LaborRepository"
 
 class LaborRepository(
     private val laborDetailsDao: LaborDetailsDao,
@@ -15,6 +22,9 @@ class LaborRepository(
     private val projectDao: ProjectDao,
     private val syncService: FirestoreSyncService
 ) {
+    // Fire-and-forget scope: sync failures never block the caller
+    private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     fun getAllWorkers(): Flow<List<LaborDetailsEntity>> = laborDetailsDao.getAll()
 
     suspend fun getWorkerById(id: String): LaborDetailsEntity? = laborDetailsDao.getById(id)
@@ -22,22 +32,30 @@ class LaborRepository(
     suspend fun insertWorker(worker: LaborDetailsEntity) {
         val stamped = worker.copy(lastModified = System.currentTimeMillis())
         laborDetailsDao.insert(stamped)
-        syncService.syncLaborDetails(stamped)
+        syncScope.launch {
+            runCatching { syncService.syncLaborDetails(stamped) }
+                .onFailure { Log.w(TAG, "Labor sync failed: ${it.message}") }
+        }
     }
 
     suspend fun updateWorker(worker: LaborDetailsEntity) {
         val stamped = worker.copy(lastModified = System.currentTimeMillis())
         laborDetailsDao.update(stamped)
-        syncService.syncLaborDetails(stamped)
+        syncScope.launch {
+            runCatching { syncService.syncLaborDetails(stamped) }
+                .onFailure { Log.w(TAG, "Labor sync failed: ${it.message}") }
+        }
     }
 
     suspend fun deleteWorker(worker: LaborDetailsEntity) {
         laborDetailsDao.delete(worker)
-        syncService.deleteLaborDetails(worker.id)
+        syncScope.launch {
+            runCatching { syncService.deleteLaborDetails(worker.id) }
+                .onFailure { Log.w(TAG, "Labor delete sync failed: ${it.message}") }
+        }
     }
 
     fun getAllExpenses(): Flow<List<ExpenseEntity>> = expenseDao.getAll()
 
     fun getAllProjects(): Flow<List<ProjectEntity>> = projectDao.getAll()
 }
-
