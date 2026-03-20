@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">KablanPro</string>
+
+    <!-- Navigation Tab Labels -->
+    <string name="tab_projects">Projects</string>
+    <string name="tab_expenses">Expenses</string>
+    <string name="tab_invoices">Invoices</string>
+    <string name="tab_labor">Labor</string>
+    <string name="tab_clients">Clients</string>
+    <string name="tab_analytics">Analytics</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Tab descriptions for accessibility -->
+    <string name="tab_projects_description">Projects tab</string>
+    <string name="tab_expenses_description">Expenses tab</string>
+    <string name="tab_invoices_description">Invoices tab</string>
+    <string name="tab_labor_description">Labor tab</string>
+    <string name="tab_clients_description">Clients tab</string>
+    <string name="tab_analytics_description">Analytics tab</string>
+    <string name="tab_settings_description">Settings tab</string>
 </resources>
