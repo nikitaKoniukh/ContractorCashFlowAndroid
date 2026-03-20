@@ -14,20 +14,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -39,6 +30,7 @@ import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -86,10 +78,12 @@ fun InvoiceFormContent(
                     }
 
                     if (state.useExistingClient) {
-                        ExistingClientPicker(
+                        ModernDropdown(
+                            label = stringResource(R.string.invoices_select_existing_client),
                             options = state.existingClients.map { it.name },
                             selected = state.selectedClientName,
-                            onSelected = { onStateChange(state.copy(selectedClientName = it)) }
+                            onSelected = { onStateChange(state.copy(selectedClientName = it)) },
+                            modifier = Modifier.fillMaxWidth()
                         )
                     } else {
                         ModernTextField(
@@ -153,10 +147,15 @@ fun InvoiceFormContent(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    ProjectPicker(
-                        selectedProjectId = state.projectId,
-                        projectOptions = state.projects,
-                        onSelected = { onStateChange(state.copy(projectId = it)) }
+                    ModernDropdown(
+                        label = stringResource(R.string.invoices_project_optional),
+                        options = listOf(stringResource(R.string.invoices_no_project)) + state.projects.map { it.name },
+                        selected = state.projects.firstOrNull { it.id == state.projectId }?.name ?: stringResource(R.string.invoices_no_project),
+                        onSelected = { projectName ->
+                            val selectedProject = state.projects.find { it.name == projectName }
+                            onStateChange(state.copy(projectId = selectedProject?.id))
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -191,34 +190,6 @@ fun InvoiceFormContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExistingClientPicker(options: List<String>, selected: String, onSelected: (String) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-        TextField(
-            value = selected,
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
-            label = { Text(stringResource(R.string.invoices_select_existing_client)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { name ->
-                DropdownMenuItem(
-                    text = { Text(name) },
-                    onClick = {
-                        onSelected(name)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
 @Composable
 private fun DueDatePicker(dueDate: Long, onDateSelected: (Long) -> Unit) {
     val context = LocalContext.current
@@ -232,7 +203,7 @@ private fun DueDatePicker(dueDate: Long, onDateSelected: (Long) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f)
         ) {
-            Icon(
+            androidx.compose.material3.Icon(
                 imageVector = Icons.Default.CalendarToday,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -244,7 +215,7 @@ private fun DueDatePicker(dueDate: Long, onDateSelected: (Long) -> Unit) {
                 fontWeight = FontWeight.Medium
             )
         }
-        androidx.compose.material3.TextButton(onClick = {
+        TextButton(onClick = {
             val cal = Calendar.getInstance().apply { timeInMillis = dueDate }
             DatePickerDialog(
                 context,
@@ -267,45 +238,3 @@ private fun DueDatePicker(dueDate: Long, onDateSelected: (Long) -> Unit) {
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ProjectPicker(
-    selectedProjectId: String?,
-    projectOptions: List<com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity>,
-    onSelected: (String?) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val selected = projectOptions.firstOrNull { it.id == selectedProjectId }
-
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-        TextField(
-            value = selected?.name ?: stringResource(R.string.invoices_no_project),
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
-            label = { Text(stringResource(R.string.invoices_project_optional)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.invoices_no_project)) },
-                onClick = {
-                    onSelected(null)
-                    expanded = false
-                }
-            )
-            projectOptions.forEach { project ->
-                DropdownMenuItem(
-                    text = { Text(project.name) },
-                    onClick = {
-                        onSelected(project.id)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-

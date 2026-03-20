@@ -8,16 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,6 +34,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRep
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,10 +126,12 @@ fun NewProjectScreen(
             }
 
             if (useExistingClient) {
-                ClientDropdown(
-                    clients = clients.map { it.name },
+                ModernDropdown(
+                    label = stringResource(R.string.projects_select_client),
+                    options = clients.map { it.name },
                     selected = selectedClientName,
-                    onSelect = { selectedClientName = it }
+                    onSelected = { selectedClientName = it },
+                    modifier = Modifier.fillMaxWidth()
                 )
             } else {
                 ModernTextField(
@@ -187,38 +186,5 @@ fun NewProjectScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ClientDropdown(
-    clients: List<String>,
-    selected: String,
-    onSelect: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-        TextField(
-            value = selected,
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(),
-            label = { Text(stringResource(R.string.projects_select_client)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            clients.forEach { client ->
-                DropdownMenuItem(
-                    text = { Text(client) },
-                    onClick = {
-                        onSelect(client)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
 
 

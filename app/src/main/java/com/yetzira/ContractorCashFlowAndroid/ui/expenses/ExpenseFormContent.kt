@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,20 +13,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +30,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -76,22 +66,31 @@ fun ExpenseFormContent(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    CategoryPicker(
-                        selected = state.category,
-                        onSelected = { onStateChange(state.copy(category = it)) }
+                    ModernDropdown(
+                        label = stringResource(R.string.expenses_form_category_label),
+                        options = ExpenseCategory.entries.map { it.name },
+                        selected = state.category.name,
+                        onSelected = { selectedName ->
+                            val selected = ExpenseCategory.entries.find { it.name == selectedName }
+                            if (selected != null) {
+                                onStateChange(state.copy(category = selected))
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     if (state.category == ExpenseCategory.LABOR && state.workers.isNotEmpty()) {
-                        WorkerPicker(
-                            workers = state.workers,
-                            selectedWorkerId = state.workerId,
-                            onSelected = { workerId ->
-                                onStateChange(
-                                    state.copy(workerId = workerId).let {
-                                        it
-                                    }
-                                )
-                            }
+                        ModernDropdown(
+                            label = stringResource(R.string.expenses_form_worker_label),
+                            options = state.workers.map { it.worker.workerName },
+                            selected = state.workers.firstOrNull { it.worker.id == state.workerId }?.worker?.workerName.orEmpty(),
+                            onSelected = { workerName ->
+                                val worker = state.workers.find { it.worker.workerName == workerName }
+                                if (worker != null) {
+                                    onStateChange(state.copy(workerId = worker.worker.id))
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
                         )
 
                         val worker = state.workers.firstOrNull { it.worker.id == state.workerId }
@@ -180,76 +179,17 @@ fun ExpenseFormContent(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    ProjectPicker(
-                        projectOptions = state.projects,
-                        selectedProjectId = state.projectId,
-                        onSelected = { onStateChange(state.copy(projectId = it)) }
+                    ModernDropdown(
+                        label = stringResource(R.string.expenses_form_project_label),
+                        options = listOf(stringResource(R.string.expenses_form_no_project)) + state.projects.map { it.name },
+                        selected = state.projects.firstOrNull { it.id == state.projectId }?.name ?: stringResource(R.string.expenses_form_no_project),
+                        onSelected = { projectName ->
+                            val selectedProject = state.projects.find { it.name == projectName }
+                            onStateChange(state.copy(projectId = selectedProject?.id))
+                        },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CategoryPicker(
-    selected: ExpenseCategory,
-    onSelected: (ExpenseCategory) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-        TextField(
-            value = selected.name,
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
-            label = { Text(stringResource(R.string.expenses_form_category_label)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            ExpenseCategory.values().forEach { category ->
-                DropdownMenuItem(
-                    text = { Text(category.name) },
-                    onClick = {
-                        onSelected(category)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun WorkerPicker(
-    workers: List<WorkerOptionUi>,
-    selectedWorkerId: String?,
-    onSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val selected = workers.firstOrNull { it.worker.id == selectedWorkerId }
-
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-        TextField(
-            value = selected?.worker?.workerName.orEmpty(),
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
-            label = { Text(stringResource(R.string.expenses_form_worker_label)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            workers.forEach { worker ->
-                val detail = "${worker.worker.workerName} • ${worker.rate ?: 0.0}${worker.rateSuffix}"
-                DropdownMenuItem(
-                    text = { Text(detail) },
-                    onClick = {
-                        onSelected(worker.worker.id)
-                        expanded = false
-                    }
-                )
             }
         }
     }
@@ -258,17 +198,17 @@ private fun WorkerPicker(
 @Composable
 private fun DatePickerField(date: Long, onDateSelected: (Long) -> Unit) {
     val context = LocalContext.current
-    Row(
+    androidx.compose.foundation.layout.Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        androidx.compose.foundation.layout.Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f)
         ) {
-            Icon(
+            androidx.compose.material3.Icon(
                 imageVector = Icons.Default.CalendarToday,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -304,43 +244,4 @@ private fun DatePickerField(date: Long, onDateSelected: (Long) -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ProjectPicker(
-    projectOptions: List<com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity>,
-    selectedProjectId: String?,
-    onSelected: (String?) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val selected = projectOptions.firstOrNull { it.id == selectedProjectId }
-
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-        TextField(
-            value = selected?.name ?: stringResource(R.string.expenses_form_no_project),
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
-            label = { Text(stringResource(R.string.expenses_form_project_label)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.expenses_form_no_project)) },
-                onClick = {
-                    onSelected(null)
-                    expanded = false
-                }
-            )
-            projectOptions.forEach { project ->
-                DropdownMenuItem(
-                    text = { Text(project.name) },
-                    onClick = {
-                        onSelected(project.id)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
 

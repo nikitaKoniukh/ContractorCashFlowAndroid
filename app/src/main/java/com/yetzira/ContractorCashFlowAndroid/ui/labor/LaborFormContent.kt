@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
 
 @Composable
 fun LaborFormContent(
@@ -43,9 +44,10 @@ fun LaborFormContent(
             Text(text = stringResource(R.string.labor_form_duplicate_warning))
         }
 
-        LaborTypePicker(
+        LaborTypeDropdown(
             selected = state.laborType,
-            onSelected = { onChange(state.copy(laborType = it)) }
+            onSelected = { onChange(state.copy(laborType = it)) },
+            modifier = Modifier.fillMaxWidth()
         )
 
         if (state.laborType == LaborType.HOURLY || state.laborType == LaborType.DAILY) {
@@ -90,27 +92,22 @@ fun LaborFormContent(
 }
 
 @Composable
-private fun LaborTypePicker(
+private fun LaborTypeDropdown(
     selected: LaborType,
-    onSelected: (LaborType) -> Unit
+    onSelected: (LaborType) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Column {
-        Text(text = stringResource(R.string.labor_form_type_label))
-        TextButton(onClick = { expanded = true }) {
-            Text(selected.name)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            LaborType.entries.forEach { type ->
-                DropdownMenuItem(
-                    text = { Text(type.name) },
-                    onClick = {
-                        onSelected(type)
-                        expanded = false
-                    }
-                )
+    ModernDropdown(
+        label = stringResource(R.string.labor_form_type_label),
+        options = LaborType.entries.map { it.name },
+        selected = selected.name,
+        onSelected = { selectedName ->
+            val type = LaborType.entries.find { it.name == selectedName }
+            if (type != null) {
+                onSelected(type)
             }
-        }
-    }
+        },
+        modifier = modifier
+    )
 }
 
