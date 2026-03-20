@@ -14,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -25,7 +26,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +56,7 @@ fun InvoicesListScreen(
     val state by viewModel.listUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showFilterMenu by remember { mutableStateOf(false) }
-    val deletedLabel = "Invoice deleted"
+    var pendingDelete by remember { mutableStateOf<InvoiceListItemUi?>(null) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -121,17 +121,12 @@ fun InvoicesListScreen(
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
                                 if (value != SwipeToDismissBoxValue.Settled) {
-                                    viewModel.deleteInvoice(item.invoice)
+                                    pendingDelete = item
+                                    return@rememberSwipeToDismissBoxState false
                                 }
                                 true
                             }
                         )
-
-                        LaunchedEffect(dismissState.currentValue) {
-                            if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-                                snackbarHostState.showSnackbar(deletedLabel)
-                            }
-                        }
 
                         SwipeToDismissBox(
                             state = dismissState,
@@ -155,6 +150,27 @@ fun InvoicesListScreen(
                 }
             }
         }
+    }
+
+    pendingDelete?.let { item ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text(text = stringResource(R.string.common_delete)) },
+            text = { Text(text = item.invoice.clientName) },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingDelete = null
+                    viewModel.deleteInvoice(item.invoice)
+                }) {
+                    Text(text = stringResource(R.string.common_delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) {
+                    Text(text = stringResource(R.string.action_cancel))
+                }
+            }
+        )
     }
 }
 

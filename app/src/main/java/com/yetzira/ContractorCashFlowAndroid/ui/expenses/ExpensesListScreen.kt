@@ -30,9 +30,7 @@ fun ExpensesListScreen(
     val state by viewModel.listUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showFilters by remember { mutableStateOf(false) }
-
-    val deletedMessage = stringResource(R.string.expenses_deleted)
-    val undoLabel = stringResource(R.string.common_undo)
+    var pendingDelete by remember { mutableStateOf<ExpenseListItemUi?>(null) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -89,23 +87,12 @@ fun ExpensesListScreen(
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
                                 if (value != SwipeToDismissBoxValue.Settled) {
-                                    viewModel.deleteExpense(item.expense)
+                                    pendingDelete = item
+                                    return@rememberSwipeToDismissBoxState false
                                 }
                                 true
                             }
                         )
-
-                        LaunchedEffect(dismissState.currentValue) {
-                            if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-                                val result = snackbarHostState.showSnackbar(
-                                    message = deletedMessage,
-                                    actionLabel = undoLabel
-                                )
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    viewModel.undoDeleteExpense()
-                                }
-                            }
-                        }
 
                         SwipeToDismissBox(
                             state = dismissState,
@@ -143,6 +130,27 @@ fun ExpensesListScreen(
                 showFilters = false
             },
             onDismiss = { showFilters = false }
+        )
+    }
+
+    pendingDelete?.let { item ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text(text = stringResource(R.string.common_delete)) },
+            text = { Text(text = item.expense.descriptionText) },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingDelete = null
+                    viewModel.deleteExpense(item.expense)
+                }) {
+                    Text(text = stringResource(R.string.common_delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) {
+                    Text(text = stringResource(R.string.action_cancel))
+                }
+            }
         )
     }
 }
