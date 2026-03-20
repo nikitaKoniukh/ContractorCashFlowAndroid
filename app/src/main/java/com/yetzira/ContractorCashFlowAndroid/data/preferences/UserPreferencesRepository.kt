@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,7 @@ private const val PREFERENCES_NAME = "kablan_pro_preferences"
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PREFERENCES_NAME)
 
-class UserPreferencesRepository(private val context: Context) {
+class UserPreferencesRepository(context: Context) {
     private val dataStore = context.dataStore
 
     // Preference Keys
@@ -24,6 +25,9 @@ class UserPreferencesRepository(private val context: Context) {
         val INVOICE_REMINDERS_ENABLED = booleanPreferencesKey("invoice_reminders_enabled")
         val OVERDUE_ALERTS_ENABLED = booleanPreferencesKey("overdue_alerts_enabled")
         val BUDGET_WARNINGS_ENABLED = booleanPreferencesKey("budget_warnings_enabled")
+        val SUBSCRIPTION_IS_PRO = booleanPreferencesKey("subscription_is_pro")
+        val SUBSCRIPTION_PLAN_NAME = stringPreferencesKey("subscription_plan_name")
+        val SUBSCRIPTION_RENEWAL_DATE = longPreferencesKey("subscription_renewal_date")
     }
 
     // Flow getters
@@ -47,6 +51,18 @@ class UserPreferencesRepository(private val context: Context) {
 
     val budgetWarningsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[BUDGET_WARNINGS_ENABLED] ?: true
+    }
+
+    val subscriptionIsPro: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[SUBSCRIPTION_IS_PRO] ?: false
+    }
+
+    val subscriptionPlanName: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[SUBSCRIPTION_PLAN_NAME]
+    }
+
+    val subscriptionRenewalDate: Flow<Long?> = dataStore.data.map { preferences ->
+        preferences[SUBSCRIPTION_RENEWAL_DATE]
     }
 
     // Suspend setters
@@ -78,6 +94,30 @@ class UserPreferencesRepository(private val context: Context) {
         dataStore.edit { preferences ->
             preferences[BUDGET_WARNINGS_ENABLED] = enabled
         }
+    }
+
+    suspend fun setSubscription(
+        isPro: Boolean,
+        planName: String? = null,
+        renewalDate: Long? = null
+    ) {
+        dataStore.edit { preferences ->
+            preferences[SUBSCRIPTION_IS_PRO] = isPro
+            if (planName == null) {
+                preferences.remove(SUBSCRIPTION_PLAN_NAME)
+            } else {
+                preferences[SUBSCRIPTION_PLAN_NAME] = planName
+            }
+            if (renewalDate == null) {
+                preferences.remove(SUBSCRIPTION_RENEWAL_DATE)
+            } else {
+                preferences[SUBSCRIPTION_RENEWAL_DATE] = renewalDate
+            }
+        }
+    }
+
+    suspend fun clearSubscription() {
+        setSubscription(isPro = false, planName = null, renewalDate = null)
     }
 }
 

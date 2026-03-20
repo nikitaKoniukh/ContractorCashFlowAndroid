@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepository
 import com.yetzira.ContractorCashFlowAndroid.notification.InvoiceNotificationScheduler
 
@@ -20,7 +21,8 @@ class InvoiceViewModelFactory(
                     clientDao = database.clientDao(),
                     projectDao = database.projectDao()
                 ),
-                notificationScheduler = InvoiceNotificationScheduler(context)
+                notificationScheduler = InvoiceNotificationScheduler(context),
+                userPreferencesRepository = UserPreferencesRepository(context.applicationContext)
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepository
 import com.yetzira.ContractorCashFlowAndroid.notification.InvoiceNotificationScheduler
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +17,8 @@ import kotlinx.coroutines.launch
 
 class InvoiceViewModel(
     private val repository: InvoiceRepository,
-    private val notificationScheduler: InvoiceNotificationScheduler
+    private val notificationScheduler: InvoiceNotificationScheduler,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
@@ -154,11 +157,15 @@ class InvoiceViewModel(
             if (invoice.isPaid) {
                 notificationScheduler.cancel(invoice.id)
             } else {
+                val invoiceRemindersEnabled = userPreferencesRepository.invoiceRemindersEnabled.first()
+                val overdueAlertsEnabled = userPreferencesRepository.overdueAlertsEnabled.first()
                 notificationScheduler.schedule(
                     invoiceId = invoice.id,
                     clientName = invoice.clientName,
                     dueDate = invoice.dueDate,
-                    isPaid = invoice.isPaid
+                    isPaid = invoice.isPaid,
+                    invoiceRemindersEnabled = invoiceRemindersEnabled,
+                    overdueAlertsEnabled = overdueAlertsEnabled
                 )
             }
 
@@ -188,11 +195,15 @@ class InvoiceViewModel(
         viewModelScope.launch {
             repository.insertInvoice(invoice)
             if (!invoice.isPaid) {
+                val invoiceRemindersEnabled = userPreferencesRepository.invoiceRemindersEnabled.first()
+                val overdueAlertsEnabled = userPreferencesRepository.overdueAlertsEnabled.first()
                 notificationScheduler.schedule(
                     invoiceId = invoice.id,
                     clientName = invoice.clientName,
                     dueDate = invoice.dueDate,
-                    isPaid = invoice.isPaid
+                    isPaid = invoice.isPaid,
+                    invoiceRemindersEnabled = invoiceRemindersEnabled,
+                    overdueAlertsEnabled = overdueAlertsEnabled
                 )
             }
             recentlyDeleted = null

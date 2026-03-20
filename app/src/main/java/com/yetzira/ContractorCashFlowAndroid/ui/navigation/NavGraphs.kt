@@ -44,7 +44,13 @@ import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectsListScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallViewModel
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsRoutes
+import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsViewModel
+import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsViewModelFactory
 import androidx.navigation.navArgument
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 
@@ -318,7 +324,7 @@ fun NavGraphBuilder.clientsGraph(navController: NavController) {
     }
 }
 
-fun NavGraphBuilder.analyticsGraph(navController: NavController) {
+fun NavGraphBuilder.analyticsGraph(@Suppress("UNUSED_PARAMETER") navController: NavController) {
     navigation(
         startDestination = TabDestination.ANALYTICS.route,
         route = "analytics_graph"
@@ -335,11 +341,29 @@ fun NavGraphBuilder.analyticsGraph(navController: NavController) {
 
 fun NavGraphBuilder.settingsGraph(navController: NavController) {
     navigation(
-        startDestination = TabDestination.SETTINGS.route,
-        route = "settings_graph"
+        startDestination = SettingsRoutes.ROOT,
+        route = SettingsRoutes.GRAPH
     ) {
-        composable(TabDestination.SETTINGS.route) {
-            SettingsScreen()
+        composable(SettingsRoutes.ROOT) {
+            val context = LocalContext.current
+            val factory = remember { SettingsViewModelFactory(context, AppDatabase.getInstance(context)) }
+            val viewModel: SettingsViewModel = viewModel(factory = factory)
+
+            SettingsScreen(
+                viewModel = viewModel,
+                onOpenPaywall = { navController.navigate(SettingsRoutes.PAYWALL) }
+            )
+        }
+
+        composable(SettingsRoutes.PAYWALL) {
+            val context = LocalContext.current
+            val factory = remember { PaywallViewModelFactory(context) }
+            val viewModel: PaywallViewModel = viewModel(factory = factory)
+
+            PaywallScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

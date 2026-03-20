@@ -4,28 +4,57 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 
 class InvoiceNotificationScheduler(
     private val context: Context
 ) {
 
-    fun schedule(invoiceId: String, clientName: String, dueDate: Long, isPaid: Boolean) {
+    fun schedule(
+        invoiceId: String,
+        clientName: String,
+        dueDate: Long,
+        isPaid: Boolean,
+        invoiceRemindersEnabled: Boolean = true,
+        overdueAlertsEnabled: Boolean = true
+    ) {
         cancel(invoiceId)
         if (isPaid) return
 
-        scheduleWorker(
-            requestCode = reminderRequestCode(invoiceId),
-            triggerAtMillis = dueDate - THREE_DAYS_MS,
-            title = "Invoice Reminder",
-            message = "Invoice for $clientName is due in 3 days."
-        )
+        if (invoiceRemindersEnabled) {
+            scheduleWorker(
+                requestCode = reminderRequestCode(invoiceId),
+                triggerAtMillis = dueDate - THREE_DAYS_MS,
+                title = "Invoice Reminder",
+                message = "Invoice for $clientName is due in 3 days."
+            )
+        }
 
-        scheduleWorker(
-            requestCode = overdueRequestCode(invoiceId),
-            triggerAtMillis = dueDate + ONE_DAY_MS,
-            title = "Invoice Overdue",
-            message = "Invoice for $clientName is overdue."
-        )
+        if (overdueAlertsEnabled) {
+            scheduleWorker(
+                requestCode = overdueRequestCode(invoiceId),
+                triggerAtMillis = dueDate + ONE_DAY_MS,
+                title = "Invoice Overdue",
+                message = "Invoice for $clientName is overdue."
+            )
+        }
+    }
+
+    fun rescheduleAll(
+        invoices: List<InvoiceEntity>,
+        invoiceRemindersEnabled: Boolean,
+        overdueAlertsEnabled: Boolean
+    ) {
+        invoices.forEach { invoice ->
+            schedule(
+                invoiceId = invoice.id,
+                clientName = invoice.clientName,
+                dueDate = invoice.dueDate,
+                isPaid = invoice.isPaid,
+                invoiceRemindersEnabled = invoiceRemindersEnabled,
+                overdueAlertsEnabled = overdueAlertsEnabled
+            )
+        }
     }
 
     fun cancel(invoiceId: String) {

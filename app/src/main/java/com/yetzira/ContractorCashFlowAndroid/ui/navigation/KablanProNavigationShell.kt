@@ -13,6 +13,7 @@ import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectRoutes
+import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsRoutes
 
 @Composable
 fun KablanProNavigationShell(
@@ -70,7 +71,7 @@ private fun getGraphRoute(tab: TabDestination): String = when (tab) {
     TabDestination.LABOR -> LaborRoutes.GRAPH
     TabDestination.CLIENTS -> ClientRoutes.GRAPH
     TabDestination.ANALYTICS -> "analytics_graph"
-    TabDestination.SETTINGS -> "settings_graph"
+    TabDestination.SETTINGS -> SettingsRoutes.GRAPH
 }
 
 private fun getTabRootRoute(tab: TabDestination): String = when (tab) {
@@ -79,6 +80,7 @@ private fun getTabRootRoute(tab: TabDestination): String = when (tab) {
     TabDestination.INVOICES -> InvoiceRoutes.LIST
     TabDestination.LABOR -> LaborRoutes.LIST
     TabDestination.CLIENTS -> ClientRoutes.LIST
+    TabDestination.SETTINGS -> SettingsRoutes.ROOT
     else -> tab.route
 }
 
