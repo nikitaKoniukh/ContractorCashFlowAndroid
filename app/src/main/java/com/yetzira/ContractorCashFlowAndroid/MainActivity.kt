@@ -1,6 +1,7 @@
 package com.yetzira.ContractorCashFlowAndroid
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.core.os.LocaleListCompat
+import com.google.firebase.FirebaseApp
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProNavigationShell
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.TabDestination
@@ -26,6 +28,12 @@ class MainActivity : ComponentActivity() {
         val language = runBlocking { preferencesRepo.appLanguage.first() }
         val localeList = LocaleListCompat.forLanguageTags(language.code)
         AppCompatDelegate.setApplicationLocales(localeList)
+
+        if (BuildConfig.DEBUG) {
+            val apps = FirebaseApp.getApps(this)
+            val projectIds = apps.mapNotNull { it.options.projectId }
+            Log.d("KablanProFirebase", "Initialized=${apps.isNotEmpty()} projects=$projectIds")
+        }
         
         enableEdgeToEdge()
         setContent {
