@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,6 +36,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -128,7 +134,7 @@ fun LaborListScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .clip(MaterialTheme.shapes.medium)
+                                    .clip(RoundedCornerShape(16.dp))
                                     .background(MaterialTheme.colorScheme.errorContainer)
                                     .padding(horizontal = 16.dp),
                                 contentAlignment = Alignment.CenterEnd
@@ -190,23 +196,41 @@ fun LaborListScreen(
 
 @Composable
 private fun SummaryCard(summary: LaborSummaryUi) {
-    Card(modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 12.dp)) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 12.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
         Column(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(text = summary.periodLabel, style = MaterialTheme.typography.labelLarge)
-            Text(text = "Total Labor Cost: ${formatMoney(summary.totalLaborCost)}", fontWeight = FontWeight.Bold)
-            Text(text = "Worker Count: ${summary.workerCount}")
-            Text(text = "Days Worked: ${summary.daysWorked}")
-            Text(text = "Avg Daily Cost: ${formatMoney(summary.avgDailyCost)}")
-            Text(text = "Total Hours: ${String.format(Locale.US, "%.2f", summary.totalHours)}")
+            Text(text = summary.periodLabel, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = "Total Labor Cost: ${formatMoney(summary.totalLaborCost)}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "Worker Count: ${summary.workerCount}")
+                Text(text = "Days Worked: ${summary.daysWorked}")
+            }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "Avg Daily Cost: ${formatMoney(summary.avgDailyCost)}")
+                Text(text = "Total Hours: ${String.format(Locale.US, "%.2f", summary.totalHours)}")
+            }
         }
     }
 }
 
 @Composable
 private fun WorkerCard(worker: WorkerMetricsUi, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(text = worker.worker.workerName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
                     text = worker.laborType?.name ?: "Unknown",
@@ -216,15 +240,38 @@ private fun WorkerCard(worker: WorkerMetricsUi, onClick: () -> Unit) {
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 )
             }
-            Text(text = "Earned: ${formatMoney(worker.totalAmountEarned)}")
-            Text(text = "Rate: ${worker.rateLabel}")
-            Text(text = "Days Worked: ${worker.totalDaysWorked}")
-            Text(text = "Units: ${String.format(Locale.US, "%.2f", worker.totalUnitsWorked)}")
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Earned: ${formatMoney(worker.totalAmountEarned)}", fontWeight = FontWeight.SemiBold)
+                Icon(
+                    imageVector = Icons.Default.Work,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = 2.dp)
+                )
+            }
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = "Rate: ${worker.rateLabel}")
+                Text(text = "Days: ${worker.totalDaysWorked}")
+                Text(text = "Units: ${String.format(Locale.US, "%.2f", worker.totalUnitsWorked)}")
+            }
+
             if (worker.associatedProjects.isNotEmpty()) {
                 Text(text = "Projects: ${worker.associatedProjects.joinToString()} ")
             }
             if (!worker.worker.notes.isNullOrBlank()) {
                 Text(text = worker.worker.notes, maxLines = 2)
+            }
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
             }
         }
     }

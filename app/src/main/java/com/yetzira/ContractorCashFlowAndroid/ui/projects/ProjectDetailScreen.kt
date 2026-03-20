@@ -4,12 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,6 +27,10 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -194,7 +205,7 @@ fun ProjectDetailScreen(
                     state = dismissState,
                     backgroundContent = {},
                     content = {
-                        ExpenseRow(expense = expense, onClick = { showMenu = true })
+                        ExpenseRow(expense = expense, currency = currency, onClick = { showMenu = true })
                         
                     }
                 )
@@ -242,7 +253,7 @@ fun ProjectDetailScreen(
                     state = dismissState,
                     backgroundContent = {},
                     content = {
-                        InvoiceRow(invoice = invoice, onClick = { showMenu = true })
+                        InvoiceRow(invoice = invoice, currency = currency, onClick = { showMenu = true })
                     }
                 )
             }
@@ -350,36 +361,81 @@ private fun CategoryBreakdownSection(
 }
 
 @Composable
-private fun ExpenseRow(expense: ExpenseEntity, onClick: () -> Unit) {
-    val context = LocalContext.current
-    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
-    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Column {
-            Text(text = expense.descriptionText, fontWeight = FontWeight.SemiBold)
-            Text(text = formatDate(expense.date), style = MaterialTheme.typography.bodySmall)
-        }
-        TextButton(onClick = onClick) {
-            Text(text = formatCurrencyAmount(expense.amount, currency), color = Color(0xFFFF3B30))
+private fun ExpenseRow(expense: ExpenseEntity, currency: CurrencyOption, onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = expense.descriptionText, fontWeight = FontWeight.SemiBold)
+                Text(text = formatCurrencyAmount(expense.amount, currency), color = Color(0xFFFF3B30), fontWeight = FontWeight.SemiBold)
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 6.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            )
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row {
+                    Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.padding(top = 2.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = formatDate(expense.date), style = MaterialTheme.typography.bodySmall)
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun InvoiceRow(invoice: InvoiceEntity, onClick: () -> Unit) {
-    val context = LocalContext.current
-    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
-    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Column {
-            Text(text = invoice.clientName, fontWeight = FontWeight.SemiBold)
-            Text(text = formatDate(invoice.dueDate), style = MaterialTheme.typography.bodySmall)
-        }
-        Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
-            TextButton(onClick = onClick) {
-                Text(text = formatCurrencyAmount(invoice.amount, currency), color = if (invoice.isPaid) Color(0xFF34C759) else Color(0xFFFF9500))
+private fun InvoiceRow(invoice: InvoiceEntity, currency: CurrencyOption, onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row {
+                    Icon(imageVector = Icons.Default.Person, contentDescription = null, modifier = Modifier.padding(top = 2.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = invoice.clientName, fontWeight = FontWeight.SemiBold)
+                }
+                Text(
+                    text = formatCurrencyAmount(invoice.amount, currency),
+                    color = if (invoice.isPaid) Color(0xFF34C759) else Color(0xFFFF9500),
+                    fontWeight = FontWeight.SemiBold
+                )
             }
-            InvoiceStatusBadge(invoice = invoice)
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 6.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            )
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(text = formatDate(invoice.dueDate), style = MaterialTheme.typography.bodySmall)
+                Row {
+                    InvoiceStatusBadge(invoice = invoice)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
+            }
         }
     }
 }

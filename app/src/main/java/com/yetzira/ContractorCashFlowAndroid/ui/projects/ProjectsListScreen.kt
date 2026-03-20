@@ -113,11 +113,10 @@ fun ProjectsListScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(top = 12.dp, bottom = 80.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(top = 14.dp, bottom = 92.dp)
                 ) {
                     items(uiState.projects, key = { it.project.id }) { item ->
-                        val cardShape = RoundedCornerShape(16.dp)
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
                                 if (value != SwipeToDismissBoxValue.Settled) {
@@ -129,26 +128,17 @@ fun ProjectsListScreen(
                         )
 
                         SwipeToDismissBox(
-                            modifier = Modifier.clip(cardShape),
                             state = dismissState,
                             backgroundContent = {
-                                val showDeleteBackground = dismissState.dismissDirection != null
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(
-                                            if (showDeleteBackground) {
-                                                MaterialTheme.colorScheme.errorContainer
-                                            } else {
-                                                Color.Transparent
-                                            }
-                                        )
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(MaterialTheme.colorScheme.errorContainer)
                                         .padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.CenterEnd
                                 ) {
-                                    if (showDeleteBackground) {
-                                        Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete))
-                                    }
+                                    Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete))
                                 }
                             },
                             content = {
@@ -244,7 +234,7 @@ private fun ProjectCard(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 7.dp)
     ) {
         Row(
             modifier = Modifier
