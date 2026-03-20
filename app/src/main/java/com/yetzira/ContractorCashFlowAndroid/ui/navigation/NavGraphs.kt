@@ -10,8 +10,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsScreen
-import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientsScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientDetailScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientRoutes
+import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientViewModel
+import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientViewModelFactory
+import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientsListScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.clients.EditClientScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.clients.NewClientScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.EditExpenseScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseViewModel
@@ -211,11 +216,63 @@ fun NavGraphBuilder.laborGraph(navController: NavController) {
 
 fun NavGraphBuilder.clientsGraph(navController: NavController) {
     navigation(
-        startDestination = TabDestination.CLIENTS.route,
-        route = "clients_graph"
+        startDestination = ClientRoutes.LIST,
+        route = ClientRoutes.GRAPH
     ) {
-        composable(TabDestination.CLIENTS.route) {
-            ClientsScreen()
+        composable(ClientRoutes.LIST) {
+            val context = LocalContext.current
+            val factory = remember { ClientViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: ClientViewModel = viewModel(factory = factory)
+
+            ClientsListScreen(
+                viewModel = viewModel,
+                onCreate = { navController.navigate(ClientRoutes.NEW) },
+                onOpenDetail = { clientId -> navController.navigate(ClientRoutes.detail(clientId)) }
+            )
+        }
+
+        composable(ClientRoutes.NEW) {
+            val context = LocalContext.current
+            val factory = remember { ClientViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: ClientViewModel = viewModel(factory = factory)
+
+            NewClientScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = ClientRoutes.DETAIL,
+            arguments = listOf(navArgument("clientId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { ClientViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: ClientViewModel = viewModel(factory = factory)
+            val clientId = backStackEntry.arguments?.getString("clientId").orEmpty()
+
+            ClientDetailScreen(
+                clientId = clientId,
+                viewModel = viewModel,
+                onEdit = { id -> navController.navigate(ClientRoutes.edit(id)) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = ClientRoutes.EDIT,
+            arguments = listOf(navArgument("clientId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { ClientViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: ClientViewModel = viewModel(factory = factory)
+            val clientId = backStackEntry.arguments?.getString("clientId").orEmpty()
+
+            EditClientScreen(
+                clientId = clientId,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

@@ -110,4 +110,19 @@
     <string name="invoices_due_date">Due date</string>
     <string name="invoices_project_optional">Project (optional)</string>
     <string name="invoices_paid_toggle">Mark as paid</string>
+
+    <string name="clients_new">New Client</string>
+    <string name="clients_edit">Edit Client</string>
+    <string name="clients_deleted">Client deleted</string>
+    <string name="clients_search_placeholder">Search by name, email, or phone</string>
+    <string name="clients_empty_title">No clients yet</string>
+    <string name="clients_empty_body">Add your first client to manage contacts.</string>
+    <string name="clients_detail_title">Client Details</string>
+    <string name="clients_not_found">Client not found</string>
+    <string name="clients_name">Name</string>
+    <string name="clients_email">Email</string>
+    <string name="clients_phone">Phone</string>
+    <string name="clients_address">Address</string>
+    <string name="clients_notes">Notes</string>
+    <string name="clients_notes_title">Notes</string>
 </resources>
