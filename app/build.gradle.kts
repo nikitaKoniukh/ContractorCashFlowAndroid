@@ -86,6 +86,7 @@ dependencies {
 
     // Google Play Billing
     implementation(libs.google.play.billing.ktx)
+    implementation(libs.google.play.services.auth)
 
     // ML Kit Text Recognition
     implementation(libs.mlkit.text.recognition)

@@ -18,6 +18,7 @@ data class ClientEntity(
     val email: String? = null,
     val phone: String? = null,
     val address: String? = null,
-    val notes: String? = null
+    val notes: String? = null,
+    val lastModified: Long = System.currentTimeMillis()
 )
 

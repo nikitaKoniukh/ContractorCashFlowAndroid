@@ -30,6 +30,7 @@ data class InvoiceEntity(
     val isPaid: Boolean = false,
     val clientName: String,
     val createdDate: Long = System.currentTimeMillis(),
-    val projectId: String? = null
+    val projectId: String? = null,
+    val lastModified: Long = System.currentTimeMillis()
 )
 

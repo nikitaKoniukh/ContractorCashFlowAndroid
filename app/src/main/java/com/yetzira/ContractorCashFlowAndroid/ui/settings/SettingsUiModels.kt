@@ -17,6 +17,8 @@ data class SubscriptionUiState(
 )
 
 data class SettingsUiState(
+    val isAuthenticated: Boolean = false,
+    val userEmail: String? = null,
     val selectedLanguage: AppLanguageOption = AppLanguageOption.HEBREW,
     val selectedCurrency: CurrencyOption = CurrencyOption.ILS,
     val invoiceRemindersEnabled: Boolean = true,

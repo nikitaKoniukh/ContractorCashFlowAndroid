@@ -21,6 +21,7 @@ data class LaborDetailsEntity(
     val dailyRate: Double? = null,
     val contractPrice: Double? = null,
     val notes: String? = null,
-    val createdDate: Long = System.currentTimeMillis()
+    val createdDate: Long = System.currentTimeMillis(),
+    val lastModified: Long = System.currentTimeMillis()
 )
 

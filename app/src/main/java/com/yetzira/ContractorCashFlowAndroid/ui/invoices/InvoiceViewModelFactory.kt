@@ -7,6 +7,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepository
 import com.yetzira.ContractorCashFlowAndroid.notification.InvoiceNotificationScheduler
+import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
 
 class InvoiceViewModelFactory(
     private val context: Context,
@@ -19,7 +20,8 @@ class InvoiceViewModelFactory(
                 repository = InvoiceRepository(
                     invoiceDao = database.invoiceDao(),
                     clientDao = database.clientDao(),
-                    projectDao = database.projectDao()
+                    projectDao = database.projectDao(),
+                    syncService = FirestoreSyncService(database)
                 ),
                 notificationScheduler = InvoiceNotificationScheduler(context),
                 userPreferencesRepository = UserPreferencesRepository(context.applicationContext)

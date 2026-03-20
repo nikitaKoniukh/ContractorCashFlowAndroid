@@ -12,6 +12,7 @@ data class ProjectEntity(
     val clientName: String,
     val budget: Double,
     val createdDate: Long = System.currentTimeMillis(),
-    val isActive: Boolean = true
+    val isActive: Boolean = true,
+    val lastModified: Long = System.currentTimeMillis()
 )
 

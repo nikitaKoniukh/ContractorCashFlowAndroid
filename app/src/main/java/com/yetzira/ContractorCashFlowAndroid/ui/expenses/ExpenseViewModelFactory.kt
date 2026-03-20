@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepository
+import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
 
 class ExpenseViewModelFactory(
     private val database: AppDatabase
@@ -15,7 +16,8 @@ class ExpenseViewModelFactory(
                 repository = ExpenseRepository(
                     expenseDao = database.expenseDao(),
                     projectDao = database.projectDao(),
-                    laborDetailsDao = database.laborDetailsDao()
+                    laborDetailsDao = database.laborDetailsDao(),
+                    syncService = FirestoreSyncService(database)
                 )
             ) as T
         }

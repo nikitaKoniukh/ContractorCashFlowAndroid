@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ClientDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ExpenseDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.InvoiceDao
@@ -23,7 +25,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
         ClientEntity::class,
         LaborDetailsEntity::class
     ],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,6 +36,22 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun laborDetailsDao(): LaborDetailsDao
 
     companion object {
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE projects ADD COLUMN lastModified INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE expenses ADD COLUMN lastModified INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE invoices ADD COLUMN lastModified INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE clients ADD COLUMN lastModified INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE labor_details ADD COLUMN lastModified INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // No-op. Version 3 keeps schema stable and reserves room for future sync metadata.
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -43,7 +61,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "kablan_pro_database"
-                ).build()
+                )
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .build()
                 INSTANCE = instance
                 instance
             }

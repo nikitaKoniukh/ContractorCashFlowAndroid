@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepository
+import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
 
 class ProjectViewModelFactory(
     private val database: AppDatabase
@@ -12,7 +13,10 @@ class ProjectViewModelFactory(
         if (modelClass.isAssignableFrom(ProjectViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return ProjectViewModel(
-                repository = ProjectRepository(database.projectDao()),
+                repository = ProjectRepository(
+                    projectDao = database.projectDao(),
+                    syncService = FirestoreSyncService(database)
+                ),
                 expenseDao = database.expenseDao(),
                 invoiceDao = database.invoiceDao(),
                 clientDao = database.clientDao()
