@@ -10,6 +10,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepository
+import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -120,7 +121,7 @@ class ProjectViewModel(
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-            val budget = budgetText.toDoubleOrNull() ?: 0.0
+            val budget = parseAmountInput(budgetText) ?: 0.0
             val clientName = if (useExistingClient) selectedClientName else newClientName
             if (name.isBlank() || clientName.isBlank() || budget <= 0.0) return@launch
 

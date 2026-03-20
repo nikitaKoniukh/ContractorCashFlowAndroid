@@ -7,6 +7,8 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepository
 import com.yetzira.ContractorCashFlowAndroid.notification.InvoiceNotificationScheduler
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -86,7 +88,7 @@ class InvoiceViewModel(
                 useExistingClient = clients.any { it.name == invoice.clientName },
                 selectedClientName = invoice.clientName,
                 enteredClientName = invoice.clientName,
-                amount = invoice.amount.toString(),
+                amount = formatAmountInput(invoice.amount.toLong().toString()),
                 dueDate = invoice.dueDate,
                 isPaid = invoice.isPaid,
                 projectId = invoice.projectId,
@@ -119,13 +121,13 @@ class InvoiceViewModel(
 
     fun updateForm(state: InvoiceFormUiState): InvoiceFormUiState {
         val clientName = if (state.useExistingClient) state.selectedClientName else state.enteredClientName
-        val canSave = clientName.isNotBlank() && (state.amount.toDoubleOrNull() ?: 0.0) > 0.0
+        val canSave = clientName.isNotBlank() && (parseAmountInput(state.amount) ?: 0.0) > 0.0
         return state.copy(canSave = canSave)
     }
 
     fun saveInvoice(state: InvoiceFormUiState, onDone: () -> Unit) {
         viewModelScope.launch {
-            val amount = state.amount.toDoubleOrNull() ?: 0.0
+            val amount = parseAmountInput(state.amount) ?: 0.0
             val clientName = if (state.useExistingClient) state.selectedClientName else state.enteredClientName
             if (clientName.isBlank() || amount <= 0.0) return@launch
 

@@ -24,6 +24,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -32,6 +34,7 @@ import java.util.Locale
 @Composable
 fun InvoiceFormContent(
     state: InvoiceFormUiState,
+    currency: CurrencyOption,
     onStateChange: (InvoiceFormUiState) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -65,9 +68,10 @@ fun InvoiceFormContent(
 
         TextField(
             value = state.amount,
-            onValueChange = { onStateChange(state.copy(amount = it)) },
+            onValueChange = { onStateChange(state.copy(amount = formatAmountInput(it))) },
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.invoices_amount)) },
+            prefix = { Text(currency.symbol) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true
         )

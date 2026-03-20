@@ -33,11 +33,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -52,6 +56,9 @@ fun ProjectDetailScreen(
     onOpenClient: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val state by viewModel.detailUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showMenu by remember { mutableStateOf(false) }
@@ -125,6 +132,7 @@ fun ProjectDetailScreen(
                     balance = state.balance,
                     income = state.totalIncome,
                     expenses = state.totalExpenses,
+                    currency = currency,
                     profitMargin = state.profitMargin
                 )
             }
@@ -134,6 +142,7 @@ fun ProjectDetailScreen(
                     projectName = project.name,
                     clientName = project.clientName,
                     budget = project.budget,
+                    currency = currency,
                     isActive = project.isActive,
                     createdDate = project.createdDate,
                     onClientClick = { onOpenClient(project.clientName) }
@@ -186,6 +195,7 @@ fun ProjectDetailScreen(
                     backgroundContent = {},
                     content = {
                         ExpenseRow(expense = expense, onClick = { showMenu = true })
+                        
                     }
                 )
             }
@@ -245,6 +255,7 @@ private fun FinancialSummaryCard(
     balance: Double,
     income: Double,
     expenses: Double,
+    currency: CurrencyOption,
     profitMargin: Double,
     modifier: Modifier = Modifier
 ) {
@@ -256,14 +267,14 @@ private fun FinancialSummaryCard(
     ) {
         Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_net_balance), style = MaterialTheme.typography.labelLarge)
         Text(
-            text = formatMoney(balance),
+            text = formatCurrencyAmount(balance, currency),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = if (balance >= 0) Color(0xFF34C759) else Color(0xFFFF3B30)
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_income)}: ${formatMoney(income)}", color = Color(0xFF34C759))
-            Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expenses)}: ${formatMoney(expenses)}", color = Color(0xFFFF3B30))
+            Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_income)}: ${formatCurrencyAmount(income, currency)}", color = Color(0xFF34C759))
+            Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expenses)}: ${formatCurrencyAmount(expenses, currency)}", color = Color(0xFFFF3B30))
         }
         Text(
             text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_profit_margin)}: ${String.format(Locale.US, "%.1f", profitMargin)}%",
@@ -278,6 +289,7 @@ private fun ProjectInfoSection(
     projectName: String,
     clientName: String,
     budget: Double,
+    currency: CurrencyOption,
     isActive: Boolean,
     createdDate: Long,
     onClientClick: () -> Unit,
@@ -291,7 +303,7 @@ private fun ProjectInfoSection(
             }
             StatusBadge(active = isActive)
         }
-        Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget)}: ${formatMoney(budget)}")
+        Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget)}: ${formatCurrencyAmount(budget, currency)}")
         Text(text = "${stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_created_date)}: ${formatDate(createdDate)}")
     }
 }
@@ -339,19 +351,25 @@ private fun CategoryBreakdownSection(
 
 @Composable
 private fun ExpenseRow(expense: ExpenseEntity, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Column {
             Text(text = expense.descriptionText, fontWeight = FontWeight.SemiBold)
             Text(text = formatDate(expense.date), style = MaterialTheme.typography.bodySmall)
         }
         TextButton(onClick = onClick) {
-            Text(text = formatMoney(expense.amount), color = Color(0xFFFF3B30))
+            Text(text = formatCurrencyAmount(expense.amount, currency), color = Color(0xFFFF3B30))
         }
     }
 }
 
 @Composable
 private fun InvoiceRow(invoice: InvoiceEntity, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Column {
             Text(text = invoice.clientName, fontWeight = FontWeight.SemiBold)
@@ -359,7 +377,7 @@ private fun InvoiceRow(invoice: InvoiceEntity, onClick: () -> Unit) {
         }
         Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
             TextButton(onClick = onClick) {
-                Text(text = formatMoney(invoice.amount), color = if (invoice.isPaid) Color(0xFF34C759) else Color(0xFFFF9500))
+                Text(text = formatCurrencyAmount(invoice.amount, currency), color = if (invoice.isPaid) Color(0xFF34C759) else Color(0xFFFF9500))
             }
             InvoiceStatusBadge(invoice = invoice)
         }
@@ -400,5 +418,4 @@ private fun InvoiceStatusBadge(invoice: InvoiceEntity) {
 private fun formatDate(timestamp: Long): String =
     SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
 
-private fun formatMoney(amount: Double): String = String.format(Locale.US, "%.2f", amount)
 

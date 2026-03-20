@@ -10,13 +10,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -110,6 +114,7 @@ fun ExpensesListScreen(
                             },
                             content = {
                                 ExpenseRow(item = item, onClick = { onEditExpense(item.expense.id) })
+                                
                             }
                         )
                     }
@@ -184,6 +189,9 @@ private fun EmptyExpensesState(onCreateExpense: () -> Unit, modifier: Modifier =
 
 @Composable
 private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -193,7 +201,7 @@ private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
-                Text(text = formatMoney(item.expense.amount), color = Color(0xFFFF3B30), fontWeight = FontWeight.SemiBold)
+                Text(text = formatCurrencyAmount(item.expense.amount, currency), color = Color(0xFFFF3B30), fontWeight = FontWeight.SemiBold)
             }
             Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Badge { Text(item.expense.category) }
@@ -204,7 +212,6 @@ private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
     }
 }
 
-private fun formatMoney(amount: Double): String = String.format(Locale.US, "%.2f", amount)
 
 private fun formatDate(timestamp: Long): String = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
 

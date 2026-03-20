@@ -13,10 +13,11 @@ import androidx.compose.ui.res.stringResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KablanProTopBar(
+    title: String,
     onMenuClick: () -> Unit
 ) {
     TopAppBar(
-        title = { Text(stringResource(id = com.yetzira.ContractorCashFlowAndroid.R.string.app_name)) },
+        title = { Text(text = title) },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
                 Icon(

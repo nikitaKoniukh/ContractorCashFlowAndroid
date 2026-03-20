@@ -6,6 +6,8 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepository
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -97,7 +99,7 @@ class ExpenseViewModel(
                 ExpenseFormUiState(
                     expenseId = editableExpense.id,
                     category = ExpenseCategory.fromString(editableExpense.category) ?: ExpenseCategory.MATERIALS,
-                    amount = editableExpense.amount.toString(),
+                    amount = formatAmountInput(editableExpense.amount.toLong().toString()),
                     description = editableExpense.descriptionText,
                     date = editableExpense.date,
                     projectId = editableExpense.projectId,
@@ -165,13 +167,13 @@ class ExpenseViewModel(
 
     fun saveExpense(state: ExpenseFormUiState) {
         viewModelScope.launch {
-            val amountValue = state.amount.toDoubleOrNull() ?: 0.0
-            if (state.description.isBlank() || amountValue <= 0.0) return@launch
+            val parsedAmount = parseAmountInput(state.amount) ?: 0.0
+            if (state.description.isBlank() || parsedAmount <= 0.0) return@launch
 
             val entity = ExpenseEntity(
                 id = state.expenseId ?: java.util.UUID.randomUUID().toString(),
                 category = state.category.name,
-                amount = amountValue,
+                amount = parsedAmount,
                 descriptionText = state.description,
                 date = state.date,
                 projectId = state.projectId,
@@ -233,7 +235,7 @@ class ExpenseViewModel(
             return input.copy(
                 isAmountReadOnly = false,
                 laborTypeSnapshot = null,
-                canSave = input.description.isNotBlank() && (input.amount.toDoubleOrNull() ?: 0.0) > 0.0
+                canSave = input.description.isNotBlank() && (parseAmountInput(input.amount) ?: 0.0) > 0.0
             )
         }
 
@@ -242,7 +244,7 @@ class ExpenseViewModel(
             return input.copy(
                 isAmountReadOnly = false,
                 laborTypeSnapshot = null,
-                canSave = input.description.isNotBlank() && (input.amount.toDoubleOrNull() ?: 0.0) > 0.0
+                canSave = input.description.isNotBlank() && (parseAmountInput(input.amount) ?: 0.0) > 0.0
             )
         }
 
@@ -259,13 +261,13 @@ class ExpenseViewModel(
 
         if (laborType == LaborType.HOURLY || laborType == LaborType.DAILY) {
             val units = input.unitsWorked.toDoubleOrNull() ?: 0.0
-            amount = if (units > 0.0) (rate * units).toString() else input.amount
+            amount = if (units > 0.0) formatAmountInput((rate * units).toLong().toString()) else input.amount
         } else if (laborType == LaborType.CONTRACT || laborType == LaborType.SUBCONTRACTOR) {
-            amount = rate.toString()
+            amount = formatAmountInput(rate.toLong().toString())
             readOnly = true
         }
 
-        val canSave = description.isNotBlank() && (amount.toDoubleOrNull() ?: 0.0) > 0.0
+        val canSave = description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0
 
         return input.copy(
             amount = amount,

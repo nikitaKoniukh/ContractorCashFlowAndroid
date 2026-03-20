@@ -28,10 +28,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +46,9 @@ fun NewProjectScreen(
     modifier: Modifier = Modifier
 ) {
     val clients by viewModel.existingClients.collectAsState()
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
 
     var name by rememberSaveable { mutableStateOf("") }
     var budget by rememberSaveable { mutableStateOf("") }
@@ -53,7 +61,7 @@ fun NewProjectScreen(
     var newClientNotes by rememberSaveable { mutableStateOf("") }
 
     val clientName = if (useExistingClient) selectedClientName else newClientName
-    val budgetValue = budget.toDoubleOrNull() ?: 0.0
+    val budgetValue = parseAmountInput(budget) ?: 0.0
     val canSave = name.isNotBlank() && clientName.isNotBlank() && budgetValue > 0.0
     val duplicateClient = !useExistingClient && clients.any { it.name.equals(newClientName, ignoreCase = true) }
 
@@ -106,9 +114,10 @@ fun NewProjectScreen(
 
             TextField(
                 value = budget,
-                onValueChange = { budget = it },
+                onValueChange = { budget = formatAmountInput(it) },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(stringResource(R.string.projects_budget)) },
+                prefix = { Text(currency.symbol) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
             )

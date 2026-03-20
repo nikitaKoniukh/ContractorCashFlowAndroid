@@ -34,13 +34,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,6 +57,9 @@ fun InvoicesListScreen(
     onEdit: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val state by viewModel.listUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showFilterMenu by remember { mutableStateOf(false) }
@@ -142,7 +149,7 @@ fun InvoicesListScreen(
                                 }
                             },
                             content = {
-                                InvoiceRow(item = item, onClick = { onEdit(item.invoice.id) })
+                                InvoiceRow(item = item, currency = currency, onClick = { onEdit(item.invoice.id) })
                             }
                         )
                     }
@@ -203,7 +210,7 @@ private fun EmptyInvoicesState(onCreate: () -> Unit) {
 }
 
 @Composable
-private fun InvoiceRow(item: InvoiceListItemUi, onClick: () -> Unit) {
+private fun InvoiceRow(item: InvoiceListItemUi, currency: CurrencyOption, onClick: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -214,7 +221,7 @@ private fun InvoiceRow(item: InvoiceListItemUi, onClick: () -> Unit) {
                     modifier = Modifier.weight(1f)
                 )
                 val amountColor = if (item.invoice.isPaid) Color(0xFF34C759) else MaterialTheme.colorScheme.onSurface
-                Text(text = formatMoney(item.invoice.amount), color = amountColor)
+                Text(text = formatCurrencyAmount(item.invoice.amount, currency), color = amountColor)
             }
 
             Row(
@@ -251,5 +258,4 @@ private fun InvoiceStatusBadge(isPaid: Boolean, isOverdue: Boolean) {
 private fun formatDate(timestamp: Long): String =
     SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
 
-private fun formatMoney(amount: Double): String = String.format(Locale.US, "%.2f", amount)
 

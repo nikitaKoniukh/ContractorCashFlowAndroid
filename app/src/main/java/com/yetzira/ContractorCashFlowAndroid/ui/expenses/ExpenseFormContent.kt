@@ -25,8 +25,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -35,6 +37,7 @@ import java.util.Locale
 @Composable
 fun ExpenseFormContent(
     state: ExpenseFormUiState,
+    currency: CurrencyOption,
     onStateChange: (ExpenseFormUiState) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -91,9 +94,14 @@ fun ExpenseFormContent(
 
         TextField(
             value = state.amount,
-            onValueChange = { if (!state.isAmountReadOnly) onStateChange(state.copy(amount = it)) },
+            onValueChange = {
+                if (!state.isAmountReadOnly) {
+                    onStateChange(state.copy(amount = formatAmountInput(it)))
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             label = { Text(stringResource(R.string.expenses_form_amount_label)) },
+            prefix = { Text(currency.symbol) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             readOnly = state.isAmountReadOnly

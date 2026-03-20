@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,8 +57,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
-import java.util.Locale
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +71,9 @@ fun ProjectsListScreen(
     onOpenProject: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val uiState by viewModel.projectsUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -111,6 +117,7 @@ fun ProjectsListScreen(
                     contentPadding = PaddingValues(top = 12.dp, bottom = 80.dp)
                 ) {
                     items(uiState.projects, key = { it.project.id }) { item ->
+                        val cardShape = RoundedCornerShape(16.dp)
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
                                 if (value != SwipeToDismissBoxValue.Settled) {
@@ -122,22 +129,32 @@ fun ProjectsListScreen(
                         )
 
                         SwipeToDismissBox(
+                            modifier = Modifier.clip(cardShape),
                             state = dismissState,
                             backgroundContent = {
+                                val showDeleteBackground = dismissState.dismissDirection != null
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .background(MaterialTheme.colorScheme.errorContainer)
+                                        .background(
+                                            if (showDeleteBackground) {
+                                                MaterialTheme.colorScheme.errorContainer
+                                            } else {
+                                                Color.Transparent
+                                            }
+                                        )
                                         .padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.CenterEnd
                                 ) {
-                                    Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete))
+                                    if (showDeleteBackground) {
+                                        Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete))
+                                    }
                                 }
                             },
                             content = {
                                 ProjectCard(
                                     item = item,
+                                    currency = currency,
                                     onClick = { onOpenProject(item.project.id) }
                                 )
                             }
@@ -214,6 +231,7 @@ private fun EmptyProjectsState(
 @Composable
 private fun ProjectCard(
     item: ProjectListItemUi,
+    currency: CurrencyOption,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -334,7 +352,7 @@ private fun ProjectCard(
                         }
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = formatCurrency(item.totalIncome),
+                            text = formatCurrencyAmount(item.totalIncome, currency),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -344,7 +362,7 @@ private fun ProjectCard(
                     // Expenses (end/right)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = formatCurrency(item.totalExpenses),
+                            text = formatCurrencyAmount(item.totalExpenses, currency),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -383,7 +401,7 @@ private fun ProjectCard(
                 ) {
                     // Balance amount (start/left, color-coded)
                     Text(
-                        text = formatCurrency(item.balance),
+                        text = formatCurrencyAmount(item.balance, currency),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = balanceColor,
@@ -401,8 +419,4 @@ private fun ProjectCard(
     }
 }
 
-private fun formatCurrency(amount: Double): String {
-    val format = String.format(Locale.US, "%.2f", amount)
-    return "₪ $format"
-}
 

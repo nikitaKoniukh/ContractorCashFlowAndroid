@@ -15,9 +15,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +32,9 @@ fun EditInvoiceScreen(
 ) {
     val vmState by viewModel.formUiState.collectAsState()
     var formState by remember { mutableStateOf(vmState) }
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
 
     LaunchedEffect(invoiceId) {
         viewModel.startEdit(invoiceId)
@@ -78,6 +84,7 @@ fun EditInvoiceScreen(
     ) { innerPadding ->
         InvoiceFormContent(
             state = formState,
+            currency = currency,
             onStateChange = { formState = viewModel.updateForm(it) },
             modifier = Modifier
                 .padding(innerPadding)

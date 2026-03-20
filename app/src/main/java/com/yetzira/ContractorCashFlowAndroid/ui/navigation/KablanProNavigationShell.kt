@@ -7,10 +7,14 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.annotation.StringRes
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseRoutes
@@ -72,8 +76,17 @@ private fun KablanProNavigationContent(
     onMenuClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val backStackEntry by (navController as androidx.navigation.NavHostController).currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+    val screenTitle = stringResource(id = titleResForRoute(currentRoute))
+
     androidx.compose.material3.Scaffold(
-        topBar = { KablanProTopBar(onMenuClick = onMenuClick) }
+        topBar = {
+            KablanProTopBar(
+                title = screenTitle,
+                onMenuClick = onMenuClick
+            )
+        }
     ) { paddingValues ->
         androidx.compose.foundation.layout.Column(
             modifier = modifier
@@ -94,6 +107,43 @@ private fun KablanProNavigationContent(
                 settingsGraph(navController)
             }
         }
+    }
+}
+
+@StringRes
+private fun titleResForRoute(route: String?): Int {
+    if (route == null) return com.yetzira.ContractorCashFlowAndroid.R.string.app_name
+
+    return when {
+        route == ProjectRoutes.LIST || route == ProjectRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_projects
+        route == ProjectRoutes.NEW -> com.yetzira.ContractorCashFlowAndroid.R.string.projects_new_project
+        route == ProjectRoutes.DETAIL -> com.yetzira.ContractorCashFlowAndroid.R.string.projects_detail_title
+        route == ProjectRoutes.EDIT -> com.yetzira.ContractorCashFlowAndroid.R.string.common_edit
+        route == ProjectRoutes.CLIENT_DETAIL -> com.yetzira.ContractorCashFlowAndroid.R.string.clients_detail_title
+
+        route == ExpenseRoutes.LIST || route == ExpenseRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_expenses
+        route == ExpenseRoutes.NEW -> com.yetzira.ContractorCashFlowAndroid.R.string.expenses_new
+        route == ExpenseRoutes.EDIT -> com.yetzira.ContractorCashFlowAndroid.R.string.expenses_edit
+
+        route == InvoiceRoutes.LIST || route == InvoiceRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_invoices
+        route == InvoiceRoutes.NEW -> com.yetzira.ContractorCashFlowAndroid.R.string.invoices_new
+        route == InvoiceRoutes.EDIT -> com.yetzira.ContractorCashFlowAndroid.R.string.invoices_edit
+
+        route == LaborRoutes.LIST || route == LaborRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_labor
+        route == LaborRoutes.ADD -> com.yetzira.ContractorCashFlowAndroid.R.string.labor_screen_add_title
+        route == LaborRoutes.EDIT -> com.yetzira.ContractorCashFlowAndroid.R.string.labor_screen_edit_title
+
+        route == ClientRoutes.LIST || route == ClientRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_clients
+        route == ClientRoutes.NEW -> com.yetzira.ContractorCashFlowAndroid.R.string.clients_new
+        route == ClientRoutes.DETAIL -> com.yetzira.ContractorCashFlowAndroid.R.string.clients_detail_title
+        route == ClientRoutes.EDIT -> com.yetzira.ContractorCashFlowAndroid.R.string.clients_edit
+
+        route == TabDestination.ANALYTICS.route || route == "analytics_graph" -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_analytics
+
+        route == SettingsRoutes.ROOT || route == SettingsRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_settings
+        route == SettingsRoutes.PAYWALL -> com.yetzira.ContractorCashFlowAndroid.R.string.settings_upgrade_pro
+
+        else -> com.yetzira.ContractorCashFlowAndroid.R.string.app_name
     }
 }
 

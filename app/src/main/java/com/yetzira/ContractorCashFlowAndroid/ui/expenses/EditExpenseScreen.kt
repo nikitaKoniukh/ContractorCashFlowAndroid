@@ -21,6 +21,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.notification.BudgetWarningNotifier
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +38,8 @@ fun EditExpenseScreen(
     val saveResult by viewModel.lastSaveResult.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val budgetHighMessage = stringResource(R.string.expenses_budget_warning_high)
     val budgetCriticalMessage = stringResource(R.string.expenses_budget_warning_critical)
 
@@ -86,6 +90,7 @@ fun EditExpenseScreen(
     ) { innerPadding ->
         ExpenseFormContent(
             state = formState,
+            currency = currency,
             onStateChange = { updated -> formState = viewModel.updateForm(updated) },
             modifier = Modifier.padding(innerPadding).padding(16.dp)
         )
