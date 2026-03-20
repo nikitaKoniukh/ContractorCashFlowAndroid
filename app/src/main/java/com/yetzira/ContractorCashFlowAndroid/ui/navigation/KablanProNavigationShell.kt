@@ -1,15 +1,14 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectRoutes
 
 @Composable
 fun KablanProNavigationShell(
@@ -26,7 +25,7 @@ fun KablanProNavigationShell(
                 onTabSelected = { newTab ->
                     if (newTab == selectedTab.value) {
                         // Pop to root if tapping same tab
-                        navController.popBackStack(newTab.route, inclusive = false)
+                        navController.popBackStack(getTabRootRoute(newTab), inclusive = false)
                     } else {
                         // Navigate to new tab, clearing back stack
                         selectedTab.value = newTab
@@ -44,7 +43,7 @@ fun KablanProNavigationShell(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = "projects_graph",
+            startDestination = ProjectRoutes.GRAPH,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -61,12 +60,17 @@ fun KablanProNavigationShell(
 }
 
 private fun getGraphRoute(tab: TabDestination): String = when (tab) {
-    TabDestination.PROJECTS -> "projects_graph"
+    TabDestination.PROJECTS -> ProjectRoutes.GRAPH
     TabDestination.EXPENSES -> "expenses_graph"
     TabDestination.INVOICES -> "invoices_graph"
     TabDestination.LABOR -> "labor_graph"
     TabDestination.CLIENTS -> "clients_graph"
     TabDestination.ANALYTICS -> "analytics_graph"
     TabDestination.SETTINGS -> "settings_graph"
+}
+
+private fun getTabRootRoute(tab: TabDestination): String = when (tab) {
+    TabDestination.PROJECTS -> ProjectRoutes.LIST
+    else -> tab.route
 }
 

@@ -1,0 +1,146 @@
+package com.yetzira.ContractorCashFlowAndroid.ui.projects
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.yetzira.ContractorCashFlowAndroid.R
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun EditProjectScreen(
+    projectId: String,
+    viewModel: ProjectViewModel,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val state by viewModel.detailUiState.collectAsState()
+
+    LaunchedEffect(projectId) {
+        viewModel.selectProject(projectId)
+    }
+
+    val project = state.project
+    if (project == null) {
+        Text(stringResource(R.string.projects_not_found))
+        return
+    }
+
+    var name by remember(project.id) { mutableStateOf(project.name) }
+    var clientName by remember(project.id) { mutableStateOf(project.clientName) }
+    var budget by remember(project.id) { mutableStateOf(project.budget.toString()) }
+
+    val budgetValue = budget.toDoubleOrNull() ?: 0.0
+    val reducedBelowExpenses = budgetValue in 0.0..<state.totalExpenses
+
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.common_edit)) },
+                navigationIcon = {
+                    TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) }
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            viewModel.updateProject(
+                                project.copy(
+                                    name = name,
+                                    clientName = clientName,
+                                    budget = budgetValue
+                                )
+                            )
+                            onBack()
+                        },
+                        enabled = name.isNotBlank() && clientName.isNotBlank() && budgetValue > 0.0
+                    ) {
+                        Text(stringResource(R.string.common_save))
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            TextField(
+                value = name,
+                onValueChange = { name = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.projects_name)) },
+                singleLine = true
+            )
+            TextField(
+                value = clientName,
+                onValueChange = { clientName = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.projects_client_name)) },
+                singleLine = true
+            )
+            TextField(
+                value = budget,
+                onValueChange = { budget = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.projects_budget)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                singleLine = true
+            )
+
+            if (reducedBelowExpenses) {
+                Text(
+                    text = stringResource(R.string.projects_budget_reduction_warning),
+                    color = Color(0xFFFF3B30),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Text(
+                text = "${stringResource(R.string.projects_created_date)}: ${formatDate(project.createdDate)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "${stringResource(R.string.projects_expenses)}: ${formatMoney(state.totalExpenses)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "${stringResource(R.string.projects_income)}: ${formatMoney(state.totalIncome)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+private fun formatDate(timestamp: Long): String =
+    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
+
+private fun formatMoney(amount: Double): String = String.format(Locale.US, "%.2f", amount)
+
+
