@@ -196,6 +196,10 @@
     <string name="settings_sign_in_with_google">היכנס עם Google</string>
     <string name="settings_section_language">שפה</string>
     <string name="settings_section_currency">מטבע</string>
+    <string name="settings_section_theme">ערכת נושא</string>
+    <string name="settings_theme_system">ברירת מחדל של המערכת</string>
+    <string name="settings_theme_light">בהיר</string>
+    <string name="settings_theme_dark">כהה</string>
     <string name="settings_section_notifications">הודעות</string>
     <string name="settings_section_subscription">מנוי</string>
     <string name="settings_subscription_pro_badge">👑</string>

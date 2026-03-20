@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -56,6 +57,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
 import java.text.SimpleDateFormat
@@ -143,6 +145,11 @@ fun SettingsScreen(
     ) { uri ->
         uri?.let(viewModel::exportData)
     }
+    val themeLabels = mapOf(
+        ThemeModeOption.SYSTEM to stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_theme_system),
+        ThemeModeOption.LIGHT to stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_theme_light),
+        ThemeModeOption.DARK to stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_theme_dark)
+    )
 
     LaunchedEffect(state.statusMessage) {
         state.statusMessage?.let { message ->
@@ -228,6 +235,15 @@ fun SettingsScreen(
                 options = CurrencyOption.entries.toList(),
                 optionLabel = { "${it.code} (${it.symbol})" },
                 onOptionSelected = viewModel::setCurrency
+            )
+
+            SettingsDropdownCard(
+                title = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_section_theme),
+                selectedLabel = themeLabels[state.selectedThemeMode]
+                    ?: stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_theme_system),
+                options = ThemeModeOption.entries.toList(),
+                optionLabel = { themeLabels[it] ?: it.name },
+                onOptionSelected = viewModel::setThemeMode
             )
 
             AnalyticsCard {
@@ -367,7 +383,7 @@ private fun <T> SettingsDropdownCard(
                     .menuAnchor()
                     .fillMaxWidth()
             )
-            ExposedDropdownMenu(
+            DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {

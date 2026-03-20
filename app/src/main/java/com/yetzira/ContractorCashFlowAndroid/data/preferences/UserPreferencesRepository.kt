@@ -21,6 +21,7 @@ class UserPreferencesRepository(context: Context) {
     // Preference Keys
     private companion object {
         val APP_LANGUAGE = stringPreferencesKey("app_language")
+        val THEME_MODE = stringPreferencesKey("theme_mode")
         val SELECTED_CURRENCY_CODE = stringPreferencesKey("selected_currency_code")
         val INVOICE_REMINDERS_ENABLED = booleanPreferencesKey("invoice_reminders_enabled")
         val OVERDUE_ALERTS_ENABLED = booleanPreferencesKey("overdue_alerts_enabled")
@@ -34,6 +35,11 @@ class UserPreferencesRepository(context: Context) {
     val appLanguage: Flow<AppLanguageOption> = dataStore.data.map { preferences ->
         val code = preferences[APP_LANGUAGE] ?: "he"
         AppLanguageOption.fromCode(code)
+    }
+
+    val themeMode: Flow<ThemeModeOption> = dataStore.data.map { preferences ->
+        val code = preferences[THEME_MODE] ?: ThemeModeOption.SYSTEM.code
+        ThemeModeOption.fromCode(code)
     }
 
     val selectedCurrencyCode: Flow<CurrencyOption> = dataStore.data.map { preferences ->
@@ -69,6 +75,12 @@ class UserPreferencesRepository(context: Context) {
     suspend fun setAppLanguage(language: AppLanguageOption) {
         dataStore.edit { preferences ->
             preferences[APP_LANGUAGE] = language.code
+        }
+    }
+
+    suspend fun setThemeMode(themeMode: ThemeModeOption) {
+        dataStore.edit { preferences ->
+            preferences[THEME_MODE] = themeMode.code
         }
     }
 

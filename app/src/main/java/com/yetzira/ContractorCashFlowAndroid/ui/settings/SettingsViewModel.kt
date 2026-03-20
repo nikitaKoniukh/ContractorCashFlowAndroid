@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.export.AppDataSnapshotExporter
 import com.yetzira.ContractorCashFlowAndroid.network.NetworkConnectivityChecker
@@ -58,6 +59,7 @@ class SettingsViewModel(
     val uiState: StateFlow<SettingsUiState> = combine(
         authUser,
         preferencesRepository.appLanguage,
+        preferencesRepository.themeMode,
         preferencesRepository.selectedCurrencyCode,
         preferencesRepository.invoiceRemindersEnabled,
         preferencesRepository.overdueAlertsEnabled,
@@ -70,20 +72,22 @@ class SettingsViewModel(
     ) { values ->
         val user = values[0] as com.google.firebase.auth.FirebaseUser?
         val language = values[1] as AppLanguageOption
-        val currency = values[2] as CurrencyOption
-        val invoiceReminders = values[3] as Boolean
-        val overdueAlerts = values[4] as Boolean
-        val budgetWarnings = values[5] as Boolean
-        val isPro = values[6] as Boolean
-        val planName = values[7] as String?
-        val renewalDate = values[8] as Long?
-        val cloudSyncState = values[9] as CloudSyncState
-        val message = values[10] as String?
+        val themeMode = values[2] as ThemeModeOption
+        val currency = values[3] as CurrencyOption
+        val invoiceReminders = values[4] as Boolean
+        val overdueAlerts = values[5] as Boolean
+        val budgetWarnings = values[6] as Boolean
+        val isPro = values[7] as Boolean
+        val planName = values[8] as String?
+        val renewalDate = values[9] as Long?
+        val cloudSyncState = values[10] as CloudSyncState
+        val message = values[11] as String?
 
         SettingsUiState(
             isAuthenticated = user != null,
             userEmail = user?.email,
             selectedLanguage = language,
+            selectedThemeMode = themeMode,
             selectedCurrency = currency,
             invoiceRemindersEnabled = invoiceReminders,
             overdueAlertsEnabled = overdueAlerts,
@@ -108,6 +112,14 @@ class SettingsViewModel(
             Log.d(SETTINGS_AUTH_LOG_TAG, "Applying app locale code=${language.code}")
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.code))
             statusMessage.value = "Language updated"
+        }
+    }
+
+    fun setThemeMode(themeMode: ThemeModeOption) {
+        viewModelScope.launch {
+            preferencesRepository.setThemeMode(themeMode)
+            AppCompatDelegate.setDefaultNightMode(themeMode.nightModeValue)
+            statusMessage.value = "Theme updated"
         }
     }
 

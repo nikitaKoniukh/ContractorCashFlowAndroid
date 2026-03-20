@@ -196,6 +196,10 @@
     <string name="settings_sign_in_with_google">Войти с Google</string>
     <string name="settings_section_language">Язык</string>
     <string name="settings_section_currency">Валюта</string>
+    <string name="settings_section_theme">Тема</string>
+    <string name="settings_theme_system">Как в системе</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
     <string name="settings_section_notifications">Уведомления</string>
     <string name="settings_section_subscription">Подписка</string>
     <string name="settings_subscription_pro_badge">👑</string>

@@ -3,9 +3,9 @@ package com.yetzira.ContractorCashFlowAndroid
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.mutableStateOf
@@ -21,7 +21,7 @@ import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     /**
      * Called before onCreate() — the earliest point to apply locale so that
@@ -37,6 +37,9 @@ class MainActivity : ComponentActivity() {
         // Sync DataStore → SharedPreferences so attachBaseContext always
         // has the latest user preference on the next recreate / cold start.
         val preferencesRepo = UserPreferencesRepository(this)
+        val themeMode = runBlocking { preferencesRepo.themeMode.first() }
+        AppCompatDelegate.setDefaultNightMode(themeMode.nightModeValue)
+
         val language = runBlocking { preferencesRepo.appLanguage.first() }
         val savedCode = LocaleHelper.getSavedLanguage(this)
         if (language.code != savedCode) {
