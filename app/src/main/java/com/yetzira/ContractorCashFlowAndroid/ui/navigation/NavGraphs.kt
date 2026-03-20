@@ -12,7 +12,12 @@ import androidx.navigation.navigation
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientsScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientDetailScreen
-import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpensesScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.expenses.EditExpenseScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseRoutes
+import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseViewModel
+import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseViewModelFactory
+import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpensesListScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.expenses.NewExpenseScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoicesScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.EditProjectScreen
@@ -101,11 +106,44 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
 
 fun NavGraphBuilder.expensesGraph(navController: NavController) {
     navigation(
-        startDestination = TabDestination.EXPENSES.route,
-        route = "expenses_graph"
+        startDestination = ExpenseRoutes.LIST,
+        route = ExpenseRoutes.GRAPH
     ) {
-        composable(TabDestination.EXPENSES.route) {
-            ExpensesScreen()
+        composable(ExpenseRoutes.LIST) {
+            val context = LocalContext.current
+            val factory = remember { ExpenseViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: ExpenseViewModel = viewModel(factory = factory)
+
+            ExpensesListScreen(
+                viewModel = viewModel,
+                onCreateExpense = { navController.navigate(ExpenseRoutes.NEW) },
+                onEditExpense = { expenseId -> navController.navigate(ExpenseRoutes.edit(expenseId)) }
+            )
+        }
+
+        composable(ExpenseRoutes.NEW) {
+            val context = LocalContext.current
+            val factory = remember { ExpenseViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: ExpenseViewModel = viewModel(factory = factory)
+            NewExpenseScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = ExpenseRoutes.EDIT,
+            arguments = listOf(navArgument("expenseId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { ExpenseViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: ExpenseViewModel = viewModel(factory = factory)
+            val expenseId = backStackEntry.arguments?.getString("expenseId").orEmpty()
+            EditExpenseScreen(
+                expenseId = expenseId,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

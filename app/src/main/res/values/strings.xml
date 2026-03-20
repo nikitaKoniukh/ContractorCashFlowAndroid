@@ -65,4 +65,34 @@
     <string name="projects_invoice_pending">Pending</string>
     <string name="projects_budget_reduction_warning">Warning: new budget is below current expenses.</string>
     <string name="projects_client_detail_placeholder">Client Detail Screen</string>
+
+    <string name="expenses_new">New Expense</string>
+    <string name="expenses_edit">Edit Expense</string>
+    <string name="expenses_deleted">Expense deleted</string>
+    <string name="expenses_search_placeholder">Search by description</string>
+    <string name="expenses_filter_button">Filter</string>
+    <string name="expenses_empty_title">No expenses yet</string>
+    <string name="expenses_empty_body">Add your first expense to start tracking costs.</string>
+    <string name="expenses_description">Description</string>
+    <string name="expenses_amount">Amount</string>
+    <string name="expenses_date">Date</string>
+    <string name="expenses_category">Category</string>
+    <string name="expenses_worker">Worker</string>
+    <string name="expenses_units_worked">Units worked</string>
+    <string name="expenses_no_project">No project</string>
+    <string name="expenses_project_optional">Project (optional)</string>
+
+    <string name="expenses_filters_title">Expense Filters</string>
+    <string name="expenses_filter_category">Category</string>
+    <string name="expenses_category_all">All</string>
+    <string name="expenses_filter_start_date">Start date</string>
+    <string name="expenses_filter_end_date">End date</string>
+    <string name="expenses_filter_pick_date">Pick date</string>
+    <string name="expenses_filter_clear_all">Clear All</string>
+    <string name="expenses_filter_apply">Apply</string>
+
+    <string name="expenses_budget_warning_title">Budget warning</string>
+    <string name="expenses_budget_warning_channel">Budget Warnings</string>
+    <string name="expenses_budget_warning_high">Project budget reached 80% utilization.</string>
+    <string name="expenses_budget_warning_critical">Project budget reached 100% utilization.</string>
 </resources>
