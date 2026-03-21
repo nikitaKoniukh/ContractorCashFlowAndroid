@@ -45,8 +45,8 @@ import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectsListScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallViewModel
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallViewModelFactory
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsViewModel
@@ -361,12 +361,12 @@ fun NavGraphBuilder.settingsGraph(navController: NavController) {
 
         composable(SettingsRoutes.PAYWALL) {
             val context = LocalContext.current
-            val factory = remember { PaywallViewModelFactory(context) }
-            val viewModel: PaywallViewModel = viewModel(factory = factory)
+            val factory = remember { PurchaseViewModelFactory(context) }
+            val viewModel: PurchaseViewModel = viewModel(factory = factory)
 
             PaywallScreen(
                 viewModel = viewModel,
-                onBack = { navController.popBackStack() }
+                onDismiss = { navController.popBackStack() }
             )
         }
     }

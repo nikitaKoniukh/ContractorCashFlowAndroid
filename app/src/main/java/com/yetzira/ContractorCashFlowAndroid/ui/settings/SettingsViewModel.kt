@@ -8,7 +8,6 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yetzira.ContractorCashFlowAndroid.R
-import com.yetzira.ContractorCashFlowAndroid.billing.BillingRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.SettingsPreferencesRepositoryContract
@@ -27,7 +26,6 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    private val billingRepository: BillingRepositoryContract,
     private val preferencesRepository: SettingsPreferencesRepositoryContract,
     private val notificationSettingsCoordinator: NotificationSettingsCoordinatorContract,
     private val firestoreSyncService: CloudSyncServiceContract,
@@ -51,15 +49,11 @@ class SettingsViewModel(
 
     init {
         authGateway.addAuthStateListener(authStateListener)
-        viewModelScope.launch {
-            billingRepository.refresh()
-        }
     }
 
     override fun onCleared() {
         super.onCleared()
         authGateway.removeAuthStateListener(authStateListener)
-        billingRepository.close()
     }
 
     val uiState: StateFlow<SettingsUiState> = combine(

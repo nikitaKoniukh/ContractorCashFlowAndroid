@@ -3,7 +3,6 @@ package com.yetzira.ContractorCashFlowAndroid.ui.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.yetzira.ContractorCashFlowAndroid.billing.PlayBillingRepository
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.export.DataExportService
@@ -21,10 +20,6 @@ class SettingsViewModelFactory(
             val preferencesRepository = UserPreferencesRepository(context.applicationContext)
             @Suppress("UNCHECKED_CAST")
             return SettingsViewModel(
-                billingRepository = PlayBillingRepository(
-                    context = context.applicationContext,
-                    preferencesRepository = preferencesRepository
-                ),
                 preferencesRepository = preferencesRepository,
                 notificationSettingsCoordinator = NotificationSettingsCoordinator(
                     context = context.applicationContext,

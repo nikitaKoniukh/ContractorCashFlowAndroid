@@ -1,10 +1,6 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.settings
 
 import com.yetzira.ContractorCashFlowAndroid.R
-import com.yetzira.ContractorCashFlowAndroid.billing.BillingActionState
-import com.yetzira.ContractorCashFlowAndroid.billing.BillingEntitlementState
-import com.yetzira.ContractorCashFlowAndroid.billing.BillingProductState
-import com.yetzira.ContractorCashFlowAndroid.billing.BillingRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.SettingsPreferencesRepositoryContract
@@ -108,7 +104,6 @@ class SettingsViewModelTest {
 
     private fun createViewModel(
         preferences: FakeSettingsPreferencesRepository = FakeSettingsPreferencesRepository(),
-        billingRepository: FakeBillingRepository = FakeBillingRepository(),
         coordinator: FakeNotificationSettingsCoordinator = FakeNotificationSettingsCoordinator(),
         syncService: FakeCloudSyncService = FakeCloudSyncService(),
         exporter: FakeExporter = FakeExporter(Result.success(Unit)),
@@ -116,7 +111,6 @@ class SettingsViewModelTest {
         networkChecker: FakeNetworkChecker = FakeNetworkChecker(true)
     ): SettingsViewModel {
         return SettingsViewModel(
-            billingRepository = billingRepository,
             preferencesRepository = preferences,
             notificationSettingsCoordinator = coordinator,
             firestoreSyncService = syncService,
@@ -185,19 +179,6 @@ class SettingsViewModelTest {
         }
     }
 
-    private class FakeBillingRepository : BillingRepositoryContract {
-        override val productState = MutableStateFlow(BillingProductState(isLoading = false))
-        override val entitlementState = MutableStateFlow(BillingEntitlementState(isLoading = false))
-        override val actionState = MutableStateFlow<BillingActionState>(BillingActionState.Idle)
-
-        override suspend fun refresh(): Result<Unit> = Result.success(Unit)
-
-        override suspend fun launchPurchase(activity: android.app.Activity): Result<Unit> = Result.success(Unit)
-
-        override fun clearActionState() = Unit
-
-        override fun close() = Unit
-    }
 
     private class FakeCloudSyncService(
         private val fullSyncResult: Result<Unit> = Result.success(Unit),

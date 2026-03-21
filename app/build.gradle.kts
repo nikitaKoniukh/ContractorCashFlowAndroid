@@ -17,9 +17,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "PLAY_BILLING_SUBSCRIPTION_PRODUCT_ID", "\"kablanpro_pro\"")
-        buildConfigField("String", "PLAY_BILLING_SUBSCRIPTION_BASE_PLAN_ID", "\"\"")
-        buildConfigField("String", "PLAY_BILLING_SUBSCRIPTION_OFFER_ID", "\"\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -90,6 +87,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
 
     // Google Play Billing
+    implementation(libs.google.play.billing)
     implementation(libs.google.play.billing.ktx)
     implementation(libs.google.play.services.auth)
     implementation(libs.androidx.credentials)

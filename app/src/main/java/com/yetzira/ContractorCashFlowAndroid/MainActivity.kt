@@ -12,12 +12,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.FirebaseApp
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProNavigationShell
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.TabDestination
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProTheme
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
@@ -71,6 +74,13 @@ class MainActivity : AppCompatActivity() {
                     modifier = Modifier.fillMaxSize()
                 )
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            PurchaseManagerProvider.getInstance(applicationContext).checkCurrentEntitlements()
         }
     }
 }
