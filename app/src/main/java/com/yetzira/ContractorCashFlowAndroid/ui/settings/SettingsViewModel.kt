@@ -1,6 +1,5 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.settings
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.StringRes
@@ -8,17 +7,15 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.SettingsPreferencesRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
-import com.yetzira.ContractorCashFlowAndroid.export.DataExportService
-import com.yetzira.ContractorCashFlowAndroid.network.NetworkConnectivityChecker
-import com.yetzira.ContractorCashFlowAndroid.notification.NotificationSettingsCoordinator
-import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
+import com.yetzira.ContractorCashFlowAndroid.export.DataExportServiceContract
+import com.yetzira.ContractorCashFlowAndroid.network.NetworkConnectivityCheckerContract
+import com.yetzira.ContractorCashFlowAndroid.notification.NotificationSettingsCoordinatorContract
+import com.yetzira.ContractorCashFlowAndroid.sync.CloudSyncServiceContract
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,37 +24,36 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class SettingsViewModel(
-    private val appContext: Context,
-    private val preferencesRepository: UserPreferencesRepository,
-    private val notificationSettingsCoordinator: NotificationSettingsCoordinator,
-    private val firestoreSyncService: FirestoreSyncService,
-    private val exporter: DataExportService,
-    private val firebaseAuth: FirebaseAuth,
-    private val networkConnectivityChecker: NetworkConnectivityChecker
+    private val preferencesRepository: SettingsPreferencesRepositoryContract,
+    private val notificationSettingsCoordinator: NotificationSettingsCoordinatorContract,
+    private val firestoreSyncService: CloudSyncServiceContract,
+    private val exporter: DataExportServiceContract,
+    private val authGateway: AuthGateway,
+    private val networkConnectivityChecker: NetworkConnectivityCheckerContract,
+    private val stringResolver: SettingsStringResolver
 ) : ViewModel() {
 
     private val syncState = MutableStateFlow(CloudSyncState.IDLE)
     private val statusMessage = MutableStateFlow<String?>(null)
-    private val authUser = MutableStateFlow(firebaseAuth.currentUser)
+    private val authUser = MutableStateFlow(authGateway.currentUser)
 
-    private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
-        authUser.value = auth.currentUser
+    private val authStateListener: (AuthUser?) -> Unit = { user ->
+        authUser.value = user
         Log.d(
             SETTINGS_AUTH_LOG_TAG,
-            "Auth state changed signedIn=${auth.currentUser != null} uid=${auth.currentUser?.uid.orEmpty()} email=${auth.currentUser?.email.orEmpty()}"
+            "Auth state changed signedIn=${user != null} uid=${user?.uid.orEmpty()} email=${user?.email.orEmpty()}"
         )
     }
 
     init {
-        firebaseAuth.addAuthStateListener(authStateListener)
+        authGateway.addAuthStateListener(authStateListener)
     }
 
     override fun onCleared() {
         super.onCleared()
-        firebaseAuth.removeAuthStateListener(authStateListener)
+        authGateway.removeAuthStateListener(authStateListener)
     }
 
     val uiState: StateFlow<SettingsUiState> = combine(
@@ -74,7 +70,7 @@ class SettingsViewModel(
         syncState,
         statusMessage
     ) { values ->
-        val user = values[0] as com.google.firebase.auth.FirebaseUser?
+        val user = values[0] as AuthUser?
         val language = values[1] as AppLanguageOption
         val themeMode = values[2] as ThemeModeOption
         val currency = values[3] as CurrencyOption
@@ -99,9 +95,9 @@ class SettingsViewModel(
             subscription = SubscriptionUiState(
                 isPro = isPro,
                 planName = if (isPro) {
-                    planName ?: appContext.getString(R.string.settings_subscription_plan_pro_default)
+                    planName ?: stringResolver.getString(R.string.settings_subscription_plan_pro_default)
                 } else {
-                    appContext.getString(R.string.settings_subscription_free)
+                    stringResolver.getString(R.string.settings_subscription_free)
                 },
                 renewalDate = renewalDate
             ),
@@ -162,12 +158,11 @@ class SettingsViewModel(
     fun signInWithGoogleIdToken(idToken: String) {
         viewModelScope.launch {
             Log.d(SETTINGS_AUTH_LOG_TAG, "Firebase credential sign-in started idTokenLength=${idToken.length}")
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
-            val result = runCatching { firebaseAuth.signInWithCredential(credential).await() }
-            result.onSuccess { authResult ->
+            val result = authGateway.signInWithGoogleIdToken(idToken)
+            result.onSuccess { user ->
                 Log.d(
                     SETTINGS_AUTH_LOG_TAG,
-                    "Firebase sign-in success uid=${authResult.user?.uid.orEmpty()} email=${authResult.user?.email.orEmpty()}"
+                    "Firebase sign-in success uid=${user?.uid.orEmpty()} email=${user?.email.orEmpty()}"
                 )
                 if (!networkConnectivityChecker.canAttemptNetworkCall()) {
                     syncState.value = CloudSyncState.FAILED
@@ -188,7 +183,7 @@ class SettingsViewModel(
                     showStatus(R.string.settings_status_signed_in_synced)
                 } else {
                     val err = pushResult.exceptionOrNull()?.message
-                        ?: appContext.getString(R.string.settings_status_upload_failed)
+                        ?: stringResolver.getString(R.string.settings_status_upload_failed)
                     Log.e(SETTINGS_AUTH_LOG_TAG, "Auto push-on-sign-in failed: $err")
                     syncState.value = CloudSyncState.FAILED
                     showStatus(R.string.settings_status_signed_in_sync_failed, err)
@@ -196,7 +191,7 @@ class SettingsViewModel(
             }.onFailure { throwable ->
                 Log.e(SETTINGS_AUTH_LOG_TAG, "Firebase sign-in failed", throwable)
                 statusMessage.value = throwable.message
-                    ?: appContext.getString(R.string.settings_google_sign_in_failed)
+                    ?: stringResolver.getString(R.string.settings_google_sign_in_failed)
             }
         }
     }
@@ -207,13 +202,13 @@ class SettingsViewModel(
     }
 
     fun signOut() {
-        firebaseAuth.signOut()
+        authGateway.signOut()
         showStatus(R.string.settings_status_signed_out)
     }
 
     fun runCloudSync() {
         viewModelScope.launch {
-            if (firebaseAuth.currentUser == null) {
+            if (authGateway.currentUser == null) {
                 syncState.value = CloudSyncState.FAILED
                 showStatus(R.string.settings_status_sign_in_required_for_sync)
                 return@launch
@@ -231,10 +226,10 @@ class SettingsViewModel(
             }
             syncState.value = if (result.isSuccess) CloudSyncState.DONE else CloudSyncState.FAILED
             statusMessage.value = if (result.isSuccess) {
-                appContext.getString(R.string.settings_sync_done)
+                stringResolver.getString(R.string.settings_sync_done)
             } else {
                 result.exceptionOrNull()?.message
-                    ?: appContext.getString(R.string.settings_sync_failed)
+                    ?: stringResolver.getString(R.string.settings_sync_failed)
             }
         }
     }
@@ -243,10 +238,10 @@ class SettingsViewModel(
         viewModelScope.launch {
             val result = exporter.exportToUri(uri)
             statusMessage.value = if (result.isSuccess) {
-                appContext.getString(R.string.settings_status_export_success)
+                stringResolver.getString(R.string.settings_status_export_success)
             } else {
                 result.exceptionOrNull()?.message
-                    ?: appContext.getString(R.string.settings_status_export_failed)
+                    ?: stringResolver.getString(R.string.settings_status_export_failed)
             }
         }
     }
@@ -267,7 +262,7 @@ class SettingsViewModel(
     }
 
     private fun showStatus(@StringRes resId: Int, vararg formatArgs: Any) {
-        statusMessage.value = appContext.getString(resId, *formatArgs)
+        statusMessage.value = stringResolver.getString(resId, *formatArgs)
     }
 }
 

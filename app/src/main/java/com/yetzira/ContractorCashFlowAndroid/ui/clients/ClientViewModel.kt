@@ -3,7 +3,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.clients
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
-import com.yetzira.ContractorCashFlowAndroid.data.repository.ClientRepository
+import com.yetzira.ContractorCashFlowAndroid.data.repository.ClientRepositoryContract
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClientViewModel(
-    private val repository: ClientRepository
+    private val repository: ClientRepositoryContract
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")

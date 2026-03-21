@@ -5,12 +5,20 @@ import androidx.core.app.NotificationManagerCompat
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.InvoiceDao
 import kotlinx.coroutines.flow.first
 
+interface NotificationSettingsCoordinatorContract {
+    suspend fun rescheduleAll(
+        invoiceRemindersEnabled: Boolean,
+        overdueAlertsEnabled: Boolean,
+        budgetWarningsEnabled: Boolean
+    )
+}
+
 class NotificationSettingsCoordinator(
     private val context: Context,
     private val invoiceDao: InvoiceDao,
     private val invoiceNotificationScheduler: InvoiceNotificationScheduler
-) {
-    suspend fun rescheduleAll(
+) : NotificationSettingsCoordinatorContract {
+    override suspend fun rescheduleAll(
         invoiceRemindersEnabled: Boolean,
         overdueAlertsEnabled: Boolean,
         budgetWarningsEnabled: Boolean

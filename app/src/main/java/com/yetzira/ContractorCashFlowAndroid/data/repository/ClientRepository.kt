@@ -10,19 +10,28 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
+interface ClientRepositoryContract {
+    fun getAllClients(): Flow<List<ClientEntity>>
+    fun searchClients(query: String): Flow<List<ClientEntity>>
+    suspend fun getClientById(id: String): ClientEntity?
+    suspend fun insertClient(client: ClientEntity)
+    suspend fun updateClient(client: ClientEntity)
+    suspend fun deleteClient(client: ClientEntity)
+}
+
 class ClientRepository(
     private val clientDao: ClientDao,
     private val syncService: FirestoreSyncService
-) {
+) : ClientRepositoryContract {
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun getAllClients(): Flow<List<ClientEntity>> = clientDao.getAll()
+    override fun getAllClients(): Flow<List<ClientEntity>> = clientDao.getAll()
 
-    fun searchClients(query: String): Flow<List<ClientEntity>> = clientDao.search(query)
+    override fun searchClients(query: String): Flow<List<ClientEntity>> = clientDao.search(query)
 
-    suspend fun getClientById(id: String): ClientEntity? = clientDao.getById(id)
+    override suspend fun getClientById(id: String): ClientEntity? = clientDao.getById(id)
 
-    suspend fun insertClient(client: ClientEntity) {
+    override suspend fun insertClient(client: ClientEntity) {
         val stamped = client.copy(lastModified = System.currentTimeMillis())
         clientDao.insert(stamped)
         syncScope.launch {
@@ -32,7 +41,7 @@ class ClientRepository(
         }
     }
 
-    suspend fun updateClient(client: ClientEntity) {
+    override suspend fun updateClient(client: ClientEntity) {
         val stamped = client.copy(lastModified = System.currentTimeMillis())
         clientDao.update(stamped)
         syncScope.launch {
@@ -42,7 +51,7 @@ class ClientRepository(
         }
     }
 
-    suspend fun deleteClient(client: ClientEntity) {
+    override suspend fun deleteClient(client: ClientEntity) {
         clientDao.delete(client)
         syncScope.launch {
             syncService.deleteClient(client.id).onFailure { throwable ->

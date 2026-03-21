@@ -22,11 +22,16 @@ object ExportFileNameFormatter {
     }
 }
 
+interface DataExportServiceContract {
+    suspend fun exportToUri(uri: Uri): Result<Unit>
+    fun suggestedFileName(now: Long = System.currentTimeMillis()): String
+}
+
 class DataExportService(
     private val context: Context,
     private val database: AppDatabase,
     private val preferencesRepository: UserPreferencesRepository = UserPreferencesRepository(context.applicationContext)
-) {
+) : DataExportServiceContract {
     private val gson = GsonBuilder()
         .setPrettyPrinting()
         .create()
@@ -72,7 +77,7 @@ class DataExportService(
         return gson.toJson(payload)
     }
 
-    suspend fun exportToUri(uri: Uri): Result<Unit> {
+    override suspend fun exportToUri(uri: Uri): Result<Unit> {
         return runCatching {
             val json = generateExportJson()
             val outputStream = context.contentResolver.openOutputStream(uri)
@@ -83,7 +88,7 @@ class DataExportService(
         }
     }
 
-    fun suggestedFileName(now: Long = System.currentTimeMillis()): String =
+    override fun suggestedFileName(now: Long): String =
         ExportFileNameFormatter.suggestedFileName(now)
 }
 

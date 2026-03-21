@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
-import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepository
+import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +21,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExpenseViewModel(
-    private val repository: ExpenseRepository
+    private val repository: ExpenseRepositoryContract
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")

@@ -16,20 +16,31 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "InvoiceRepository"
 
+interface InvoiceRepositoryContract {
+    fun getAllInvoices(): Flow<List<InvoiceEntity>>
+    suspend fun getInvoiceById(id: String): InvoiceEntity?
+    suspend fun insertInvoice(invoice: InvoiceEntity)
+    suspend fun updateInvoice(invoice: InvoiceEntity)
+    suspend fun deleteInvoice(invoice: InvoiceEntity)
+    fun getAllClients(): Flow<List<ClientEntity>>
+    suspend fun insertClient(client: ClientEntity)
+    fun getAllProjects(): Flow<List<ProjectEntity>>
+}
+
 class InvoiceRepository(
     private val invoiceDao: InvoiceDao,
     private val clientDao: ClientDao,
     private val projectDao: ProjectDao,
     private val syncService: FirestoreSyncService
-) {
+) : InvoiceRepositoryContract {
     // Fire-and-forget scope: sync failures never block the caller
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun getAllInvoices(): Flow<List<InvoiceEntity>> = invoiceDao.getAll()
+    override fun getAllInvoices(): Flow<List<InvoiceEntity>> = invoiceDao.getAll()
 
-    suspend fun getInvoiceById(id: String): InvoiceEntity? = invoiceDao.getById(id)
+    override suspend fun getInvoiceById(id: String): InvoiceEntity? = invoiceDao.getById(id)
 
-    suspend fun insertInvoice(invoice: InvoiceEntity) {
+    override suspend fun insertInvoice(invoice: InvoiceEntity) {
         val stamped = invoice.copy(lastModified = System.currentTimeMillis())
         invoiceDao.insert(stamped)
         syncScope.launch {
@@ -38,7 +49,7 @@ class InvoiceRepository(
         }
     }
 
-    suspend fun updateInvoice(invoice: InvoiceEntity) {
+    override suspend fun updateInvoice(invoice: InvoiceEntity) {
         val stamped = invoice.copy(lastModified = System.currentTimeMillis())
         invoiceDao.update(stamped)
         syncScope.launch {
@@ -47,7 +58,7 @@ class InvoiceRepository(
         }
     }
 
-    suspend fun deleteInvoice(invoice: InvoiceEntity) {
+    override suspend fun deleteInvoice(invoice: InvoiceEntity) {
         invoiceDao.delete(invoice)
         syncScope.launch {
             runCatching { syncService.deleteInvoice(invoice.id) }
@@ -55,9 +66,9 @@ class InvoiceRepository(
         }
     }
 
-    fun getAllClients(): Flow<List<ClientEntity>> = clientDao.getAll()
+    override fun getAllClients(): Flow<List<ClientEntity>> = clientDao.getAll()
 
-    suspend fun insertClient(client: ClientEntity) {
+    override suspend fun insertClient(client: ClientEntity) {
         val stamped = client.copy(lastModified = System.currentTimeMillis())
         clientDao.insert(stamped)
         syncScope.launch {
@@ -66,5 +77,5 @@ class InvoiceRepository(
         }
     }
 
-    fun getAllProjects(): Flow<List<ProjectEntity>> = projectDao.getAll()
+    override fun getAllProjects(): Flow<List<ProjectEntity>> = projectDao.getAll()
 }

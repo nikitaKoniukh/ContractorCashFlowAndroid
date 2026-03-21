@@ -21,6 +21,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import java.net.UnknownHostException
 
+interface CloudSyncServiceContract {
+    suspend fun pushAllData(): Result<Unit>
+    suspend fun fullSync(): Result<Unit>
+}
+
 class FirestoreSyncService(
     private val database: AppDatabase,
     private val firestore: FirebaseFirestore = Firebase.firestore,
@@ -28,7 +33,7 @@ class FirestoreSyncService(
     private val networkConnectivityChecker: NetworkConnectivityChecker = NetworkConnectivityChecker(
         FirebaseApp.getInstance().applicationContext
     )
-) {
+) : CloudSyncServiceContract {
     suspend fun syncProject(project: ProjectEntity): Result<Unit> = writeDocument(
         collection = COLLECTION_PROJECTS,
         id = project.id,
@@ -111,7 +116,7 @@ class FirestoreSyncService(
     suspend fun deleteLaborDetails(id: String): Result<Unit> = deleteDocument(COLLECTION_LABOR_DETAILS, id)
 
     /** Push all local Room data up to Firestore (local → cloud). */
-    suspend fun pushAllData(): Result<Unit> {
+    override suspend fun pushAllData(): Result<Unit> {
         return runCatching {
             requireNetwork()
             requireUserId() // fail fast if not signed in
@@ -141,7 +146,7 @@ class FirestoreSyncService(
     }
 
     /** Full bidirectional sync: push local data up, then pull remote data down. */
-    suspend fun fullSync(): Result<Unit> {
+    override suspend fun fullSync(): Result<Unit> {
         return runCatching {
             runSyncStage("fullSync.push") { pushAllData().getOrThrow() }
             runSyncStage("fullSync.pull") { pullAllData().getOrThrow() }

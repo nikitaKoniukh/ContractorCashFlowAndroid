@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
-import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepository
-import com.yetzira.ContractorCashFlowAndroid.notification.InvoiceNotificationScheduler
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepositoryContract
+import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepositoryContract
+import com.yetzira.ContractorCashFlowAndroid.notification.InvoiceNotificationSchedulerContract
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.flow.first
@@ -18,9 +18,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class InvoiceViewModel(
-    private val repository: InvoiceRepository,
-    private val notificationScheduler: InvoiceNotificationScheduler,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val repository: InvoiceRepositoryContract,
+    private val notificationScheduler: InvoiceNotificationSchedulerContract,
+    private val userPreferencesRepository: UserPreferencesRepositoryContract
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")

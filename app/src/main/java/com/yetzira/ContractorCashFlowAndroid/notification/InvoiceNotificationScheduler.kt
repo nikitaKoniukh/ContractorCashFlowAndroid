@@ -6,10 +6,7 @@ import android.content.Context
 import android.content.Intent
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 
-class InvoiceNotificationScheduler(
-    private val context: Context
-) {
-
+interface InvoiceNotificationSchedulerContract {
     fun schedule(
         invoiceId: String,
         clientName: String,
@@ -17,6 +14,28 @@ class InvoiceNotificationScheduler(
         isPaid: Boolean,
         invoiceRemindersEnabled: Boolean = true,
         overdueAlertsEnabled: Boolean = true
+    )
+
+    fun rescheduleAll(
+        invoices: List<InvoiceEntity>,
+        invoiceRemindersEnabled: Boolean,
+        overdueAlertsEnabled: Boolean
+    )
+
+    fun cancel(invoiceId: String)
+}
+
+class InvoiceNotificationScheduler(
+    private val context: Context
+) : InvoiceNotificationSchedulerContract {
+
+    override fun schedule(
+        invoiceId: String,
+        clientName: String,
+        dueDate: Long,
+        isPaid: Boolean,
+        invoiceRemindersEnabled: Boolean,
+        overdueAlertsEnabled: Boolean
     ) {
         cancel(invoiceId)
         if (isPaid) return
@@ -40,7 +59,7 @@ class InvoiceNotificationScheduler(
         }
     }
 
-    fun rescheduleAll(
+    override fun rescheduleAll(
         invoices: List<InvoiceEntity>,
         invoiceRemindersEnabled: Boolean,
         overdueAlertsEnabled: Boolean
@@ -57,7 +76,7 @@ class InvoiceNotificationScheduler(
         }
     }
 
-    fun cancel(invoiceId: String) {
+    override fun cancel(invoiceId: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(createPendingIntent(reminderRequestCode(invoiceId), "", ""))
         alarmManager.cancel(createPendingIntent(overdueRequestCode(invoiceId), "", ""))

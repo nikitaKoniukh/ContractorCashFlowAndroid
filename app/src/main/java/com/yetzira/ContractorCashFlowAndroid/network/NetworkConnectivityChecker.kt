@@ -4,13 +4,17 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 
+interface NetworkConnectivityCheckerContract {
+    fun canAttemptNetworkCall(): Boolean
+}
+
 class NetworkConnectivityChecker(
     context: Context
-) {
+) : NetworkConnectivityCheckerContract {
     private val connectivityManager =
         context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    fun canAttemptNetworkCall(): Boolean {
+    override fun canAttemptNetworkCall(): Boolean {
         val activeNetwork = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
         val hasInternetTransport = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||

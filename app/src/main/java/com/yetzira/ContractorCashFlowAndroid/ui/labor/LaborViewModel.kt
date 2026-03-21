@@ -6,7 +6,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
-import com.yetzira.ContractorCashFlowAndroid.data.repository.LaborRepository
+import com.yetzira.ContractorCashFlowAndroid.data.repository.LaborRepositoryContract
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +17,7 @@ import java.util.Date
 import java.util.Locale
 
 class LaborViewModel(
-    private val repository: LaborRepository
+    private val repository: LaborRepositoryContract
 ) : ViewModel() {
 
     private var workers: List<LaborDetailsEntity> = emptyList()

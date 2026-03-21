@@ -2,11 +2,11 @@ package com.yetzira.ContractorCashFlowAndroid.ui.paywall
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.SubscriptionPreferencesRepositoryContract
 import kotlinx.coroutines.launch
 
 class PaywallViewModel(
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: SubscriptionPreferencesRepositoryContract
 ) : ViewModel() {
     fun activatePro(onDone: () -> Unit) {
         viewModelScope.launch {

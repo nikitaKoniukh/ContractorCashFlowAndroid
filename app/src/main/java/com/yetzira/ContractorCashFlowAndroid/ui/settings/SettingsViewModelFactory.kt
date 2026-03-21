@@ -3,7 +3,6 @@ package com.yetzira.ContractorCashFlowAndroid.ui.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.auth.FirebaseAuth
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.export.DataExportService
@@ -21,7 +20,6 @@ class SettingsViewModelFactory(
             val preferencesRepository = UserPreferencesRepository(context.applicationContext)
             @Suppress("UNCHECKED_CAST")
             return SettingsViewModel(
-                appContext = context.applicationContext,
                 preferencesRepository = preferencesRepository,
                 notificationSettingsCoordinator = NotificationSettingsCoordinator(
                     context = context.applicationContext,
@@ -34,8 +32,9 @@ class SettingsViewModelFactory(
                     database = database,
                     preferencesRepository = preferencesRepository
                 ),
-                firebaseAuth = FirebaseAuth.getInstance(),
-                networkConnectivityChecker = NetworkConnectivityChecker(context.applicationContext)
+                authGateway = FirebaseAuthGateway(),
+                networkConnectivityChecker = NetworkConnectivityChecker(context.applicationContext),
+                stringResolver = AndroidSettingsStringResolver(context.applicationContext)
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

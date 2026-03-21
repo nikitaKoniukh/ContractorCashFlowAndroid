@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ExpenseDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.InvoiceDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ProjectDao
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.SettingsPreferencesRepositoryContract
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +16,7 @@ class AnalyticsViewModel(
     expenseDao: ExpenseDao,
     invoiceDao: InvoiceDao,
     projectDao: ProjectDao,
-    userPreferencesRepository: UserPreferencesRepository
+    userPreferencesRepository: SettingsPreferencesRepositoryContract
 ) : ViewModel() {
 
     private val selectedPeriod = MutableStateFlow(AnalyticsPeriod.MONTH)

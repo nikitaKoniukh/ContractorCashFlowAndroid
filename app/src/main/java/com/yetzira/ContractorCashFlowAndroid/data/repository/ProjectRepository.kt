@@ -10,19 +10,28 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
+interface ProjectRepositoryContract {
+    fun getAllProjects(): Flow<List<ProjectEntity>>
+    fun searchProjects(query: String): Flow<List<ProjectEntity>>
+    suspend fun getProjectById(id: String): ProjectEntity?
+    suspend fun insertProject(project: ProjectEntity)
+    suspend fun updateProject(project: ProjectEntity)
+    suspend fun deleteProject(project: ProjectEntity)
+}
+
 class ProjectRepository(
     private val projectDao: ProjectDao,
     private val syncService: FirestoreSyncService
-) {
+) : ProjectRepositoryContract {
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun getAllProjects(): Flow<List<ProjectEntity>> = projectDao.getAll()
+    override fun getAllProjects(): Flow<List<ProjectEntity>> = projectDao.getAll()
 
-    fun searchProjects(query: String): Flow<List<ProjectEntity>> = projectDao.search(query)
+    override fun searchProjects(query: String): Flow<List<ProjectEntity>> = projectDao.search(query)
 
-    suspend fun getProjectById(id: String): ProjectEntity? = projectDao.getById(id)
+    override suspend fun getProjectById(id: String): ProjectEntity? = projectDao.getById(id)
 
-    suspend fun insertProject(project: ProjectEntity) {
+    override suspend fun insertProject(project: ProjectEntity) {
         val stamped = project.copy(lastModified = System.currentTimeMillis())
         projectDao.insert(stamped)
         syncScope.launch {
@@ -32,7 +41,7 @@ class ProjectRepository(
         }
     }
 
-    suspend fun updateProject(project: ProjectEntity) {
+    override suspend fun updateProject(project: ProjectEntity) {
         val stamped = project.copy(lastModified = System.currentTimeMillis())
         projectDao.update(stamped)
         syncScope.launch {
@@ -42,7 +51,7 @@ class ProjectRepository(
         }
     }
 
-    suspend fun deleteProject(project: ProjectEntity) {
+    override suspend fun deleteProject(project: ProjectEntity) {
         projectDao.delete(project)
         syncScope.launch {
             syncService.deleteProject(project.id).onFailure { throwable ->

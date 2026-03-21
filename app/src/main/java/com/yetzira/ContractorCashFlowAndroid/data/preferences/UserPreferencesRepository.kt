@@ -15,7 +15,42 @@ private const val PREFERENCES_NAME = "kablan_pro_preferences"
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PREFERENCES_NAME)
 
-class UserPreferencesRepository(context: Context) {
+interface UserPreferencesRepositoryContract {
+    val invoiceRemindersEnabled: Flow<Boolean>
+    val overdueAlertsEnabled: Flow<Boolean>
+}
+
+interface SettingsPreferencesRepositoryContract {
+    val appLanguage: Flow<AppLanguageOption>
+    val themeMode: Flow<ThemeModeOption>
+    val selectedCurrencyCode: Flow<CurrencyOption>
+    val invoiceRemindersEnabled: Flow<Boolean>
+    val overdueAlertsEnabled: Flow<Boolean>
+    val budgetWarningsEnabled: Flow<Boolean>
+    val subscriptionIsPro: Flow<Boolean>
+    val subscriptionPlanName: Flow<String?>
+    val subscriptionRenewalDate: Flow<Long?>
+
+    suspend fun setAppLanguage(language: AppLanguageOption)
+    suspend fun setThemeMode(themeMode: ThemeModeOption)
+    suspend fun setSelectedCurrency(currency: CurrencyOption)
+    suspend fun setInvoiceRemindersEnabled(enabled: Boolean)
+    suspend fun setOverdueAlertsEnabled(enabled: Boolean)
+    suspend fun setBudgetWarningsEnabled(enabled: Boolean)
+}
+
+interface SubscriptionPreferencesRepositoryContract {
+    suspend fun setSubscription(
+        isPro: Boolean,
+        planName: String? = null,
+        renewalDate: Long? = null
+    )
+}
+
+class UserPreferencesRepository(context: Context) :
+    UserPreferencesRepositoryContract,
+    SettingsPreferencesRepositoryContract,
+    SubscriptionPreferencesRepositoryContract {
     private val dataStore = context.dataStore
 
     // Preference Keys
@@ -32,86 +67,86 @@ class UserPreferencesRepository(context: Context) {
     }
 
     // Flow getters
-    val appLanguage: Flow<AppLanguageOption> = dataStore.data.map { preferences ->
+    override val appLanguage: Flow<AppLanguageOption> = dataStore.data.map { preferences ->
         val code = preferences[APP_LANGUAGE] ?: "he"
         AppLanguageOption.fromCode(code)
     }
 
-    val themeMode: Flow<ThemeModeOption> = dataStore.data.map { preferences ->
+    override val themeMode: Flow<ThemeModeOption> = dataStore.data.map { preferences ->
         val code = preferences[THEME_MODE] ?: ThemeModeOption.SYSTEM.code
         ThemeModeOption.fromCode(code)
     }
 
-    val selectedCurrencyCode: Flow<CurrencyOption> = dataStore.data.map { preferences ->
+    override val selectedCurrencyCode: Flow<CurrencyOption> = dataStore.data.map { preferences ->
         val code = preferences[SELECTED_CURRENCY_CODE] ?: "ILS"
         CurrencyOption.fromCode(code)
     }
 
-    val invoiceRemindersEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+    override val invoiceRemindersEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[INVOICE_REMINDERS_ENABLED] ?: true
     }
 
-    val overdueAlertsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+    override val overdueAlertsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[OVERDUE_ALERTS_ENABLED] ?: true
     }
 
-    val budgetWarningsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+    override val budgetWarningsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[BUDGET_WARNINGS_ENABLED] ?: true
     }
 
-    val subscriptionIsPro: Flow<Boolean> = dataStore.data.map { preferences ->
+    override val subscriptionIsPro: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[SUBSCRIPTION_IS_PRO] ?: false
     }
 
-    val subscriptionPlanName: Flow<String?> = dataStore.data.map { preferences ->
+    override val subscriptionPlanName: Flow<String?> = dataStore.data.map { preferences ->
         preferences[SUBSCRIPTION_PLAN_NAME]
     }
 
-    val subscriptionRenewalDate: Flow<Long?> = dataStore.data.map { preferences ->
+    override val subscriptionRenewalDate: Flow<Long?> = dataStore.data.map { preferences ->
         preferences[SUBSCRIPTION_RENEWAL_DATE]
     }
 
     // Suspend setters
-    suspend fun setAppLanguage(language: AppLanguageOption) {
+    override suspend fun setAppLanguage(language: AppLanguageOption) {
         dataStore.edit { preferences ->
             preferences[APP_LANGUAGE] = language.code
         }
     }
 
-    suspend fun setThemeMode(themeMode: ThemeModeOption) {
+    override suspend fun setThemeMode(themeMode: ThemeModeOption) {
         dataStore.edit { preferences ->
             preferences[THEME_MODE] = themeMode.code
         }
     }
 
-    suspend fun setSelectedCurrency(currency: CurrencyOption) {
+    override suspend fun setSelectedCurrency(currency: CurrencyOption) {
         dataStore.edit { preferences ->
             preferences[SELECTED_CURRENCY_CODE] = currency.code
         }
     }
 
-    suspend fun setInvoiceRemindersEnabled(enabled: Boolean) {
+    override suspend fun setInvoiceRemindersEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[INVOICE_REMINDERS_ENABLED] = enabled
         }
     }
 
-    suspend fun setOverdueAlertsEnabled(enabled: Boolean) {
+    override suspend fun setOverdueAlertsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[OVERDUE_ALERTS_ENABLED] = enabled
         }
     }
 
-    suspend fun setBudgetWarningsEnabled(enabled: Boolean) {
+    override suspend fun setBudgetWarningsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[BUDGET_WARNINGS_ENABLED] = enabled
         }
     }
 
-    suspend fun setSubscription(
+    override suspend fun setSubscription(
         isPro: Boolean,
-        planName: String? = null,
-        renewalDate: Long? = null
+        planName: String?,
+        renewalDate: Long?
     ) {
         dataStore.edit { preferences ->
             preferences[SUBSCRIPTION_IS_PRO] = isPro

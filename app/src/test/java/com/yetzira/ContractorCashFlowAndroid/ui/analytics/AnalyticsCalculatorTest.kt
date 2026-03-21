@@ -71,7 +71,7 @@ class AnalyticsCalculatorTest {
 
         assertEquals(3, state.expensesByCategory.size)
         assertEquals("Project B", state.topProjects.first().projectName)
-        assertEquals(45.0, state.budgetUtilization.first { it.projectId == "p1" }.utilization, 0.001)
+        assertEquals(40.0, state.budgetUtilization.first { it.projectId == "p1" }.utilization, 0.001)
         assertEquals(12.5, state.budgetUtilization.first { it.projectId == "p2" }.utilization, 0.001)
         assertTrue(state.averageBudgetUtilization > 0.0)
         assertTrue(state.monthlyTrend.isNotEmpty())

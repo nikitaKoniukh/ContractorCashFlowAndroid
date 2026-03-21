@@ -9,7 +9,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
-import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepository
+import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectViewModel(
-    private val repository: ProjectRepository,
+    private val repository: ProjectRepositoryContract,
     private val expenseDao: ExpenseDao,
     private val invoiceDao: InvoiceDao,
     private val clientDao: ClientDao
