@@ -17,10 +17,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -239,19 +239,9 @@ private fun ProjectCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 4.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Chevron — auto-mirrors to ‹ in RTL languages (e.g. Hebrew)
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                modifier = Modifier.size(20.dp)
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
             // Main content
             Column(modifier = Modifier.weight(1f)) {
 
@@ -261,7 +251,15 @@ private fun ProjectCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Status badge (start side)
+
+                    Text(
+                        text = item.project.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
                     if (item.project.isActive) {
                         Box(
                             modifier = Modifier
@@ -280,25 +278,22 @@ private fun ProjectCard(
                     } else {
                         Spacer(modifier = Modifier.width(1.dp))
                     }
-
-                    // Project name (end side)
-                    Text(
-                        text = item.project.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
                 }
 
                 // ── Row 2: client name with person icon ────────────────────
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = item.project.clientName,
                         style = MaterialTheme.typography.bodySmall,
@@ -306,38 +301,56 @@ private fun ProjectCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp)
-                    )
                 }
 
                 // ── Row 3: income | expenses ───────────────────────────────
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(top = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     // Income (start/left)
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Green circle with TrendingUp icon
                         Box(
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(ExpenseRed),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.TrendingDown,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+
+
+                        Text(
+                            text = formatCurrencyAmount(item.totalExpenses, currency),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
                                 .clip(CircleShape)
                                 .background(IncomeGreen),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.TrendingUp,
+                                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(12.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(6.dp))
@@ -347,32 +360,6 @@ private fun ProjectCard(
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                    }
-
-                    // Expenses (end/right)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = formatCurrencyAmount(item.totalExpenses, currency),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        // Red circle with TrendingDown icon
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(ExpenseRed),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.TrendingDown,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
                     }
                 }
 
@@ -385,10 +372,16 @@ private fun ProjectCard(
 
                 // ── Row 4: balance ─────────────────────────────────────────
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    // "יתרה" / "Balance" label (end/right)
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_balance),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     // Balance amount (start/left, color-coded)
                     Text(
                         text = formatCurrencyAmount(item.balance, currency),
@@ -397,14 +390,17 @@ private fun ProjectCard(
                         color = balanceColor,
                         fontSize = 15.sp
                     )
-                    // "יתרה" / "Balance" label (end/right)
-                    Text(
-                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_balance),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
