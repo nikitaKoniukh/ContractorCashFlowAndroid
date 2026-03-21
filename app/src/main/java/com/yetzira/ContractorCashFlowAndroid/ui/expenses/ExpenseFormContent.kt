@@ -87,7 +87,7 @@ fun ExpenseFormContent(
                             onSelected = { workerName ->
                                 val worker = state.workers.find { it.worker.workerName == workerName }
                                 if (worker != null) {
-                                    onStateChange(state.copy(workerId = worker.worker.id))
+                                    onStateChange(state.copy(workerId = worker.worker.id, laborTypeSnapshot = null))
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -95,17 +95,63 @@ fun ExpenseFormContent(
 
                         val worker = state.workers.firstOrNull { it.worker.id == state.workerId }
                         if (worker != null) {
+                            val hasHourly = worker.hourlyRate != null
+                            val hasDaily = worker.dailyRate != null
+                            val selectedLaborMode = state.laborTypeSnapshot
+
+                            if (hasHourly && hasDaily) {
+                                val hourlyLabel = stringResource(R.string.expenses_form_labor_mode_hourly)
+                                val dailyLabel = stringResource(R.string.expenses_form_labor_mode_daily)
+                                val selectedModeLabel = when (selectedLaborMode) {
+                                    LaborType.HOURLY -> hourlyLabel
+                                    LaborType.DAILY -> dailyLabel
+                                    else -> ""
+                                }
+
+                                ModernDropdown(
+                                    label = stringResource(R.string.expenses_form_labor_mode_label),
+                                    options = listOf(hourlyLabel, dailyLabel),
+                                    selected = selectedModeLabel,
+                                    onSelected = { modeLabel ->
+                                        val selectedMode = when (modeLabel) {
+                                            hourlyLabel -> LaborType.HOURLY
+                                            dailyLabel -> LaborType.DAILY
+                                            else -> null
+                                        }
+                                        onStateChange(state.copy(laborTypeSnapshot = selectedMode))
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            val effectiveLaborType = when {
+                                hasHourly && hasDaily -> selectedLaborMode
+                                hasHourly -> LaborType.HOURLY
+                                hasDaily -> LaborType.DAILY
+                                else -> worker.laborType
+                            }
+                            val effectiveRate = when (effectiveLaborType) {
+                                LaborType.HOURLY -> worker.hourlyRate
+                                LaborType.DAILY -> worker.dailyRate
+                                LaborType.CONTRACT, LaborType.SUBCONTRACTOR -> worker.contractPrice
+                                null -> null
+                            }
+
                             Text(
-                                text = "${worker.worker.workerName} • ${worker.rate ?: 0.0}${worker.rateSuffix}",
+                                text = "${worker.worker.workerName} • ${effectiveRate ?: 0.0}${effectiveLaborType?.rateSuffix.orEmpty()}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
-                            if (worker.laborType == LaborType.HOURLY || worker.laborType == LaborType.DAILY) {
+                            if (effectiveLaborType == LaborType.HOURLY || effectiveLaborType == LaborType.DAILY) {
                                 ModernTextField(
                                     value = state.unitsWorked,
                                     onValueChange = { onStateChange(state.copy(unitsWorked = it)) },
-                                    label = stringResource(R.string.expenses_form_units_label),
+                                    label = if (effectiveLaborType == LaborType.DAILY) {
+                                        stringResource(R.string.expenses_form_days_worked_label)
+                                    } else {
+                                        stringResource(R.string.expenses_form_hours_worked_label)
+                                    },
                                     modifier = Modifier.fillMaxWidth(),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                     singleLine = true

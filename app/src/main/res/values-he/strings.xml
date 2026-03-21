@@ -235,6 +235,11 @@
 
     <!-- Expense Form Strings -->
     <string name="expenses_form_units_label">יחידות עבודה</string>
+    <string name="expenses_form_hours_worked_label">שעות עבודה</string>
+    <string name="expenses_form_days_worked_label">ימי עבודה</string>
+    <string name="expenses_form_labor_mode_label">סוג חיוב</string>
+    <string name="expenses_form_labor_mode_hourly">שעתי</string>
+    <string name="expenses_form_labor_mode_daily">יומי</string>
     <string name="expenses_form_description_label">תיאור</string>
     <string name="expenses_form_amount_label">סכום</string>
     <string name="expenses_form_category_label">קטגוריה</string>

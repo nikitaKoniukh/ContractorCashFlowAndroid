@@ -81,17 +81,12 @@ class ExpenseViewModel(
             val activeProjects = projects.filter { it.isActive }
             val workerOptions = workers.map { worker ->
                 val laborType = LaborType.fromString(worker.laborType)
-                val rate = when (laborType) {
-                    LaborType.HOURLY -> worker.hourlyRate
-                    LaborType.DAILY -> worker.dailyRate
-                    LaborType.CONTRACT, LaborType.SUBCONTRACTOR -> worker.contractPrice
-                    null -> null
-                }
                 WorkerOptionUi(
                     worker = worker,
                     laborType = laborType,
-                    rate = rate,
-                    rateSuffix = laborType?.rateSuffix.orEmpty()
+                    hourlyRate = worker.hourlyRate,
+                    dailyRate = worker.dailyRate,
+                    contractPrice = worker.contractPrice
                 )
             }
 
@@ -201,7 +196,8 @@ class ExpenseViewModel(
         date: Long? = null,
         projectId: String? = null,
         workerId: String? = null,
-        unitsWorked: String? = null
+        unitsWorked: String? = null,
+        laborTypeSnapshot: LaborType? = current.laborTypeSnapshot
     ): ExpenseFormUiState {
         val updated = current.copy(
             category = category ?: current.category,
@@ -210,7 +206,8 @@ class ExpenseViewModel(
             date = date ?: current.date,
             projectId = projectId ?: current.projectId,
             workerId = workerId ?: current.workerId,
-            unitsWorked = unitsWorked ?: current.unitsWorked
+            unitsWorked = unitsWorked ?: current.unitsWorked,
+            laborTypeSnapshot = laborTypeSnapshot
         )
         return recalculateLaborDependentFields(updated)
     }
@@ -251,29 +248,52 @@ class ExpenseViewModel(
         var amount = input.amount
         var description = input.description
         var readOnly = false
-
-        val laborType = workerOption.laborType
-        val rate = workerOption.rate ?: 0.0
+        var selectedLaborType: LaborType? = input.laborTypeSnapshot
 
         if (description.isBlank()) {
             description = "Labor: ${workerOption.worker.workerName}"
         }
 
-        if (laborType == LaborType.HOURLY || laborType == LaborType.DAILY) {
-            val units = input.unitsWorked.toDoubleOrNull() ?: 0.0
-            amount = if (units > 0.0) formatAmountInput((rate * units).toLong().toString()) else input.amount
-        } else if (laborType == LaborType.CONTRACT || laborType == LaborType.SUBCONTRACTOR) {
-            amount = formatAmountInput(rate.toLong().toString())
+        if (workerOption.laborType == LaborType.CONTRACT || workerOption.laborType == LaborType.SUBCONTRACTOR) {
+            selectedLaborType = workerOption.laborType
+            val contractRate = workerOption.contractPrice ?: 0.0
+            amount = formatAmountInput(contractRate.toLong().toString())
             readOnly = true
+        } else {
+            val hasHourly = workerOption.hourlyRate != null
+            val hasDaily = workerOption.dailyRate != null
+            selectedLaborType = when {
+                hasHourly && hasDaily && (selectedLaborType == LaborType.HOURLY || selectedLaborType == LaborType.DAILY) -> selectedLaborType
+                hasHourly && hasDaily -> null
+                hasHourly -> LaborType.HOURLY
+                hasDaily -> LaborType.DAILY
+                workerOption.laborType == LaborType.HOURLY || workerOption.laborType == LaborType.DAILY -> workerOption.laborType
+                else -> null
+            }
+
+            val rate = when (selectedLaborType) {
+                LaborType.HOURLY -> workerOption.hourlyRate
+                LaborType.DAILY -> workerOption.dailyRate
+                else -> null
+            }
+
+            val units = input.unitsWorked.toDoubleOrNull() ?: 0.0
+            if (rate != null && units > 0.0) {
+                amount = formatAmountInput((rate * units).toLong().toString())
+            }
         }
 
-        val canSave = description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0
+        val requiresLaborModeSelection =
+            workerOption.hourlyRate != null && workerOption.dailyRate != null &&
+                (selectedLaborType != LaborType.HOURLY && selectedLaborType != LaborType.DAILY)
+
+        val canSave = !requiresLaborModeSelection && description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0
 
         return input.copy(
             amount = amount,
             description = description,
             isAmountReadOnly = readOnly,
-            laborTypeSnapshot = laborType,
+            laborTypeSnapshot = selectedLaborType,
             canSave = canSave
         )
     }

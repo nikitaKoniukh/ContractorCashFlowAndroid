@@ -31,8 +31,9 @@ data class ExpensesListUiState(
 data class WorkerOptionUi(
     val worker: LaborDetailsEntity,
     val laborType: LaborType?,
-    val rate: Double?,
-    val rateSuffix: String
+    val hourlyRate: Double?,
+    val dailyRate: Double?,
+    val contractPrice: Double?
 )
 
 data class ExpenseFormUiState(

@@ -234,6 +234,11 @@
 
     <!-- Expense Form Strings -->
     <string name="expenses_form_units_label">Units worked</string>
+    <string name="expenses_form_hours_worked_label">Hours worked</string>
+    <string name="expenses_form_days_worked_label">Days worked</string>
+    <string name="expenses_form_labor_mode_label">Billing mode</string>
+    <string name="expenses_form_labor_mode_hourly">Hourly</string>
+    <string name="expenses_form_labor_mode_daily">Daily</string>
     <string name="expenses_form_description_label">Description</string>
     <string name="expenses_form_amount_label">Amount</string>
     <string name="expenses_form_category_label">Category</string>
