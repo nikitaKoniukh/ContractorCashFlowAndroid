@@ -294,11 +294,13 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(
-                                text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_subscription_renews, formatDate(state.subscription.renewalDate)),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            state.subscription.renewalDate?.let { renewalDate ->
+                                Text(
+                                    text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_subscription_renews, formatDate(renewalDate)),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(12.dp))

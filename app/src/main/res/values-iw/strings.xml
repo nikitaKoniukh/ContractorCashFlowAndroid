@@ -247,6 +247,23 @@
     <string name="settings_status_export_failed">הייצוא נכשל</string>
     <string name="settings_status_notifications_updated">הגדרות ההתראות עודכנו</string>
 
+    <!-- Paywall Strings -->
+    <string name="paywall_title">שדרוג ל-KablanPro Pro</string>
+    <string name="paywall_description">פתח תכונות פרימיום עם מנוי אמיתי דרך Google Play.</string>
+    <string name="paywall_price_label">מחיר המנוי: %1$s</string>
+    <string name="paywall_button_subscribe">הירשם דרך Google Play</string>
+    <string name="paywall_button_subscribe_with_price">הירשם ב-%1$s</string>
+    <string name="paywall_button_processing">פותח את Google Play…</string>
+    <string name="paywall_button_restore">שחזר רכישות</string>
+    <string name="paywall_button_not_now">לא עכשיו</string>
+    <string name="paywall_already_subscribed">המנוי פעיל</string>
+    <string name="paywall_status_loading">טוען פרטי מנוי…</string>
+    <string name="paywall_status_purchased">המנוי הופעל בהצלחה.</string>
+    <string name="paywall_status_restored">המנוי הפעיל שלך שוחזר.</string>
+    <string name="paywall_status_pending">הרכישה שלך ממתינה ב-Google Play.</string>
+    <string name="paywall_status_cancelled">הרכישה בוטלה.</string>
+    <string name="paywall_status_error">לא ניתן להשלים את בקשת המנוי.</string>
+
     <!-- Labor Form Strings -->
     <string name="labor_form_worker_name_label">שם עובד</string>
     <string name="labor_form_duplicate_warning">עובד בשם זה כבר קיים.</string>

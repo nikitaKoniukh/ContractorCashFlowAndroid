@@ -17,6 +17,10 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "PLAY_BILLING_SUBSCRIPTION_PRODUCT_ID", "\"kablanpro_pro\"")
+        buildConfigField("String", "PLAY_BILLING_SUBSCRIPTION_BASE_PLAN_ID", "\"\"")
+        buildConfigField("String", "PLAY_BILLING_SUBSCRIPTION_OFFER_ID", "\"\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

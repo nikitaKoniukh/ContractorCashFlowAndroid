@@ -240,6 +240,23 @@
     <string name="settings_status_export_failed">Export failed</string>
     <string name="settings_status_notifications_updated">Notification settings updated</string>
 
+    <!-- Paywall Strings -->
+    <string name="paywall_title">Upgrade to KablanPro Pro</string>
+    <string name="paywall_description">Unlock premium workflow features with a real Google Play subscription.</string>
+    <string name="paywall_price_label">Subscription price: %1$s</string>
+    <string name="paywall_button_subscribe">Subscribe with Google Play</string>
+    <string name="paywall_button_subscribe_with_price">Subscribe for %1$s</string>
+    <string name="paywall_button_processing">Opening Google Play…</string>
+    <string name="paywall_button_restore">Restore purchases</string>
+    <string name="paywall_button_not_now">Not now</string>
+    <string name="paywall_already_subscribed">Subscription active</string>
+    <string name="paywall_status_loading">Loading subscription details…</string>
+    <string name="paywall_status_purchased">Subscription activated successfully.</string>
+    <string name="paywall_status_restored">Your active subscription was restored.</string>
+    <string name="paywall_status_pending">Your purchase is pending in Google Play.</string>
+    <string name="paywall_status_cancelled">Purchase was cancelled.</string>
+    <string name="paywall_status_error">Unable to complete the subscription request.</string>
+
     <!-- Labor Form Strings -->
     <string name="labor_form_worker_name_label">Worker Name</string>
     <string name="labor_form_duplicate_warning">A worker with this name already exists.</string>

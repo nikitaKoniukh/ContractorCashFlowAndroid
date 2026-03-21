@@ -1,12 +1,18 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.paywall
 
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.SubscriptionPreferencesRepositoryContract
+import android.app.Activity
+import com.yetzira.ContractorCashFlowAndroid.billing.BillingActionState
+import com.yetzira.ContractorCashFlowAndroid.billing.BillingEntitlementState
+import com.yetzira.ContractorCashFlowAndroid.billing.BillingProductState
+import com.yetzira.ContractorCashFlowAndroid.billing.BillingRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.testutil.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -18,41 +24,86 @@ class PaywallViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     @Test
-    fun `activatePro stores pro subscription and invokes callback`() = runTest {
-        val repository = FakeSubscriptionPreferencesRepository()
+    fun `uiState reflects billing product and entitlement state`() = runTest {
+        val repository = FakeBillingRepository().apply {
+            product.value = BillingProductState(
+                isLoading = false,
+                title = "KablanPro Pro",
+                description = "Premium plan",
+                priceText = "$9.99",
+                isAvailable = true
+            )
+            entitlement.value = BillingEntitlementState(
+                isLoading = false,
+                isPro = true,
+                planName = "KablanPro Pro"
+            )
+            action.value = BillingActionState.Purchased
+        }
         val viewModel = PaywallViewModel(repository)
-        val start = System.currentTimeMillis()
-        var onDoneCalled = false
+        val collectJob = launch { viewModel.uiState.collect { } }
 
-        viewModel.activatePro {
-            onDoneCalled = true
-        }
         advanceUntilIdle()
-        val end = System.currentTimeMillis()
 
-        assertEquals(true, repository.isPro)
-        assertEquals("KablanPro Pro", repository.planName)
-        assertNotNull(repository.renewalDate)
-        val expectedMin = start + 30L * 24 * 60 * 60 * 1000
-        val expectedMax = end + 30L * 24 * 60 * 60 * 1000
-        assertTrue(repository.renewalDate!! in expectedMin..expectedMax)
-        assertTrue(onDoneCalled)
+        assertTrue(viewModel.uiState.value.isPro)
+        assertEquals("KablanPro Pro", viewModel.uiState.value.productTitle)
+        assertEquals(PaywallStatus.PURCHASED, viewModel.uiState.value.status)
+
+        collectJob.cancel()
     }
 
-    private class FakeSubscriptionPreferencesRepository : SubscriptionPreferencesRepositoryContract {
-        var isPro: Boolean? = null
-        var planName: String? = null
-        var renewalDate: Long? = null
+    @Test
+    fun `purchase delegates to billing repository`() = runTest {
+        val repository = FakeBillingRepository()
+        val viewModel = PaywallViewModel(repository)
+        val activity = FakeActivity()
 
-        override suspend fun setSubscription(
-            isPro: Boolean,
-            planName: String?,
-            renewalDate: Long?
-        ) {
-            this.isPro = isPro
-            this.planName = planName
-            this.renewalDate = renewalDate
+        viewModel.purchase(activity)
+        advanceUntilIdle()
+
+        assertEquals(1, repository.purchaseLaunchCount)
+    }
+
+    @Test
+    fun `restorePurchases delegates to refresh`() = runTest {
+        val repository = FakeBillingRepository()
+        val viewModel = PaywallViewModel(repository)
+
+        viewModel.restorePurchases()
+        advanceUntilIdle()
+
+        assertTrue(repository.refreshCount >= 2)
+    }
+
+    private class FakeBillingRepository : BillingRepositoryContract {
+        val product = MutableStateFlow(BillingProductState(isLoading = false))
+        val entitlement = MutableStateFlow(BillingEntitlementState(isLoading = false))
+        val action = MutableStateFlow<BillingActionState>(BillingActionState.Idle)
+
+        var refreshCount = 0
+        var purchaseLaunchCount = 0
+
+        override val productState: StateFlow<BillingProductState> = product
+        override val entitlementState: StateFlow<BillingEntitlementState> = entitlement
+        override val actionState: StateFlow<BillingActionState> = action
+
+        override suspend fun refresh(): Result<Unit> {
+            refreshCount += 1
+            return Result.success(Unit)
         }
+
+        override suspend fun launchPurchase(activity: Activity): Result<Unit> {
+            purchaseLaunchCount += 1
+            return Result.success(Unit)
+        }
+
+        override fun clearActionState() {
+            action.value = BillingActionState.Idle
+        }
+
+        override fun close() = Unit
     }
+
+    private class FakeActivity : Activity()
 }
 

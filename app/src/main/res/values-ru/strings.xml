@@ -241,6 +241,23 @@
     <string name="settings_status_export_failed">Ошибка экспорта</string>
     <string name="settings_status_notifications_updated">Настройки уведомлений обновлены</string>
 
+    <!-- Paywall Strings -->
+    <string name="paywall_title">Перейти на KablanPro Pro</string>
+    <string name="paywall_description">Откройте премиум-возможности с настоящей подпиской Google Play.</string>
+    <string name="paywall_price_label">Цена подписки: %1$s</string>
+    <string name="paywall_button_subscribe">Оформить через Google Play</string>
+    <string name="paywall_button_subscribe_with_price">Оформить за %1$s</string>
+    <string name="paywall_button_processing">Открываем Google Play…</string>
+    <string name="paywall_button_restore">Восстановить покупки</string>
+    <string name="paywall_button_not_now">Не сейчас</string>
+    <string name="paywall_already_subscribed">Подписка активна</string>
+    <string name="paywall_status_loading">Загрузка данных подписки…</string>
+    <string name="paywall_status_purchased">Подписка успешно активирована.</string>
+    <string name="paywall_status_restored">Ваша активная подписка восстановлена.</string>
+    <string name="paywall_status_pending">Покупка ожидает подтверждения в Google Play.</string>
+    <string name="paywall_status_cancelled">Покупка отменена.</string>
+    <string name="paywall_status_error">Не удалось завершить запрос подписки.</string>
+
     <!-- Labor Form Strings -->
     <string name="labor_form_worker_name_label">Имя рабочего</string>
     <string name="labor_form_duplicate_warning">Рабочий с этим именем уже существует.</string>
