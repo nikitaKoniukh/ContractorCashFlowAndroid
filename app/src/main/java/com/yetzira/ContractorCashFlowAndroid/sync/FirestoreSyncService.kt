@@ -172,11 +172,12 @@ class FirestoreSyncService(
             val laborDetails = laborDocs.mapNotNull(::toLaborEntity)
 
             database.withTransaction {
+                // Merge parent tables first so dependent rows can safely reference them.
                 mergeProjects(projects)
-                mergeExpenses(expenses)
-                mergeInvoices(invoices)
                 mergeClients(clients)
                 mergeLaborDetails(laborDetails)
+                mergeExpenses(expenses)
+                mergeInvoices(invoices)
             }
         }
     }
@@ -264,7 +265,7 @@ class FirestoreSyncService(
                     rootCause is UnknownHostException ->
                         "Unable to resolve Firestore host. Check internet connection, Private DNS, VPN, or ad-blocking settings."
                     rawMessage.contains("787") ->
-                    "$rawMessage Possible Google/Firebase credential mismatch; verify SHA fingerprints and refresh sign-in."
+                        "$rawMessage SQLite FK 787 while merging cloud data. Check project/worker references and resync."
                     else -> rawMessage.ifBlank { throwable::class.java.simpleName }
                 }
             }
@@ -289,18 +290,40 @@ class FirestoreSyncService(
 
     private suspend fun mergeExpenses(remote: List<ExpenseEntity>) {
         remote.forEach { remoteItem ->
+            val sanitized = sanitizeExpenseForeignKeys(remoteItem)
             val local = database.expenseDao().getById(remoteItem.id)
-            if (local == null) database.expenseDao().insert(remoteItem)
-            else if (remoteItem.lastModified >= local.lastModified) database.expenseDao().update(remoteItem)
+            if (local == null) database.expenseDao().insert(sanitized)
+            else if (sanitized.lastModified >= local.lastModified) database.expenseDao().update(sanitized)
         }
     }
 
     private suspend fun mergeInvoices(remote: List<InvoiceEntity>) {
         remote.forEach { remoteItem ->
+            val sanitized = sanitizeInvoiceForeignKeys(remoteItem)
             val local = database.invoiceDao().getById(remoteItem.id)
-            if (local == null) database.invoiceDao().insert(remoteItem)
-            else if (remoteItem.lastModified >= local.lastModified) database.invoiceDao().update(remoteItem)
+            if (local == null) database.invoiceDao().insert(sanitized)
+            else if (sanitized.lastModified >= local.lastModified) database.invoiceDao().update(sanitized)
         }
+    }
+
+    private suspend fun sanitizeExpenseForeignKeys(expense: ExpenseEntity): ExpenseEntity {
+        val validProjectId = expense.projectId?.let { projectId ->
+            database.projectDao().getById(projectId)?.id
+        }
+        val validWorkerId = expense.workerId?.let { workerId ->
+            database.laborDetailsDao().getById(workerId)?.id
+        }
+        return expense.copy(
+            projectId = validProjectId,
+            workerId = validWorkerId
+        )
+    }
+
+    private suspend fun sanitizeInvoiceForeignKeys(invoice: InvoiceEntity): InvoiceEntity {
+        val validProjectId = invoice.projectId?.let { projectId ->
+            database.projectDao().getById(projectId)?.id
+        }
+        return invoice.copy(projectId = validProjectId)
     }
 
     private suspend fun mergeClients(remote: List<ClientEntity>) {
