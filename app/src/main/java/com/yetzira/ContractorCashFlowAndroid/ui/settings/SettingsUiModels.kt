@@ -13,7 +13,7 @@ enum class CloudSyncState {
 
 data class SubscriptionUiState(
     val isPro: Boolean = false,
-    val planName: String = "Free Plan",
+    val planName: String = "",
     val renewalDate: Long? = null
 )
 

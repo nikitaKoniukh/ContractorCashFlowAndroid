@@ -88,6 +88,9 @@ dependencies {
     // Google Play Billing
     implementation(libs.google.play.billing.ktx)
     implementation(libs.google.play.services.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // ML Kit Text Recognition
     implementation(libs.mlkit.text.recognition)

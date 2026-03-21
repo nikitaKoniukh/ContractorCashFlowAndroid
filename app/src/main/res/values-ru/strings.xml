@@ -196,6 +196,11 @@
     <string name="action_more">Ещё</string>
     <string name="menu_open">Открыть меню навигации</string>
     <string name="settings_section_account">Учётная запись</string>
+    <string name="settings_google_sign_in_setup_incomplete">Настройка входа Google неполная: отсутствует default_web_client_id в ресурсах. Пересоздайте google-services.json с OAuth-клиентом типа Web.</string>
+    <string name="settings_google_sign_in_setup_missing_client_id">Настройка входа Google неполная: отсутствует default_web_client_id.</string>
+    <string name="settings_google_sign_in_unsupported_credential">Получен неподдерживаемый тип учетных данных</string>
+    <string name="settings_google_sign_in_parse_token_failed">Не удалось разобрать Google ID token</string>
+    <string name="settings_google_sign_in_failed">Не удалось войти через Google</string>
     <string name="settings_signed_in">Вы вошли</string>
     <string name="settings_sign_out">Выйти</string>
     <string name="settings_sign_in_with_google">Войти с Google</string>
@@ -211,6 +216,7 @@
     <string name="settings_subscription_renews">Обновляется %s</string>
     <string name="settings_manage_subscription">Управление подпиской</string>
     <string name="settings_subscription_free">Бесплатный план</string>
+    <string name="settings_subscription_plan_pro_default">KablanPro Pro</string>
     <string name="settings_subscription_upgrade_text">Перейдите на KablanPro Pro, чтобы разблокировать премиум-функции.</string>
     <string name="settings_upgrade_pro">Перейти на Pro</string>
     <string name="settings_section_cloud_sync">Синхронизация облака</string>
@@ -220,6 +226,20 @@
     <string name="settings_sync_button_failed">Синхронизация не удалась</string>
     <string name="settings_section_export">Экспортировать данные</string>
     <string name="settings_section_about">О программе</string>
+    <string name="settings_status_language_updated">Язык обновлен</string>
+    <string name="settings_status_theme_updated">Тема обновлена</string>
+    <string name="settings_status_currency_updated">Валюта обновлена</string>
+    <string name="settings_status_signed_in_sync_unavailable">Вход выполнен, но облачная синхронизация недоступна. Проверьте интернет и DNS-настройки, затем попробуйте синхронизацию снова.</string>
+    <string name="settings_status_signed_in_uploading">Вход выполнен - загрузка локальных данных…</string>
+    <string name="settings_status_signed_in_synced">Вход выполнен, локальные данные синхронизированы с облаком</string>
+    <string name="settings_status_upload_failed">Ошибка загрузки</string>
+    <string name="settings_status_signed_in_sync_failed">Вход выполнен, но синхронизация не удалась: %1$s</string>
+    <string name="settings_status_signed_out">Вы вышли</string>
+    <string name="settings_status_sign_in_required_for_sync">Войдите через Google для синхронизации облачных данных</string>
+    <string name="settings_status_no_internet">Нет подключения к интернету. Проверьте Wi-Fi/мобильные данные или настройки Private DNS и повторите попытку.</string>
+    <string name="settings_status_export_success">Данные успешно экспортированы</string>
+    <string name="settings_status_export_failed">Ошибка экспорта</string>
+    <string name="settings_status_notifications_updated">Настройки уведомлений обновлены</string>
 
     <!-- Labor Form Strings -->
     <string name="labor_form_worker_name_label">Имя рабочего</string>

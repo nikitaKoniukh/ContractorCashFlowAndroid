@@ -195,6 +195,11 @@
     <string name="action_more">More</string>
     <string name="menu_open">Open Navigation Menu</string>
     <string name="settings_section_account">Account</string>
+    <string name="settings_google_sign_in_setup_incomplete">Google sign-in setup is incomplete: missing default_web_client_id in resources. Regenerate google-services.json with a Web OAuth client.</string>
+    <string name="settings_google_sign_in_setup_missing_client_id">Google sign-in setup is incomplete: missing default_web_client_id.</string>
+    <string name="settings_google_sign_in_unsupported_credential">Unsupported credential type returned</string>
+    <string name="settings_google_sign_in_parse_token_failed">Failed to parse Google ID token</string>
+    <string name="settings_google_sign_in_failed">Google sign-in failed</string>
     <string name="settings_signed_in">Signed in</string>
     <string name="settings_sign_out">Sign out</string>
     <string name="settings_sign_in_with_google">Sign in with Google</string>
@@ -210,6 +215,7 @@
     <string name="settings_subscription_renews">Renews %s</string>
     <string name="settings_manage_subscription">Manage Subscription</string>
     <string name="settings_subscription_free">Free Plan</string>
+    <string name="settings_subscription_plan_pro_default">KablanPro Pro</string>
     <string name="settings_subscription_upgrade_text">Upgrade to KablanPro Pro to unlock premium features.</string>
     <string name="settings_upgrade_pro">Upgrade to Pro</string>
     <string name="settings_section_cloud_sync">Cloud Sync</string>
@@ -219,6 +225,20 @@
     <string name="settings_sync_button_failed">Sync Failed</string>
     <string name="settings_section_export">Export Data</string>
     <string name="settings_section_about">About</string>
+    <string name="settings_status_language_updated">Language updated</string>
+    <string name="settings_status_theme_updated">Theme updated</string>
+    <string name="settings_status_currency_updated">Currency updated</string>
+    <string name="settings_status_signed_in_sync_unavailable">Signed in, but cloud sync is unavailable. Check internet connection and DNS settings, then try Sync again.</string>
+    <string name="settings_status_signed_in_uploading">Signed in - uploading local data…</string>
+    <string name="settings_status_signed_in_synced">Signed in and local data synced to cloud</string>
+    <string name="settings_status_upload_failed">Upload failed</string>
+    <string name="settings_status_signed_in_sync_failed">Signed in, but sync failed: %1$s</string>
+    <string name="settings_status_signed_out">Signed out</string>
+    <string name="settings_status_sign_in_required_for_sync">Sign in with Google to sync cloud data</string>
+    <string name="settings_status_no_internet">No internet connection. Check Wi-Fi/mobile data or Private DNS settings, then try again.</string>
+    <string name="settings_status_export_success">Data exported successfully</string>
+    <string name="settings_status_export_failed">Export failed</string>
+    <string name="settings_status_notifications_updated">Notification settings updated</string>
 
     <!-- Labor Form Strings -->
     <string name="labor_form_worker_name_label">Worker Name</string>

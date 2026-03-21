@@ -1,13 +1,16 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.settings
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
@@ -27,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class SettingsViewModel(
+    private val appContext: Context,
     private val preferencesRepository: UserPreferencesRepository,
     private val notificationSettingsCoordinator: NotificationSettingsCoordinator,
     private val firestoreSyncService: FirestoreSyncService,
@@ -94,7 +98,11 @@ class SettingsViewModel(
             budgetWarningsEnabled = budgetWarnings,
             subscription = SubscriptionUiState(
                 isPro = isPro,
-                planName = if (isPro) (planName ?: "KablanPro Pro") else "Free Plan",
+                planName = if (isPro) {
+                    planName ?: appContext.getString(R.string.settings_subscription_plan_pro_default)
+                } else {
+                    appContext.getString(R.string.settings_subscription_free)
+                },
                 renewalDate = renewalDate
             ),
             cloudSyncState = cloudSyncState,
@@ -111,7 +119,7 @@ class SettingsViewModel(
             preferencesRepository.setAppLanguage(language)
             Log.d(SETTINGS_AUTH_LOG_TAG, "Applying app locale code=${language.code}")
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.code))
-            statusMessage.value = "Language updated"
+            showStatus(R.string.settings_status_language_updated)
         }
     }
 
@@ -119,14 +127,14 @@ class SettingsViewModel(
         viewModelScope.launch {
             preferencesRepository.setThemeMode(themeMode)
             AppCompatDelegate.setDefaultNightMode(themeMode.nightModeValue)
-            statusMessage.value = "Theme updated"
+            showStatus(R.string.settings_status_theme_updated)
         }
     }
 
     fun setCurrency(currency: CurrencyOption) {
         viewModelScope.launch {
             preferencesRepository.setSelectedCurrency(currency)
-            statusMessage.value = "Currency updated"
+            showStatus(R.string.settings_status_currency_updated)
         }
     }
 
@@ -163,11 +171,11 @@ class SettingsViewModel(
                 )
                 if (!networkConnectivityChecker.canAttemptNetworkCall()) {
                     syncState.value = CloudSyncState.FAILED
-                    statusMessage.value = "Signed in, but cloud sync is unavailable. Check internet connection and DNS settings, then try Sync again."
+                    showStatus(R.string.settings_status_signed_in_sync_unavailable)
                     return@onSuccess
                 }
                 // Automatically push all existing local data to Firestore on first sign-in
-                statusMessage.value = "Signed in — uploading local data…"
+                showStatus(R.string.settings_status_signed_in_uploading)
                 syncState.value = CloudSyncState.SYNCING
                 val pushResult = runCatching {
                     withTimeout(CLOUD_SYNC_TIMEOUT_MS) {
@@ -177,16 +185,18 @@ class SettingsViewModel(
                 if (pushResult.isSuccess) {
                     Log.d(SETTINGS_AUTH_LOG_TAG, "Auto push-on-sign-in succeeded")
                     syncState.value = CloudSyncState.DONE
-                    statusMessage.value = "Signed in and local data synced to cloud"
+                    showStatus(R.string.settings_status_signed_in_synced)
                 } else {
-                    val err = pushResult.exceptionOrNull()?.message ?: "Upload failed"
+                    val err = pushResult.exceptionOrNull()?.message
+                        ?: appContext.getString(R.string.settings_status_upload_failed)
                     Log.e(SETTINGS_AUTH_LOG_TAG, "Auto push-on-sign-in failed: $err")
                     syncState.value = CloudSyncState.FAILED
-                    statusMessage.value = "Signed in, but sync failed: $err"
+                    showStatus(R.string.settings_status_signed_in_sync_failed, err)
                 }
             }.onFailure { throwable ->
                 Log.e(SETTINGS_AUTH_LOG_TAG, "Firebase sign-in failed", throwable)
-                statusMessage.value = throwable.message ?: "Google sign-in failed"
+                statusMessage.value = throwable.message
+                    ?: appContext.getString(R.string.settings_google_sign_in_failed)
             }
         }
     }
@@ -198,19 +208,19 @@ class SettingsViewModel(
 
     fun signOut() {
         firebaseAuth.signOut()
-        statusMessage.value = "Signed out"
+        showStatus(R.string.settings_status_signed_out)
     }
 
     fun runCloudSync() {
         viewModelScope.launch {
             if (firebaseAuth.currentUser == null) {
                 syncState.value = CloudSyncState.FAILED
-                statusMessage.value = "Sign in with Google to sync cloud data"
+                showStatus(R.string.settings_status_sign_in_required_for_sync)
                 return@launch
             }
             if (!networkConnectivityChecker.canAttemptNetworkCall()) {
                 syncState.value = CloudSyncState.FAILED
-                statusMessage.value = "No internet connection. Check Wi-Fi/mobile data or Private DNS settings, then try again."
+                showStatus(R.string.settings_status_no_internet)
                 return@launch
             }
             syncState.value = CloudSyncState.SYNCING
@@ -221,9 +231,10 @@ class SettingsViewModel(
             }
             syncState.value = if (result.isSuccess) CloudSyncState.DONE else CloudSyncState.FAILED
             statusMessage.value = if (result.isSuccess) {
-                "Cloud sync completed"
+                appContext.getString(R.string.settings_sync_done)
             } else {
-                result.exceptionOrNull()?.message ?: "Sync failed"
+                result.exceptionOrNull()?.message
+                    ?: appContext.getString(R.string.settings_sync_failed)
             }
         }
     }
@@ -232,9 +243,10 @@ class SettingsViewModel(
         viewModelScope.launch {
             val result = exporter.exportToUri(uri)
             statusMessage.value = if (result.isSuccess) {
-                "Data exported successfully"
+                appContext.getString(R.string.settings_status_export_success)
             } else {
-                result.exceptionOrNull()?.message ?: "Export failed"
+                result.exceptionOrNull()?.message
+                    ?: appContext.getString(R.string.settings_status_export_failed)
             }
         }
     }
@@ -251,7 +263,11 @@ class SettingsViewModel(
             overdueAlertsEnabled = preferencesRepository.overdueAlertsEnabled.first(),
             budgetWarningsEnabled = preferencesRepository.budgetWarningsEnabled.first()
         )
-        statusMessage.value = "Notification settings updated"
+        showStatus(R.string.settings_status_notifications_updated)
+    }
+
+    private fun showStatus(@StringRes resId: Int, vararg formatArgs: Any) {
+        statusMessage.value = appContext.getString(resId, *formatArgs)
     }
 }
 

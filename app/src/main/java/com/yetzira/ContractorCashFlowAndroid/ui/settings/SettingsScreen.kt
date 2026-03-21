@@ -1,4 +1,3 @@
-@file:Suppress("DEPRECATION")
 
 package com.yetzira.ContractorCashFlowAndroid.ui.settings
 
@@ -9,6 +8,11 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.credentials.CustomCredential
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -42,17 +47,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -79,6 +83,14 @@ fun SettingsScreen(
     val appVersionLabel = remember(packageInfo) {
         "KablanPro ${packageInfo.versionName}.${PackageInfoCompat.getLongVersionCode(packageInfo)}"
     }
+    val coroutineScope = rememberCoroutineScope()
+    val credentialManager = remember(context) { CredentialManager.create(context) }
+    val googleSignInSetupIncompleteMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_google_sign_in_setup_incomplete)
+    val googleSignInSetupMissingClientIdMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_google_sign_in_setup_missing_client_id)
+    val googleSignInUnsupportedCredentialMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_google_sign_in_unsupported_credential)
+    val googleSignInParseTokenFailedMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_google_sign_in_parse_token_failed)
+    val googleSignInFailedMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.settings_google_sign_in_failed)
+
     val webClientId = remember {
         @Suppress("DiscouragedApi")
         val id = context.resources.getIdentifier("default_web_client_id", "string", context.packageName)
@@ -86,52 +98,10 @@ fun SettingsScreen(
     }
     val googleSignInSetupError = remember(webClientId) {
         if (webClientId.isNullOrBlank()) {
-            "Google sign-in setup is incomplete: missing default_web_client_id in resources. Regenerate google-services.json with a Web OAuth client."
+            googleSignInSetupIncompleteMessage
         } else {
             null
         }
-    }
-    val googleSignInClient = remember {
-        val builder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-        if (!webClientId.isNullOrBlank()) {
-            builder.requestIdToken(webClientId)
-        }
-        val options = builder.build()
-        GoogleSignIn.getClient(context, options)
-    }
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        Log.d(
-            SETTINGS_AUTH_LOG_TAG,
-            "Google launcher callback resultCode=${result.resultCode} hasData=${result.data != null}"
-        )
-        val fallbackMessage = if (result.resultCode == Activity.RESULT_OK) {
-            "Google sign-in failed"
-        } else {
-            "Google sign-in was cancelled or did not complete"
-        }
-
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        runCatching { task.getResult(ApiException::class.java) }
-            .onSuccess { account: com.google.android.gms.auth.api.signin.GoogleSignInAccount ->
-                val idToken = account.idToken
-                Log.d(
-                    SETTINGS_AUTH_LOG_TAG,
-                    "Google account resolved email=${account.email.orEmpty()} idTokenPresent=${!idToken.isNullOrBlank()}"
-                )
-                if (!idToken.isNullOrBlank()) {
-                    viewModel.signInWithGoogleIdToken(idToken)
-                } else {
-                    viewModel.onGoogleSignInFailed("Google sign-in is missing ID token. Check Firebase OAuth client setup.")
-                }
-            }
-            .onFailure { throwable: Throwable ->
-                val message = googleSignInErrorMessage(throwable, fallbackMessage)
-                Log.w(SETTINGS_AUTH_LOG_TAG, "Google account task failed: $message", throwable)
-                viewModel.onGoogleSignInFailed(message)
-            }
     }
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json")
@@ -195,7 +165,61 @@ fun SettingsScreen(
                         )
                     }
                     Button(
-                        onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
+                        onClick = {
+                            val serverClientId = webClientId
+                            if (serverClientId.isNullOrBlank()) {
+                                viewModel.onGoogleSignInFailed(
+                                    googleSignInSetupMissingClientIdMessage
+                                )
+                                return@Button
+                            }
+                            coroutineScope.launch {
+                                runCatching {
+                                    val googleIdOption = GetGoogleIdOption.Builder()
+                                        .setServerClientId(serverClientId)
+                                        .setFilterByAuthorizedAccounts(false)
+                                        .setAutoSelectEnabled(false)
+                                        .build()
+                                    val request = GetCredentialRequest.Builder()
+                                        .addCredentialOption(googleIdOption)
+                                        .build()
+                                    credentialManager.getCredential(
+                                        context = context,
+                                        request = request
+                                    )
+                                }.onSuccess { response ->
+                                    val credential = response.credential
+                                    if (credential is CustomCredential) {
+                                        val isGoogleCredentialType = credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL ||
+                                            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_SIWG_CREDENTIAL
+                                        if (isGoogleCredentialType) {
+                                            val token = runCatching {
+                                                GoogleIdTokenCredential.createFrom(credential.data).idToken
+                                            }.getOrElse { parseError ->
+                                                throw parseError
+                                            }
+                                            Log.d(
+                                                SETTINGS_AUTH_LOG_TAG,
+                                                "CredentialManager sign-in success tokenLength=${token.length}"
+                                            )
+                                            viewModel.signInWithGoogleIdToken(token)
+                                        } else {
+                                            viewModel.onGoogleSignInFailed(googleSignInUnsupportedCredentialMessage)
+                                        }
+                                    } else {
+                                        viewModel.onGoogleSignInFailed(googleSignInUnsupportedCredentialMessage)
+                                    }
+                                }.onFailure { throwable ->
+                                    val message = googleSignInErrorMessage(
+                                        throwable = throwable,
+                                        parseTokenFailedMessage = googleSignInParseTokenFailedMessage,
+                                        fallbackFailedMessage = googleSignInFailedMessage
+                                    )
+                                    Log.w(SETTINGS_AUTH_LOG_TAG, "CredentialManager sign-in failed: $message", throwable)
+                                    viewModel.onGoogleSignInFailed(message)
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 12.dp),
@@ -446,19 +470,19 @@ private fun formatDate(timestamp: Long?): String {
     return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(timestamp))
 }
 
-private fun googleSignInErrorMessage(throwable: Throwable, fallback: String): String {
-    val apiException = throwable as? ApiException
-    val code = apiException?.statusCode ?: return throwable.message ?: fallback
-    val message = when (code) {
-        GoogleSignInStatusCodes.SIGN_IN_CANCELLED -> "Google sign-in was cancelled"
-        GoogleSignInStatusCodes.SIGN_IN_FAILED -> "Google sign-in failed"
-        GoogleSignInStatusCodes.SIGN_IN_CURRENTLY_IN_PROGRESS -> "Google sign-in is already in progress"
-        CommonStatusCodes.NETWORK_ERROR -> "Network error during Google sign-in"
-        CommonStatusCodes.DEVELOPER_ERROR -> "Google sign-in setup error (OAuth client/SHA mismatch)"
-        CommonStatusCodes.INTERNAL_ERROR -> "Internal Google Play services error"
-        else -> apiException.status.statusMessage ?: fallback
+private fun googleSignInErrorMessage(
+    throwable: Throwable,
+    parseTokenFailedMessage: String,
+    fallbackFailedMessage: String
+): String {
+    return when (throwable) {
+        is GoogleIdTokenParsingException -> parseTokenFailedMessage
+        is NoCredentialException -> throwable.message ?: fallbackFailedMessage
+        is GetCredentialException -> throwable.errorMessage?.toString()
+            ?: throwable.message
+            ?: fallbackFailedMessage
+        else -> throwable.message ?: fallbackFailedMessage
     }
-    return "$message (code=$code)"
 }
 
 private const val SETTINGS_AUTH_LOG_TAG = "KablanProAuth"

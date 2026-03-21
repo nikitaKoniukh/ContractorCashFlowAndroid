@@ -21,6 +21,7 @@ class SettingsViewModelFactory(
             val preferencesRepository = UserPreferencesRepository(context.applicationContext)
             @Suppress("UNCHECKED_CAST")
             return SettingsViewModel(
+                appContext = context.applicationContext,
                 preferencesRepository = preferencesRepository,
                 notificationSettingsCoordinator = NotificationSettingsCoordinator(
                     context = context.applicationContext,

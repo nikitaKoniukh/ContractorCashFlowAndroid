@@ -202,6 +202,11 @@
     <string name="action_more">עוד</string>
     <string name="menu_open">פתח תפריט ניווט</string>
     <string name="settings_section_account">חשבון</string>
+    <string name="settings_google_sign_in_setup_incomplete">הגדרת ההתחברות של Google אינה מלאה: חסר default_web_client_id במשאבים. צור מחדש google-services.json עם לקוח OAuth מסוג Web.</string>
+    <string name="settings_google_sign_in_setup_missing_client_id">הגדרת ההתחברות של Google אינה מלאה: חסר default_web_client_id.</string>
+    <string name="settings_google_sign_in_unsupported_credential">הוחזר סוג אישור לא נתמך</string>
+    <string name="settings_google_sign_in_parse_token_failed">נכשל בפענוח מזהה Google ID token</string>
+    <string name="settings_google_sign_in_failed">ההתחברות עם Google נכשלה</string>
     <string name="settings_signed_in">חובר</string>
     <string name="settings_sign_out">התנתק</string>
     <string name="settings_sign_in_with_google">היכנס עם Google</string>
@@ -217,6 +222,7 @@
     <string name="settings_subscription_renews">מתחדש ב-%s</string>
     <string name="settings_manage_subscription">נהל מנוי</string>
     <string name="settings_subscription_free">תוכנית חינם</string>
+    <string name="settings_subscription_plan_pro_default">KablanPro Pro</string>
     <string name="settings_subscription_upgrade_text">שדרג ל-KablanPro Pro כדי לפתוח תכונות פרימיום.</string>
     <string name="settings_upgrade_pro">שדרג ל-Pro</string>
     <string name="settings_section_cloud_sync">סנכרון ענן</string>
@@ -226,6 +232,20 @@
     <string name="settings_sync_button_failed">סנכרון נכשל</string>
     <string name="settings_section_export">ייצא נתונים</string>
     <string name="settings_section_about">אודות</string>
+    <string name="settings_status_language_updated">השפה עודכנה</string>
+    <string name="settings_status_theme_updated">ערכת הנושא עודכנה</string>
+    <string name="settings_status_currency_updated">המטבע עודכן</string>
+    <string name="settings_status_signed_in_sync_unavailable">התחברת, אבל סנכרון הענן אינו זמין. בדוק חיבור אינטרנט והגדרות DNS ונסה לסנכרן שוב.</string>
+    <string name="settings_status_signed_in_uploading">התחברת - מעלה נתונים מקומיים…</string>
+    <string name="settings_status_signed_in_synced">התחברת והנתונים המקומיים סונכרנו לענן</string>
+    <string name="settings_status_upload_failed">ההעלאה נכשלה</string>
+    <string name="settings_status_signed_in_sync_failed">התחברת, אבל הסנכרון נכשל: %1$s</string>
+    <string name="settings_status_signed_out">התנתקת</string>
+    <string name="settings_status_sign_in_required_for_sync">יש להתחבר עם Google כדי לסנכרן נתוני ענן</string>
+    <string name="settings_status_no_internet">אין חיבור לאינטרנט. בדוק Wi-Fi/נתונים סלולריים או הגדרות DNS פרטי ונסה שוב.</string>
+    <string name="settings_status_export_success">הנתונים יוצאו בהצלחה</string>
+    <string name="settings_status_export_failed">הייצוא נכשל</string>
+    <string name="settings_status_notifications_updated">הגדרות ההתראות עודכנו</string>
 
     <!-- Labor Form Strings -->
     <string name="labor_form_worker_name_label">שם עובד</string>
