@@ -121,3 +121,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+tasks.matching { it.name in setOf("assembleDebug", "installDebug") }.configureEach {
+    dependsOn("testDebugUnitTest")
+}
