@@ -176,7 +176,7 @@
     <string name="settings_upgrade_to_pro">Перейти на Pro</string>
     <string name="settings_cloud_sync">Синхронизация облака</string>
     <string name="settings_sync_now">Синхронизировать сейчас</string>
-    <string name="settings_syncing">Синхронизация...</string>
+    <string name="settings_syncing">Синхронизация…</string>
     <string name="settings_sync_done">Синхронизация облака завершена</string>
     <string name="settings_sync_failed">Синхронизация не удалась</string>
     <string name="settings_export_data">Экспортировать данные</string>
@@ -215,7 +215,7 @@
     <string name="settings_upgrade_pro">Перейти на Pro</string>
     <string name="settings_section_cloud_sync">Синхронизация облака</string>
     <string name="settings_sync_button_idle">Синхронизировать сейчас</string>
-    <string name="settings_sync_button_syncing">Синхронизация...</string>
+    <string name="settings_sync_button_syncing">Синхронизация…</string>
     <string name="settings_sync_button_done">Синхронизировано</string>
     <string name="settings_sync_button_failed">Синхронизация не удалась</string>
     <string name="settings_section_export">Экспортировать данные</string>

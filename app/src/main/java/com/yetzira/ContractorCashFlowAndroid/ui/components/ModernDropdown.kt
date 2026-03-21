@@ -6,6 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -39,7 +40,10 @@ fun ModernDropdown(
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
-            modifier = Modifier.menuAnchor(),
+            modifier = Modifier.menuAnchor(
+                type = MenuAnchorType.PrimaryNotEditable,
+                enabled = enabled
+            ),
             shape = RoundedCornerShape(12.dp),
             enabled = enabled,
             trailingIcon = {

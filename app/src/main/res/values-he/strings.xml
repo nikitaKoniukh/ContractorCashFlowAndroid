@@ -176,7 +176,7 @@
     <string name="settings_upgrade_to_pro">שדרג ל-Pro</string>
     <string name="settings_cloud_sync">סנכרון ענן</string>
     <string name="settings_sync_now">סנכרן כעת</string>
-    <string name="settings_syncing">מסנכרן...</string>
+    <string name="settings_syncing">מסנכרן…</string>
     <string name="settings_sync_done">סנכרון ענן הושלם</string>
     <string name="settings_sync_failed">סנכרון נכשל</string>
     <string name="settings_export_data">ייצא נתונים</string>
@@ -215,7 +215,7 @@
     <string name="settings_upgrade_pro">שדרג ל-Pro</string>
     <string name="settings_section_cloud_sync">סנכרון ענן</string>
     <string name="settings_sync_button_idle">סנכרן כעת</string>
-    <string name="settings_sync_button_syncing">מסנכרן...</string>
+    <string name="settings_sync_button_syncing">מסנכרן…</string>
     <string name="settings_sync_button_done">סונכרן</string>
     <string name="settings_sync_button_failed">סנכרון נכשל</string>
     <string name="settings_section_export">ייצא נתונים</string>
