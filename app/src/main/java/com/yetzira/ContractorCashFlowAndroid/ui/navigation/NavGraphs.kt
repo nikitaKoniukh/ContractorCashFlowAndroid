@@ -97,7 +97,9 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
                 onEdit = { id -> navController.navigate(ProjectRoutes.edit(id)) },
                 onOpenClient = { clientName -> navController.navigate(ProjectRoutes.clientDetail(clientName)) },
                 onAddExpense = { navController.navigate(ExpenseRoutes.NEW) },
-                onAddInvoice = { navController.navigate(InvoiceRoutes.NEW) }
+                onAddInvoice = { navController.navigate(InvoiceRoutes.NEW) },
+                onOpenExpense = { expenseId -> navController.navigate(ExpenseRoutes.edit(expenseId)) },
+                onOpenInvoice = { invoiceId -> navController.navigate(InvoiceRoutes.edit(invoiceId)) }
             )
         }
 

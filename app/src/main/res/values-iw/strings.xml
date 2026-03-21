@@ -54,6 +54,11 @@
     <string name="projects_detail_title">פרטי הפרויקט</string>
     <string name="projects_not_found">הפרויקט לא נמצא</string>
     <string name="projects_export">ייצא</string>
+    <string name="projects_export_options_title">אפשרויות ייצוא</string>
+    <string name="projects_export_include_expenses">כלול הוצאות</string>
+    <string name="projects_export_include_invoices">כלול חשבוניות</string>
+    <string name="projects_export_share_button">שתף דוח</string>
+    <string name="projects_export_share_chooser">שיתוף דוח פרויקט</string>
     <string name="projects_add_expense">הוסף הוצאה</string>
     <string name="projects_add_invoice">הוסף חשבונית</string>
     <string name="projects_net_balance">יתרה נקייה</string>

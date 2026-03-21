@@ -1,5 +1,6 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.projects
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,11 +21,14 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Card
@@ -54,6 +58,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.export.ProjectExportService
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -69,7 +74,9 @@ fun ProjectDetailScreen(
     onOpenClient: (String) -> Unit,
     modifier: Modifier = Modifier,
     onAddExpense: () -> Unit = {},
-    onAddInvoice: () -> Unit = {}
+    onAddInvoice: () -> Unit = {},
+    onOpenExpense: (String) -> Unit = {},
+    onOpenInvoice: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
@@ -77,6 +84,10 @@ fun ProjectDetailScreen(
     val state by viewModel.detailUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showMenu by remember { mutableStateOf(false) }
+    var showExportSheet by remember { mutableStateOf(false) }
+    var includeExpensesInExport by remember { mutableStateOf(true) }
+    var includeInvoicesInExport by remember { mutableStateOf(true) }
+    val projectExportService = remember { ProjectExportService() }
     val expenseDeletedMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expense_deleted)
     val invoiceDeletedMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_invoice_deleted)
     val undoLabel = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_undo)
@@ -108,7 +119,10 @@ fun ProjectDetailScreen(
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_export)) },
-                            onClick = { showMenu = false }
+                            onClick = {
+                                showMenu = false
+                                showExportSheet = true
+                            }
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_expense)) },
@@ -139,6 +153,61 @@ fun ProjectDetailScreen(
                     .padding(20.dp)
             )
             return@Scaffold
+        }
+
+        if (showExportSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showExportSheet = false }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_export_options_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    ExportToggleRow(
+                        title = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_export_include_expenses),
+                        checked = includeExpensesInExport,
+                        onCheckedChange = { includeExpensesInExport = it }
+                    )
+                    ExportToggleRow(
+                        title = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_export_include_invoices),
+                        checked = includeInvoicesInExport,
+                        onCheckedChange = { includeInvoicesInExport = it }
+                    )
+                    Button(
+                        onClick = {
+                            val report = projectExportService.generateProjectReport(
+                                project = project,
+                                expenses = state.expenses,
+                                invoices = state.invoices,
+                                includeExpenses = includeExpensesInExport,
+                                includeInvoices = includeInvoicesInExport,
+                                currencyCode = currency.code
+                            )
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, report)
+                            }
+                            context.startActivity(
+                                Intent.createChooser(
+                                    shareIntent,
+                                    context.getString(com.yetzira.ContractorCashFlowAndroid.R.string.projects_export_share_chooser)
+                                )
+                            )
+                            showExportSheet = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_export_share_button))
+                    }
+                }
+            }
         }
 
         LazyColumn(
@@ -231,7 +300,7 @@ fun ProjectDetailScreen(
                         }
                     },
                     content = {
-                        ExpenseRow(expense = expense, currency = currency, onClick = { showMenu = true })
+                        ExpenseRow(expense = expense, currency = currency, onClick = { onOpenExpense(expense.id) })
                     }
                 )
             }
@@ -291,11 +360,31 @@ fun ProjectDetailScreen(
                         }
                     },
                     content = {
-                        InvoiceRow(invoice = invoice, currency = currency, onClick = { showMenu = true })
+                        InvoiceRow(invoice = invoice, currency = currency, onClick = { onOpenInvoice(invoice.id) })
                     }
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ExportToggleRow(
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 

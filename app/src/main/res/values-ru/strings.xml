@@ -48,6 +48,11 @@
     <string name="projects_detail_title">Детали проекта</string>
     <string name="projects_not_found">Проект не найден</string>
     <string name="projects_export">Экспорт</string>
+    <string name="projects_export_options_title">Параметры экспорта</string>
+    <string name="projects_export_include_expenses">Включить расходы</string>
+    <string name="projects_export_include_invoices">Включить счета</string>
+    <string name="projects_export_share_button">Поделиться отчетом</string>
+    <string name="projects_export_share_chooser">Поделиться отчетом проекта</string>
     <string name="projects_add_expense">Добавить расход</string>
     <string name="projects_add_invoice">Добавить счет</string>
     <string name="projects_net_balance">Чистый баланс</string>

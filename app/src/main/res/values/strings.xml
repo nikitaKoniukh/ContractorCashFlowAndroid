@@ -47,6 +47,11 @@
     <string name="projects_detail_title">Project Details</string>
     <string name="projects_not_found">Project not found</string>
     <string name="projects_export">Export</string>
+    <string name="projects_export_options_title">Export options</string>
+    <string name="projects_export_include_expenses">Include expenses</string>
+    <string name="projects_export_include_invoices">Include invoices</string>
+    <string name="projects_export_share_button">Share report</string>
+    <string name="projects_export_share_chooser">Share project report</string>
     <string name="projects_add_expense">Add expense</string>
     <string name="projects_add_invoice">Add invoice</string>
     <string name="projects_net_balance">Net balance</string>

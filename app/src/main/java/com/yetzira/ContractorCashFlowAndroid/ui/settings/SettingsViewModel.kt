@@ -12,7 +12,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
-import com.yetzira.ContractorCashFlowAndroid.export.AppDataSnapshotExporter
+import com.yetzira.ContractorCashFlowAndroid.export.DataExportService
 import com.yetzira.ContractorCashFlowAndroid.network.NetworkConnectivityChecker
 import com.yetzira.ContractorCashFlowAndroid.notification.NotificationSettingsCoordinator
 import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
@@ -30,7 +30,7 @@ class SettingsViewModel(
     private val preferencesRepository: UserPreferencesRepository,
     private val notificationSettingsCoordinator: NotificationSettingsCoordinator,
     private val firestoreSyncService: FirestoreSyncService,
-    private val exporter: AppDataSnapshotExporter,
+    private val exporter: DataExportService,
     private val firebaseAuth: FirebaseAuth,
     private val networkConnectivityChecker: NetworkConnectivityChecker
 ) : ViewModel() {
