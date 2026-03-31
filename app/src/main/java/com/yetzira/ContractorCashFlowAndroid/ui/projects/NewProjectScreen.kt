@@ -115,7 +115,7 @@ fun NewProjectScreen(
                 onValueChange = { budget = formatAmountInput(it) },
                 label = stringResource(R.string.projects_budget),
                 modifier = Modifier.fillMaxWidth(),
-                prefix = { Text(currency.symbol) },
+                suffix = { Text(currency.symbol) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
             )

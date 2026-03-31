@@ -83,7 +83,7 @@ class ProjectExportService {
         SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(timestamp))
 
     private fun formatCurrency(amount: Double, currencyCode: String): String =
-        "$currencyCode ${String.format(Locale.US, "%,.2f", amount)}"
+        "${String.format(Locale.US, "%,.2f", amount)} $currencyCode"
 
     private fun InvoiceEntity.statusLabel(): String {
         val now = System.currentTimeMillis()

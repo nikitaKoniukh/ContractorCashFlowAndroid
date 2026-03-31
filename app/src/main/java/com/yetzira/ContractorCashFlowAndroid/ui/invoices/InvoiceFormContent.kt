@@ -116,7 +116,7 @@ fun InvoiceFormContent(
                         onValueChange = { onStateChange(state.copy(amount = formatAmountInput(it))) },
                         label = stringResource(R.string.invoices_amount),
                         modifier = Modifier.fillMaxWidth(),
-                        prefix = { Text(currency.symbol) },
+                        suffix = { Text(currency.symbol) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true
                     )

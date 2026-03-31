@@ -624,7 +624,7 @@ private fun EmptySection(message: String) {
 }
 
 private fun formatCurrency(amount: Double, currency: CurrencyOption): String {
-    return "${currency.symbol}${String.format(Locale.getDefault(), "%,.2f", amount)}"
+    return "${String.format(Locale.getDefault(), "%,.2f", amount)} ${currency.symbol}"
 }
 
 private fun formatSignedCurrency(amount: Double, currency: CurrencyOption): String {

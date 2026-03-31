@@ -217,7 +217,7 @@ fun ScannedExpenseReviewScreen(
                             onValueChange = { amount = formatAmountInput(it) },
                             label = stringResource(R.string.expenses_form_amount_label),
                             modifier = Modifier.fillMaxWidth(),
-                            prefix = { Text(currency.symbol) },
+                            suffix = { Text(currency.symbol) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             singleLine = true
                         )

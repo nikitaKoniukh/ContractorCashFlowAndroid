@@ -59,9 +59,9 @@ class ProjectExportServiceTest {
         assertTrue(report.contains("KablanPro Project Report"))
         assertTrue(report.contains("Project: Office Build"))
         assertTrue(report.contains("Financial Summary"))
-        assertTrue(report.contains("Total Expenses: ILS 1,250.00"))
-        assertTrue(report.contains("Total Income (Paid): ILS 3,500.00"))
-        assertTrue(report.contains("Balance: ILS 2,250.00"))
+        assertTrue(report.contains("Total Expenses: 1,250.00 ILS"))
+        assertTrue(report.contains("Total Income (Paid): 3,500.00 ILS"))
+        assertTrue(report.contains("Balance: 2,250.00 ILS"))
         assertTrue(report.contains("Expenses"))
         assertTrue(report.contains("Invoices"))
     }

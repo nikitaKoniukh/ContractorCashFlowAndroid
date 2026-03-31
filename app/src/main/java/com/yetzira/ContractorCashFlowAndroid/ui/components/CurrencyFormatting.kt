@@ -40,6 +40,6 @@ fun formatAmountWithGrouping(amount: Double): String {
 }
 
 fun formatCurrencyAmount(amount: Double, currency: CurrencyOption): String {
-    return "${currency.symbol} ${formatAmountWithGrouping(amount)}"
+    return "${formatAmountWithGrouping(amount)} ${currency.symbol}"
 }
 

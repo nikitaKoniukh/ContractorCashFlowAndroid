@@ -35,8 +35,8 @@ class CurrencyFormattingTest {
 
     @Test
     fun `formatCurrencyAmount includes symbol and grouped amount`() {
-        assertEquals("$ 1.000", formatCurrencyAmount(1000.0, CurrencyOption.USD))
-        assertEquals("₪ 1.234", formatCurrencyAmount(1234.0, CurrencyOption.ILS))
+        assertEquals("1.000 $", formatCurrencyAmount(1000.0, CurrencyOption.USD))
+        assertEquals("1.234 ₪", formatCurrencyAmount(1234.0, CurrencyOption.ILS))
     }
 }
 
