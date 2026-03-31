@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
@@ -82,6 +83,7 @@ private fun KablanProNavigationContent(
     val hideShellTopBar = currentRoute in routesWithOwnTopBar
 
     androidx.compose.material3.Scaffold(
+    contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             if (!hideShellTopBar) {
                 KablanProTopBar(

@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.net.Uri
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -79,6 +80,7 @@ fun ScannedExpenseReviewScreen(
     val canSave = description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0
 
     Scaffold(
+    contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.scan_review_title)) },

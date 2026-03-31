@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.expenses
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,6 +47,7 @@ fun ExpensesListScreen(
     var pendingDelete by remember { mutableStateOf<ExpenseListItemUi?>(null) }
 
     Scaffold(
+    contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {

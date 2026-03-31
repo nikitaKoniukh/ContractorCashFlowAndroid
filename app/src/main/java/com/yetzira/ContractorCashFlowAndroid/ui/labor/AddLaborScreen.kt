@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.labor
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,6 +36,7 @@ fun AddLaborScreen(
     }
 
     Scaffold(
+    contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
