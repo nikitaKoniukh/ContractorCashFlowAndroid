@@ -1,5 +1,15 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.ui.graphics.vector.ImageVector
+
 sealed class NavigationRoute(val route: String) {
     object Projects : NavigationRoute("projects")
     object Expenses : NavigationRoute("expenses")
@@ -13,55 +23,55 @@ sealed class NavigationRoute(val route: String) {
 enum class TabDestination(
     val route: String,
     val label: Int,
-    val icon: Int,
+    val icon: ImageVector,
     val description: Int
 ) {
     PROJECTS(
         route = "projects",
         label = com.yetzira.ContractorCashFlowAndroid.R.string.tab_projects,
-        icon = android.R.drawable.ic_dialog_info,
+        icon = Icons.Default.Folder,
         description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_projects_description
     ),
     EXPENSES(
         route = "expenses",
         label = com.yetzira.ContractorCashFlowAndroid.R.string.tab_expenses,
-        icon = android.R.drawable.ic_dialog_info,
+        icon = Icons.Default.AttachMoney,
         description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_expenses_description
     ),
     INVOICES(
         route = "invoices",
         label = com.yetzira.ContractorCashFlowAndroid.R.string.tab_invoices,
-        icon = android.R.drawable.ic_dialog_info,
+        icon = Icons.Default.Description,
         description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_invoices_description
     ),
     LABOR(
         route = "labor",
         label = com.yetzira.ContractorCashFlowAndroid.R.string.tab_labor,
-        icon = android.R.drawable.ic_dialog_info,
+        icon = Icons.Default.Groups,
         description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_labor_description
     ),
     CLIENTS(
         route = "clients",
         label = com.yetzira.ContractorCashFlowAndroid.R.string.tab_clients,
-        icon = android.R.drawable.ic_dialog_info,
+        icon = Icons.Default.People,
         description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_clients_description
     ),
     ANALYTICS(
         route = "analytics",
         label = com.yetzira.ContractorCashFlowAndroid.R.string.tab_analytics,
-        icon = android.R.drawable.ic_dialog_info,
+        icon = Icons.Default.BarChart,
         description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_analytics_description
     ),
     SETTINGS(
         route = "settings",
         label = com.yetzira.ContractorCashFlowAndroid.R.string.tab_settings,
-        icon = android.R.drawable.ic_menu_preferences,
+        icon = Icons.Default.Settings,
         description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_settings_description
     );
 
     companion object {
         fun fromRoute(route: String?): TabDestination? =
-            values().find { it.route == route }
+            entries.find { it.route == route }
     }
 }
 

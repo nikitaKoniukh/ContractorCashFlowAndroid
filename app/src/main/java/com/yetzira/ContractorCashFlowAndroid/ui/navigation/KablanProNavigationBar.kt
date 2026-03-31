@@ -6,7 +6,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 
 @Composable
@@ -16,15 +15,14 @@ fun KablanProNavigationBar(
     modifier: Modifier = Modifier
 ) {
     NavigationBar(modifier = modifier) {
-        TabDestination.values().forEach { tab ->
+        TabDestination.entries.forEach { tab ->
             NavigationBarItem(
                 selected = selectedTab == tab,
                 onClick = { onTabSelected(tab) },
                 icon = {
                     Icon(
-                        painter = painterResource(id = tab.icon),
-                        contentDescription = stringResource(id = tab.description),
-                        modifier = Modifier
+                        imageVector = tab.icon,
+                        contentDescription = stringResource(id = tab.description)
                     )
                 },
                 label = {

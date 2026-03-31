@@ -101,6 +101,8 @@ class ExpenseViewModel(
                     workerId = editableExpense.workerId,
                     unitsWorked = editableExpense.unitsWorked?.toString().orEmpty(),
                     laborTypeSnapshot = LaborType.fromString(editableExpense.laborTypeSnapshot),
+                    notes = editableExpense.notes.orEmpty(),
+                    receiptImageUri = editableExpense.receiptImageUri,
                     projects = activeProjects,
                     workers = workerOptions
                 )
@@ -174,7 +176,9 @@ class ExpenseViewModel(
                 projectId = state.projectId,
                 workerId = state.workerId,
                 unitsWorked = state.unitsWorked.toDoubleOrNull(),
-                laborTypeSnapshot = state.laborTypeSnapshot?.name
+                laborTypeSnapshot = state.laborTypeSnapshot?.name,
+                notes = state.notes.ifBlank { null },
+                receiptImageUri = state.receiptImageUri
             )
 
             if (state.expenseId == null) {

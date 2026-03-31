@@ -307,6 +307,24 @@
     <string name="clients_screen_detail_title">Сведения о клиенте</string>
     <string name="clients_screen_edit_title">Изменить клиента</string>
     <string name="clients_list_search">Поиск по имени, электронной почте или телефону</string>
+
+    <!-- Scan / Receipt Strings -->
+    <string name="scan_title">Сканировать чек</string>
+    <string name="scan_description">Сканируйте чек или выберите изображение для автоматического извлечения данных расхода.</string>
+    <string name="scan_document">Сканировать документ</string>
+    <string name="scan_document_subtitle">Используйте камеру для съёмки чека</string>
+    <string name="scan_photos">Выбрать из фотографий</string>
+    <string name="scan_photos_subtitle">Выберите изображение из галереи</string>
+    <string name="scan_files">Выбрать из файлов</string>
+    <string name="scan_files_subtitle">Откройте изображение или PDF из файлов</string>
+    <string name="scan_capture">Снять</string>
+    <string name="scan_processing">Анализ чека…</string>
+    <string name="scan_review_title">Проверка расхода</string>
+    <string name="scan_receipt_image">Изображение чека</string>
+    <string name="scan_receipt_attached">Чек прикреплён</string>
+    <string name="scan_receipt_hint">Извлечённые данные — проверьте и отредактируйте перед сохранением</string>
+    <string name="scan_notes_label">Заметки</string>
+    <string name="expenses_form_notes_label">Заметки (необязательно)</string>
 </resources>
 
 

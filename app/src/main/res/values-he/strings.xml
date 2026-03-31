@@ -307,6 +307,24 @@
     <string name="clients_screen_detail_title">פרטי לקוח</string>
     <string name="clients_screen_edit_title">ערוך לקוח</string>
     <string name="clients_list_search">חפש לפי שם, דוא"ל או טלפון</string>
+
+    <!-- Scan / Receipt Strings -->
+    <string name="scan_title">סריקת קבלה</string>
+    <string name="scan_description">סרוק קבלה או בחר תמונה כדי לחלץ פרטי הוצאה באופן אוטומטי.</string>
+    <string name="scan_document">סרוק מסמך</string>
+    <string name="scan_document_subtitle">השתמש במצלמה כדי לצלם קבלה</string>
+    <string name="scan_photos">בחר מהתמונות</string>
+    <string name="scan_photos_subtitle">בחר תמונה מהגלריה</string>
+    <string name="scan_files">בחר מקבצים</string>
+    <string name="scan_files_subtitle">פתח תמונה או PDF מהקבצים שלך</string>
+    <string name="scan_capture">צלם</string>
+    <string name="scan_processing">מנתח קבלה…</string>
+    <string name="scan_review_title">סקירת הוצאה</string>
+    <string name="scan_receipt_image">תמונת קבלה</string>
+    <string name="scan_receipt_attached">קבלה מצורפת</string>
+    <string name="scan_receipt_hint">נתונים שחולצו — בדוק וערוך לפני שמירה</string>
+    <string name="scan_notes_label">הערות</string>
+    <string name="expenses_form_notes_label">הערות (אופציונלי)</string>
 </resources>
 
 

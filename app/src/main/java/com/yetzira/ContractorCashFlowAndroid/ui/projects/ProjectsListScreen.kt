@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -87,7 +88,7 @@ fun ProjectsListScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateProject) {
                 Icon(
-                    painter = painterResource(android.R.drawable.ic_input_add),
+                    imageVector = Icons.Default.Add,
                     contentDescription = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_new_project)
                 )
             }
@@ -211,7 +212,7 @@ private fun EmptyProjectsState(
         )
         FloatingActionButton(onClick = onCreateProject) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_input_add),
+                imageVector = Icons.Default.Add,
                 contentDescription = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_new_project)
             )
         }
@@ -234,7 +235,7 @@ private fun ProjectCard(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 7.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -263,20 +264,31 @@ private fun ProjectCard(
                     if (item.project.isActive) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(Color(0xFFD4F5DC))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                .clip(CircleShape)
+                                .background(IncomeGreen.copy(alpha = 0.15f))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
                         ) {
                             Text(
                                 text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_active),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF1B7A35),
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.sp
+                                style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
+                                color = IncomeGreen,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     } else {
-                        Spacer(modifier = Modifier.width(1.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color(0xFF8E8E93).copy(alpha = 0.15f))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_inactive),
+                                style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
+                                color = Color(0xFF8E8E93),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
 

@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.CardDefaults
@@ -69,7 +70,7 @@ fun ClientsListScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = onCreate) {
                 Icon(
-                    painter = painterResource(android.R.drawable.ic_input_add),
+                    imageVector = Icons.Default.Add,
                     contentDescription = "New Client"
                 )
             }

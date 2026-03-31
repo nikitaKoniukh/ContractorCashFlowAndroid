@@ -46,6 +46,8 @@ data class ExpenseFormUiState(
     val workerId: String? = null,
     val unitsWorked: String = "",
     val laborTypeSnapshot: LaborType? = null,
+    val notes: String = "",
+    val receiptImageUri: String? = null,
     val projects: List<ProjectEntity> = emptyList(),
     val workers: List<WorkerOptionUi> = emptyList(),
     val isAmountReadOnly: Boolean = false,

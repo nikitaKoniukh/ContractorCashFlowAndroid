@@ -10,22 +10,22 @@ enum class ExpenseCategory(
 ) {
     MATERIALS(
         displayName = "חומרים",
-        chartColor = 0xFF6C63FF.toInt(),
+        chartColor = 0xFF007AFF.toInt(),   // MaterialsBlue
         iconResId = android.R.drawable.ic_dialog_info
     ),
     LABOR(
         displayName = "עבודה",
-        chartColor = 0xFF00B4D8.toInt(),
+        chartColor = 0xFFFF9500.toInt(),   // LaborOrange
         iconResId = android.R.drawable.ic_dialog_info
     ),
     EQUIPMENT(
         displayName = "ציוד",
-        chartColor = 0xFFFFA500.toInt(),
+        chartColor = 0xFF8E8E93.toInt(),   // EquipmentGray
         iconResId = android.R.drawable.ic_dialog_info
     ),
     MISC(
         displayName = "אחר",
-        chartColor = 0xFF90EE90.toInt(),
+        chartColor = 0xFFAF52DE.toInt(),   // MiscPurple
         iconResId = android.R.drawable.ic_dialog_info
     );
 

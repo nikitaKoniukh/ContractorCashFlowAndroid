@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -840,10 +841,11 @@ private fun StatusBadge(active: Boolean) {
     val label = if (active) stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_active) else stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_inactive)
     Text(
         text = label,
-        color = Color.White,
+        color = color,
+        style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
         modifier = Modifier
-            .background(color, MaterialTheme.shapes.small)
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .background(color.copy(alpha = 0.15f), CircleShape)
+            .padding(horizontal = 8.dp, vertical = 3.dp)
     )
 }
 
@@ -857,11 +859,11 @@ private fun InvoiceStatusBadge(invoice: InvoiceEntity) {
     }
     Text(
         text = label,
-        color = Color.White,
-        style = MaterialTheme.typography.labelSmall,
+        color = color,
+        style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
         modifier = Modifier
-            .background(color, MaterialTheme.shapes.small)
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .background(color.copy(alpha = 0.15f), CircleShape)
+            .padding(horizontal = 8.dp, vertical = 3.dp)
     )
 }
 

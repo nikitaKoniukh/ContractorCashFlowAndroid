@@ -1,37 +1,59 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
-import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProShapes
-import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProSpacing
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import com.yetzira.ContractorCashFlowAndroid.ui.theme.LabelSmallSemibold
 
 /**
- * StatPill - Small metric display with value and label
- * Usage: StatPill(value = "₪5,000", label = "Revenue", backgroundColor = Color.Green)
+ * StatPill — Capsule metric display with icon + bold value + label.
+ * Matches ANDROID_UI_GUIDE §7: Stat Pill Pattern.
+ *
+ * Example: StatPill("8", "hours", Icons.Default.Schedule, HourlyTeal)
  */
 @Composable
 fun StatPill(
     value: String,
     label: String,
-    backgroundColor: Color,
-    textColor: Color = Color.White,
+    icon: ImageVector? = null,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .background(backgroundColor, shape = KablanProShapes.medium)
-            .padding(KablanProSpacing.md)
+            .background(color.copy(alpha = 0.10f), shape = CircleShape)
+            .padding(horizontal = 10.dp, vertical = 5.dp)
     ) {
+        icon?.let {
+            Icon(
+                imageVector = it,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(12.dp)
+            )
+        }
         Text(
-            text = "$value\n$label",
-            color = textColor,
-            fontSize = 12.sp
+            text = value,
+            style = LabelSmallSemibold
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

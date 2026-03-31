@@ -1,14 +1,19 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 
 import android.net.Uri
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.yetzira.ContractorCashFlowAndroid.ui.scan.ScanExpenseScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.scan.ScannedExpenseReviewScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsViewModelFactory
@@ -144,7 +149,8 @@ fun NavGraphBuilder.expensesGraph(navController: NavController) {
             ExpensesListScreen(
                 viewModel = viewModel,
                 onCreateExpense = { navController.navigate(ExpenseRoutes.NEW) },
-                onEditExpense = { expenseId -> navController.navigate(ExpenseRoutes.edit(expenseId)) }
+                onEditExpense = { expenseId -> navController.navigate(ExpenseRoutes.edit(expenseId)) },
+                onScanReceipt = { navController.navigate(ExpenseRoutes.SCAN) }
             )
         }
 
@@ -169,6 +175,39 @@ fun NavGraphBuilder.expensesGraph(navController: NavController) {
             EditExpenseScreen(
                 expenseId = expenseId,
                 viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(ExpenseRoutes.SCAN) {
+            ScanExpenseScreen(
+                onImageCaptured = { uri ->
+                    val encodedUri = Uri.encode(uri.toString())
+                    navController.navigate(ExpenseRoutes.scanReview(encodedUri))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = ExpenseRoutes.SCAN_REVIEW,
+            arguments = listOf(navArgument("imageUri") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val db = remember { AppDatabase.getInstance(context) }
+            val imageUriStr = Uri.decode(backStackEntry.arguments?.getString("imageUri").orEmpty())
+            val imageUri = Uri.parse(imageUriStr)
+            val activeProjects by db.projectDao().getAll().collectAsState(initial = emptyList())
+
+            ScannedExpenseReviewScreen(
+                imageUri = imageUri,
+                activeProjects = activeProjects.filter { it.isActive },
+                onSave = { expense ->
+                    kotlinx.coroutines.MainScope().launch {
+                        db.expenseDao().insert(expense)
+                        navController.popBackStack(ExpenseRoutes.LIST, inclusive = false)
+                    }
+                },
                 onBack = { navController.popBackStack() }
             )
         }

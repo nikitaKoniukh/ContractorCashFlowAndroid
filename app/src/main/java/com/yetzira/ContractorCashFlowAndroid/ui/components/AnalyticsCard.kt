@@ -23,12 +23,13 @@ fun AnalyticsCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
             contentColor = contentColor
         )
     ) {
-        Column(modifier = Modifier.padding(12.dp), content = content)
+        Column(modifier = Modifier.padding(16.dp), content = content)
     }
 }
 

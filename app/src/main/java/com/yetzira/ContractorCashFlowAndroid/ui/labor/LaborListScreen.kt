@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -66,7 +67,7 @@ fun LaborListScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = onAdd) {
                 Icon(
-                    painter = painterResource(android.R.drawable.ic_input_add),
+                    imageVector = Icons.Default.Add,
                     contentDescription = "Add Worker"
                 )
             }
@@ -234,10 +235,14 @@ private fun WorkerCard(worker: WorkerMetricsUi, onClick: () -> Unit) {
                 Text(text = worker.worker.workerName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(
                     text = worker.laborType?.name ?: "Unknown",
-                    color = Color.White,
+                    color = com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors.WorkerPurple,
+                    style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small)
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                        .background(
+                            com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors.WorkerPurple.copy(alpha = 0.15f),
+                            androidx.compose.foundation.shape.CircleShape
+                        )
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
                 )
             }
 

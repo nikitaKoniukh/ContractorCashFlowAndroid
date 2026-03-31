@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -76,15 +81,15 @@ fun ClientDetailScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            ContactRow(android.R.drawable.ic_menu_myplaces, client.name)
+            ContactRow(Icons.Default.Person, client.name)
             if (!client.email.isNullOrBlank()) {
-                ContactRow(android.R.drawable.ic_dialog_email, client.email)
+                ContactRow(Icons.Default.Email, client.email)
             }
             if (!client.phone.isNullOrBlank()) {
-                ContactRow(android.R.drawable.ic_menu_call, client.phone)
+                ContactRow(Icons.Default.Phone, client.phone)
             }
             if (!client.address.isNullOrBlank()) {
-                ContactRow(android.R.drawable.ic_menu_mylocation, client.address)
+                ContactRow(Icons.Default.LocationOn, client.address)
             }
 
             if (!client.notes.isNullOrBlank()) {
@@ -100,14 +105,14 @@ fun ClientDetailScreen(
 }
 
 @Composable
-private fun ContactRow(iconRes: Int, value: String) {
+private fun ContactRow(icon: androidx.compose.ui.graphics.vector.ImageVector, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         androidx.compose.material3.Icon(
-            painter = painterResource(iconRes),
+            imageVector = icon,
             contentDescription = null
         )
         Text(text = value)

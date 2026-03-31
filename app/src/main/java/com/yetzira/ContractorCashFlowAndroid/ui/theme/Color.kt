@@ -2,10 +2,18 @@ package com.yetzira.ContractorCashFlowAndroid.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// ── Light theme primary (BudgetBlue-based) ──
+val BudgetBlue = Color(0xFF007AFF)
+val BudgetBlueDark = Color(0xFF409CFF)
+val OnBluePrimary = Color.White
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// ── Secondary tones ──
+val SecondaryLight = Color(0xFF8E8E93)
+val SecondaryDark = Color(0xFFAEAEB2)
+
+// ── Tertiary tones ──
+val TertiaryLight = Color(0xFF30B0C7)
+val TertiaryDark = Color(0xFF5AC8FA)
+
+// ── Pro / Crown accent ──
+val ProGold = Color(0xFFFFD60A)

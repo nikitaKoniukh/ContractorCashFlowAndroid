@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Card
@@ -82,7 +83,7 @@ fun InvoicesListScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = onCreate) {
                 Icon(
-                    painter = painterResource(android.R.drawable.ic_input_add),
+                    imageVector = Icons.Default.Add,
                     contentDescription = "New Invoice"
                 )
             }
@@ -214,7 +215,7 @@ private fun EmptyInvoicesState(onCreate: () -> Unit) {
         )
         FloatingActionButton(onClick = onCreate) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_input_add),
+                imageVector = Icons.Default.Add,
                 contentDescription = "New Invoice"
             )
         }
@@ -310,11 +311,11 @@ private fun InvoiceStatusBadge(isPaid: Boolean, isOverdue: Boolean) {
     }
     Text(
         text = label,
-        color = Color.White,
-        style = MaterialTheme.typography.labelSmall,
+        color = color,
+        style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
         modifier = Modifier
-            .background(color, MaterialTheme.shapes.small)
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .background(color.copy(alpha = 0.15f), androidx.compose.foundation.shape.CircleShape)
+            .padding(horizontal = 8.dp, vertical = 3.dp)
     )
 }
 

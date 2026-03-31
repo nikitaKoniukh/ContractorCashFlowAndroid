@@ -103,6 +103,7 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+    implementation("com.google.guava:guava:32.1.3-android")
 
     // Kotlinx Coroutines Play Services
     implementation(libs.kotlinx.coroutines.play.services)

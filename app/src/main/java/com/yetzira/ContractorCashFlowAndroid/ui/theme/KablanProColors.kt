@@ -13,19 +13,12 @@ object KablanProColors {
     val WorkerPurple = Color(0xFFAF52DE)
     val BudgetBlue = Color(0xFF007AFF)
     val InactiveGray = Color(0xFF8E8E93)
+    val ProGold = Color(0xFFFFD60A)
     
-    // Expense category colors (matching ExpenseCategory enum)
-    val MaterialsPurple = Color(0xFF6C63FF)
-    val LaborCyan = Color(0xFF00B4D8)
-    val EquipmentOrange = Color(0xFFFFA500)
-    val MiscGreen = Color(0xFF90EE90)
-    
-    // Neutral colors
-    val Black = Color(0xFF000000)
-    val White = Color(0xFFFFFFFF)
-    val DarkGray = Color(0xFF333333)
-    val MediumGray = Color(0xFF666666)
-    val LightGray = Color(0xFFCCCCCC)
-    val VeryLightGray = Color(0xFFF5F5F5)
+    // Expense category colors (per ANDROID_UI_GUIDE)
+    val MaterialsBlue = Color(0xFF007AFF)
+    val LaborOrange = Color(0xFFFF9500)
+    val EquipmentGray = Color(0xFF8E8E93)
+    val MiscPurple = Color(0xFFAF52DE)
 }
 

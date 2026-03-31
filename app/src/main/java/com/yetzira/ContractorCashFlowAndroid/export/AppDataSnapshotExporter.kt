@@ -132,6 +132,8 @@ private data class ExportExpense(
     val workerId: String?,
     val unitsWorked: Double?,
     val laborTypeSnapshot: String?,
+    val notes: String?,
+    val receiptImageUri: String?,
     val lastModified: String
 )
 
@@ -167,6 +169,8 @@ private fun ExpenseEntity.toExportExpense(): ExportExpense = ExportExpense(
     workerId = workerId,
     unitsWorked = unitsWorked,
     laborTypeSnapshot = laborTypeSnapshot,
+    notes = notes,
+    receiptImageUri = receiptImageUri,
     lastModified = lastModified.toIso8601()
 )
 

@@ -132,14 +132,13 @@ fun PaywallScreen(
             Icon(
                 imageVector = Icons.Default.Star,
                 contentDescription = null,
-                tint = Color(0xFFFFCC00),
-                modifier = Modifier.size(64.dp)
+                tint = com.yetzira.ContractorCashFlowAndroid.ui.theme.ProGold,
+                modifier = Modifier.size(60.dp)
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "Upgrade to Pro",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
+                style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BalanceTextStyle
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

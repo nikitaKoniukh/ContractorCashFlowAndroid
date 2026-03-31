@@ -306,4 +306,22 @@
     <string name="clients_screen_detail_title">Client Details</string>
     <string name="clients_screen_edit_title">Edit Client</string>
     <string name="clients_list_search">Search by name, email, or phone</string>
+
+    <!-- Scan / Receipt Strings -->
+    <string name="scan_title">Scan Receipt</string>
+    <string name="scan_description">Scan a receipt or choose an image to automatically extract expense details.</string>
+    <string name="scan_document">Scan Document</string>
+    <string name="scan_document_subtitle">Use the camera to capture a receipt</string>
+    <string name="scan_photos">Choose from Photos</string>
+    <string name="scan_photos_subtitle">Select an image from your gallery</string>
+    <string name="scan_files">Choose from Files</string>
+    <string name="scan_files_subtitle">Open an image or PDF from your files</string>
+    <string name="scan_capture">Capture</string>
+    <string name="scan_processing">Analyzing receipt…</string>
+    <string name="scan_review_title">Review Expense</string>
+    <string name="scan_receipt_image">Receipt image</string>
+    <string name="scan_receipt_attached">Receipt attached</string>
+    <string name="scan_receipt_hint">Extracted data — review and edit before saving</string>
+    <string name="scan_notes_label">Notes</string>
+    <string name="expenses_form_notes_label">Notes (optional)</string>
 </resources>

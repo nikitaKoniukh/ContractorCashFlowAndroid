@@ -21,6 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DocumentScanner
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
@@ -35,6 +37,7 @@ fun ExpensesListScreen(
     viewModel: ExpenseViewModel,
     onCreateExpense: () -> Unit,
     onEditExpense: (String) -> Unit,
+    onScanReceipt: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.listUiState.collectAsState()
@@ -46,11 +49,25 @@ fun ExpensesListScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(onClick = onCreateExpense) {
-                Icon(
-                    painter = painterResource(android.R.drawable.ic_input_add),
-                    contentDescription = "New Expense"
-                )
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                SmallFloatingActionButton(
+                    onClick = onScanReceipt,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ) {
+                    Icon(
+                        Icons.Default.DocumentScanner,
+                        contentDescription = stringResource(R.string.scan_title)
+                    )
+                }
+                FloatingActionButton(onClick = onCreateExpense) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "New Expense"
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -186,7 +203,7 @@ private fun EmptyExpensesState(onCreateExpense: () -> Unit, modifier: Modifier =
         )
         FloatingActionButton(onClick = onCreateExpense) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_input_add),
+                imageVector = Icons.Default.Add,
                 contentDescription = "New Expense"
             )
         }
@@ -230,15 +247,20 @@ private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                val categoryColor = com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
+                    .fromString(item.expense.category)?.let {
+                        Color(it.chartColor)
+                    } ?: MaterialTheme.colorScheme.primary
+                
                 Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(20.dp)
+                    color = categoryColor.copy(alpha = 0.15f),
+                    shape = androidx.compose.foundation.shape.CircleShape
                 ) {
                     Text(
                         text = item.expense.category,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
+                        color = categoryColor
                     )
                 }
 

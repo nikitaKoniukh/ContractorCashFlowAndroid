@@ -39,6 +39,8 @@ data class ExpenseEntity(
     val workerId: String? = null,
     val unitsWorked: Double? = null,
     val laborTypeSnapshot: String? = null,
+    val notes: String? = null,
+    val receiptImageUri: String? = null,
     val lastModified: Long = System.currentTimeMillis()
 )
 

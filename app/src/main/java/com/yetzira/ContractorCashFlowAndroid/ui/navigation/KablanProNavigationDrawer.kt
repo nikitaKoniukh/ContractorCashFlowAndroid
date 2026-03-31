@@ -10,7 +10,6 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
@@ -34,7 +33,7 @@ fun KablanProNavigationDrawer(
                 label = { Text(text = stringResource(id = tab.label)) },
                 icon = {
                     Icon(
-                        painter = painterResource(id = tab.icon),
+                        imageVector = tab.icon,
                         contentDescription = stringResource(id = tab.description)
                     )
                 },
