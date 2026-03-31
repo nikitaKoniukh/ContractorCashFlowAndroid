@@ -191,6 +191,7 @@ class InvoiceViewModelTest {
         data class Scheduled(
             val invoiceId: String,
             val clientName: String,
+            val amount: Double,
             val dueDate: Long,
             val isPaid: Boolean,
             val invoiceRemindersEnabled: Boolean,
@@ -203,6 +204,7 @@ class InvoiceViewModelTest {
         override fun schedule(
             invoiceId: String,
             clientName: String,
+            amount: Double,
             dueDate: Long,
             isPaid: Boolean,
             invoiceRemindersEnabled: Boolean,
@@ -211,6 +213,7 @@ class InvoiceViewModelTest {
             scheduled += Scheduled(
                 invoiceId,
                 clientName,
+                amount,
                 dueDate,
                 isPaid,
                 invoiceRemindersEnabled,

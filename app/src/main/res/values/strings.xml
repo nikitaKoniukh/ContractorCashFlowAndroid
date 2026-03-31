@@ -239,6 +239,27 @@
     <string name="settings_status_export_success">Data exported successfully</string>
     <string name="settings_status_export_failed">Export failed</string>
     <string name="settings_status_notifications_updated">Notification settings updated</string>
+    <string name="settings_notifications_footer">These preferences are stored locally on this device.</string>
+
+    <!-- Notification Explanation Dialogs -->
+    <string name="notif_dialog_cancel">Cancel</string>
+    <string name="notif_dialog_allow">Allow</string>
+    <string name="notif_dialog_invoice_reminders_title">Invoice Reminders</string>
+    <string name="notif_dialog_invoice_reminders_message">We\'ll send you timely reminders about upcoming invoice due dates, so you never miss a payment deadline.</string>
+    <string name="notif_dialog_overdue_alerts_title">Overdue Alerts</string>
+    <string name="notif_dialog_overdue_alerts_message">Get notified when invoices become overdue, helping you maintain good client relationships and cash flow.</string>
+    <string name="notif_dialog_budget_warnings_title">Budget Warnings</string>
+    <string name="notif_dialog_budget_warnings_message">Receive alerts when project expenses approach or exceed your budget limits, keeping your finances on track.</string>
+
+    <!-- Localized Push Notification Banners -->
+    <string name="notif_invoice_due_soon_title">Invoice Due Soon</string>
+    <string name="notif_invoice_due_soon_body">Invoice for %1$s (%2$s) is due in 3 days</string>
+    <string name="notif_invoice_overdue_title">Invoice Overdue</string>
+    <string name="notif_invoice_overdue_body">Invoice for %1$s (%2$s) is now overdue</string>
+    <string name="notif_budget_warning_80_title">Budget Warning: 80%%</string>
+    <string name="notif_budget_warning_80_body">Project \'%1$s\' has reached 80%% of budget (%2$s of %3$s)</string>
+    <string name="notif_budget_alert_100_title">Budget Alert: 100%%</string>
+    <string name="notif_budget_alert_100_body">Project \'%1$s\' has exceeded budget! Spent %2$s of %3$s</string>
 
     <!-- Paywall Strings -->
     <string name="paywall_title">Upgrade to KablanPro Pro</string>

@@ -240,6 +240,27 @@
     <string name="settings_status_export_success">Данные успешно экспортированы</string>
     <string name="settings_status_export_failed">Ошибка экспорта</string>
     <string name="settings_status_notifications_updated">Настройки уведомлений обновлены</string>
+    <string name="settings_notifications_footer">Эти настройки сохраняются локально на устройстве.</string>
+
+    <!-- Notification Explanation Dialogs -->
+    <string name="notif_dialog_cancel">Отмена</string>
+    <string name="notif_dialog_allow">Разрешить</string>
+    <string name="notif_dialog_invoice_reminders_title">Напоминания о счетах</string>
+    <string name="notif_dialog_invoice_reminders_message">Мы будем отправлять вам своевременные напоминания о предстоящих сроках оплаты счетов, чтобы вы никогда не пропустили дедлайн.</string>
+    <string name="notif_dialog_overdue_alerts_title">Оповещения о просрочке</string>
+    <string name="notif_dialog_overdue_alerts_message">Получайте уведомления, когда счета становятся просроченными, помогая поддерживать хорошие отношения с клиентами и денежный поток.</string>
+    <string name="notif_dialog_budget_warnings_title">Предупреждения о бюджете</string>
+    <string name="notif_dialog_budget_warnings_message">Получайте предупреждения, когда расходы по проекту приближаются к бюджетным лимитам или превышают их, поддерживая финансы под контролем.</string>
+
+    <!-- Localized Push Notification Banners -->
+    <string name="notif_invoice_due_soon_title">Счёт скоро к оплате</string>
+    <string name="notif_invoice_due_soon_body">Счёт для %1$s (%2$s) подлежит оплате через 3 дня</string>
+    <string name="notif_invoice_overdue_title">Счёт просрочен</string>
+    <string name="notif_invoice_overdue_body">Счёт для %1$s (%2$s) просрочен</string>
+    <string name="notif_budget_warning_80_title">Предупреждение: 80%% бюджета</string>
+    <string name="notif_budget_warning_80_body">Проект \'%1$s\' достиг 80%% бюджета (%2$s из %3$s)</string>
+    <string name="notif_budget_alert_100_title">Внимание: 100%% бюджета</string>
+    <string name="notif_budget_alert_100_body">Проект \'%1$s\' превысил бюджет! Потрачено %2$s из %3$s</string>
 
     <!-- Paywall Strings -->
     <string name="paywall_title">Перейти на KablanPro Pro</string>

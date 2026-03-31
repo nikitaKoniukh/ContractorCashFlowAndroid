@@ -23,9 +23,9 @@ data class SettingsUiState(
     val selectedLanguage: AppLanguageOption = AppLanguageOption.HEBREW,
     val selectedThemeMode: ThemeModeOption = ThemeModeOption.SYSTEM,
     val selectedCurrency: CurrencyOption = CurrencyOption.ILS,
-    val invoiceRemindersEnabled: Boolean = true,
-    val overdueAlertsEnabled: Boolean = true,
-    val budgetWarningsEnabled: Boolean = true,
+    val invoiceRemindersEnabled: Boolean = false,
+    val overdueAlertsEnabled: Boolean = false,
+    val budgetWarningsEnabled: Boolean = false,
     val subscription: SubscriptionUiState = SubscriptionUiState(),
     val cloudSyncState: CloudSyncState = CloudSyncState.IDLE,
     val statusMessage: String? = null

@@ -57,6 +57,11 @@ data class ExpenseFormUiState(
 sealed class ExpenseSaveResult {
     data object None : ExpenseSaveResult()
     data object Saved : ExpenseSaveResult()
-    data class BudgetWarning(val utilizationPercent: Int) : ExpenseSaveResult()
+    data class BudgetWarning(
+        val utilizationPercent: Int,
+        val projectName: String = "",
+        val totalExpenses: Double = 0.0,
+        val budget: Double = 0.0
+    ) : ExpenseSaveResult()
 }
 

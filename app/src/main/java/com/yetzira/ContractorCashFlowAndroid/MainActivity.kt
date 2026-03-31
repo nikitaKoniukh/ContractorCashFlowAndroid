@@ -27,8 +27,12 @@ import kotlinx.coroutines.runBlocking
 class MainActivity : AppCompatActivity() {
 
     /**
-     * Called before onCreate() — the earliest point to apply locale so that
-     * every resource lookup in this Activity uses the correct language.
+     * Called before onCreate().
+     * Always inject the locale from SharedPreferences so the very first
+     * frame renders in the correct language.  On Android 13+ the system
+     * per-app locale is ALSO set (by KablanProApplication), but it may
+     * not propagate in time for this first attachBaseContext call.
+     * Both mechanisms agree on the same language, so there is no conflict.
      */
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.applyLocale(newBase))
@@ -37,34 +41,45 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Sync DataStore → SharedPreferences so attachBaseContext always
-        // has the latest user preference on the next recreate / cold start.
         val preferencesRepo = UserPreferencesRepository(this)
         val themeMode = runBlocking { preferencesRepo.themeMode.first() }
         AppCompatDelegate.setDefaultNightMode(themeMode.nightModeValue)
 
         val language = runBlocking { preferencesRepo.appLanguage.first() }
+
+        // Keep SharedPreferences in sync with DataStore for attachBaseContext (pre-13).
         val savedCode = LocaleHelper.getSavedLanguage(this)
         if (language.code != savedCode) {
-            // First launch after install/migration — sync and recreate once.
-            Log.d("KablanProLocale", "Syncing locale DataStore=${language.code} prefs=$savedCode — recreating")
+            Log.d(TAG, "Syncing locale DataStore=${language.code} prefs=$savedCode — recreating")
             LocaleHelper.saveLanguage(this, language.code)
             recreate()
             return
         }
 
-        // Read and apply persisted locale during startup.
-        val localeList = LocaleListCompat.forLanguageTags(language.code)
-        AppCompatDelegate.setApplicationLocales(localeList)
-        Log.d("KablanProLocale", "Restored locale code=${language.code}")
+        // Ensure AppCompat per-app locale matches our preference.
+        // On first launch this was already set by KablanProApplication,
+        // but on subsequent launches we still need to keep it in sync
+        // (e.g. user changed language in Settings).
+        val currentTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+        val desiredTag = language.code
+        if (!currentTag.equals(desiredTag, ignoreCase = true)) {
+            Log.d(TAG, "Updating AppCompat locale: '$currentTag' → '$desiredTag'")
+            AppCompatDelegate.setApplicationLocales(
+                LocaleListCompat.forLanguageTags(desiredTag)
+            )
+            // This may trigger Activity recreation — the rest of onCreate
+            // won't execute, but will on the next pass.
+            return
+        }
 
+        Log.d(TAG, "Locale correct: $desiredTag")
 
         if (BuildConfig.DEBUG) {
             val apps = FirebaseApp.getApps(this)
             val projectIds = apps.mapNotNull { it.options.projectId }
             Log.d("KablanProFirebase", "Initialized=${apps.isNotEmpty()} projects=$projectIds")
         }
-        
+
         enableEdgeToEdge()
         setContent {
             KablanProTheme {
@@ -82,5 +97,9 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             PurchaseManagerProvider.getInstance(applicationContext).checkCurrentEntitlements()
         }
+    }
+
+    companion object {
+        private const val TAG = "KablanProLocale"
     }
 }

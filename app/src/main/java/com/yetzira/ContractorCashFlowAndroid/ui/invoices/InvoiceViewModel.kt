@@ -164,6 +164,7 @@ class InvoiceViewModel(
                 notificationScheduler.schedule(
                     invoiceId = invoice.id,
                     clientName = invoice.clientName,
+                    amount = invoice.amount,
                     dueDate = invoice.dueDate,
                     isPaid = invoice.isPaid,
                     invoiceRemindersEnabled = invoiceRemindersEnabled,
@@ -202,6 +203,7 @@ class InvoiceViewModel(
                 notificationScheduler.schedule(
                     invoiceId = invoice.id,
                     clientName = invoice.clientName,
+                    amount = invoice.amount,
                     dueDate = invoice.dueDate,
                     isPaid = invoice.isPaid,
                     invoiceRemindersEnabled = invoiceRemindersEnabled,

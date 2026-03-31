@@ -9,21 +9,46 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.yetzira.ContractorCashFlowAndroid.R
+import java.text.NumberFormat
+import java.util.Locale
 
 class BudgetWarningNotifier(private val context: Context) {
 
-    fun notify(utilizationPercent: Int) {
+    fun notify(
+        utilizationPercent: Int,
+        projectName: String = "",
+        totalExpenses: Double = 0.0,
+        budget: Double = 0.0
+    ) {
         ensureChannel()
 
-        val body = if (utilizationPercent >= 100) {
-            "Project budget reached 100% utilization."
+        val currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
+        val formattedExpenses = currencyFormat.format(totalExpenses)
+        val formattedBudget = currencyFormat.format(budget)
+
+        val title: String
+        val body: String
+
+        if (utilizationPercent >= 100) {
+            title = context.getString(R.string.notif_budget_alert_100_title)
+            body = if (projectName.isNotBlank()) {
+                context.getString(R.string.notif_budget_alert_100_body, projectName, formattedExpenses, formattedBudget)
+            } else {
+                context.getString(R.string.expenses_budget_warning_critical)
+            }
         } else {
-            "Project budget reached 80% utilization."
+            title = context.getString(R.string.notif_budget_warning_80_title)
+            body = if (projectName.isNotBlank()) {
+                context.getString(R.string.notif_budget_warning_80_body, projectName, formattedExpenses, formattedBudget)
+            } else {
+                context.getString(R.string.expenses_budget_warning_high)
+            }
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setContentTitle("Budget warning")
+            .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
@@ -61,4 +86,3 @@ class BudgetWarningNotifier(private val context: Context) {
         const val NOTIFICATION_ID = 2001
     }
 }
-

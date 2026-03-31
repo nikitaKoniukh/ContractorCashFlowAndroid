@@ -20,9 +20,9 @@ class SettingsUiModelsTest {
         assertEquals(AppLanguageOption.HEBREW, state.selectedLanguage)
         assertEquals(CurrencyOption.ILS, state.selectedCurrency)
         assertEquals(ThemeModeOption.SYSTEM, state.selectedThemeMode)
-        assertTrue(state.invoiceRemindersEnabled)
-        assertTrue(state.overdueAlertsEnabled)
-        assertTrue(state.budgetWarningsEnabled)
+        assertFalse(state.invoiceRemindersEnabled)
+        assertFalse(state.overdueAlertsEnabled)
+        assertFalse(state.budgetWarningsEnabled)
         assertEquals(CloudSyncState.IDLE, state.cloudSyncState)
     }
 

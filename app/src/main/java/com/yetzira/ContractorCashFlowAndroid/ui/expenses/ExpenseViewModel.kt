@@ -225,8 +225,18 @@ class ExpenseViewModel(
         val utilization = ((totalExpenses / project.budget) * 100.0).roundToInt()
 
         return when {
-            utilization >= 100 -> ExpenseSaveResult.BudgetWarning(100)
-            utilization >= 80 -> ExpenseSaveResult.BudgetWarning(80)
+            utilization >= 100 -> ExpenseSaveResult.BudgetWarning(
+                utilizationPercent = 100,
+                projectName = project.name,
+                totalExpenses = totalExpenses,
+                budget = project.budget
+            )
+            utilization >= 80 -> ExpenseSaveResult.BudgetWarning(
+                utilizationPercent = 80,
+                projectName = project.name,
+                totalExpenses = totalExpenses,
+                budget = project.budget
+            )
             else -> null
         }
     }

@@ -83,15 +83,15 @@ class UserPreferencesRepository(context: Context) :
     }
 
     override val invoiceRemindersEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[INVOICE_REMINDERS_ENABLED] ?: true
+        preferences[INVOICE_REMINDERS_ENABLED] ?: false
     }
 
     override val overdueAlertsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[OVERDUE_ALERTS_ENABLED] ?: true
+        preferences[OVERDUE_ALERTS_ENABLED] ?: false
     }
 
     override val budgetWarningsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[BUDGET_WARNINGS_ENABLED] ?: true
+        preferences[BUDGET_WARNINGS_ENABLED] ?: false
     }
 
     override val subscriptionIsPro: Flow<Boolean> = dataStore.data.map { preferences ->

@@ -58,7 +58,12 @@ fun NewExpenseScreen(
                 onBack()
             }
             is ExpenseSaveResult.BudgetWarning -> {
-                BudgetWarningNotifier(context).notify(result.utilizationPercent)
+                BudgetWarningNotifier(context).notify(
+                    utilizationPercent = result.utilizationPercent,
+                    projectName = result.projectName,
+                    totalExpenses = result.totalExpenses,
+                    budget = result.budget
+                )
                 snackbarHostState.showSnackbar(
                     if (result.utilizationPercent >= 100) {
                         budgetCriticalMessage

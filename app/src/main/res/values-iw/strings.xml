@@ -246,6 +246,27 @@
     <string name="settings_status_export_success">הנתונים יוצאו בהצלחה</string>
     <string name="settings_status_export_failed">הייצוא נכשל</string>
     <string name="settings_status_notifications_updated">הגדרות ההתראות עודכנו</string>
+    <string name="settings_notifications_footer">העדפות אלו נשמרות באופן מקומי במכשיר זה.</string>
+
+    <!-- Notification Explanation Dialogs -->
+    <string name="notif_dialog_cancel">ביטול</string>
+    <string name="notif_dialog_allow">אפשר</string>
+    <string name="notif_dialog_invoice_reminders_title">תזכורות לחשבוניות</string>
+    <string name="notif_dialog_invoice_reminders_message">נשלח לך תזכורות בזמן לגבי מועדי פירעון חשבוניות קרובים, כדי שלא תפספס מועד תשלום.</string>
+    <string name="notif_dialog_overdue_alerts_title">התראות על איחור</string>
+    <string name="notif_dialog_overdue_alerts_message">קבל התראות כאשר חשבוניות עוברות את מועד הפירעון, לשמירה על קשרי לקוחות טובים ותזרים מזומנים.</string>
+    <string name="notif_dialog_budget_warnings_title">אזהרות תקציב</string>
+    <string name="notif_dialog_budget_warnings_message">קבל התראות כאשר הוצאות פרויקט מתקרבות או עולות על מגבלות התקציב שלך, כדי לשמור על הכספים שלך במסלול.</string>
+
+    <!-- Localized Push Notification Banners -->
+    <string name="notif_invoice_due_soon_title">חשבונית מתקרבת לפירעון</string>
+    <string name="notif_invoice_due_soon_body">חשבונית עבור %1$s (%2$s) מתקרבת לפירעון בעוד 3 ימים</string>
+    <string name="notif_invoice_overdue_title">חשבונית באיחור</string>
+    <string name="notif_invoice_overdue_body">חשבונית עבור %1$s (%2$s) באיחור</string>
+    <string name="notif_budget_warning_80_title">אזהרת תקציב: 80%%</string>
+    <string name="notif_budget_warning_80_body">פרויקט \'%1$s\' הגיע ל-80%% מהתקציב (%2$s מתוך %3$s)</string>
+    <string name="notif_budget_alert_100_title">התראת תקציב: 100%%</string>
+    <string name="notif_budget_alert_100_body">פרויקט \'%1$s\' חרג מהתקציב! הוצא %2$s מתוך %3$s</string>
 
     <!-- Paywall Strings -->
     <string name="paywall_title">שדרוג ל-KablanPro Pro</string>

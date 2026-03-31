@@ -28,6 +28,7 @@ class NotificationSettingsCoordinator(
             invoiceNotificationScheduler.schedule(
                 invoiceId = invoice.id,
                 clientName = invoice.clientName,
+                amount = invoice.amount,
                 dueDate = invoice.dueDate,
                 isPaid = invoice.isPaid,
                 invoiceRemindersEnabled = invoiceRemindersEnabled,

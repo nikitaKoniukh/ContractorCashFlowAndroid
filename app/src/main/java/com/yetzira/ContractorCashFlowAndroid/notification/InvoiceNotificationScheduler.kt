@@ -6,16 +6,20 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
+import java.text.NumberFormat
+import java.util.Locale
 
 interface InvoiceNotificationSchedulerContract {
     fun schedule(
         invoiceId: String,
         clientName: String,
+        amount: Double,
         dueDate: Long,
         isPaid: Boolean,
-        invoiceRemindersEnabled: Boolean = true,
-        overdueAlertsEnabled: Boolean = true
+        invoiceRemindersEnabled: Boolean = false,
+        overdueAlertsEnabled: Boolean = false
     )
 
     fun rescheduleAll(
@@ -34,6 +38,7 @@ class InvoiceNotificationScheduler(
     override fun schedule(
         invoiceId: String,
         clientName: String,
+        amount: Double,
         dueDate: Long,
         isPaid: Boolean,
         invoiceRemindersEnabled: Boolean,
@@ -42,12 +47,15 @@ class InvoiceNotificationScheduler(
         cancel(invoiceId)
         if (isPaid) return
 
+        val formattedAmount = NumberFormat.getCurrencyInstance(Locale.getDefault())
+            .format(amount)
+
         if (invoiceRemindersEnabled) {
             scheduleWorker(
                 requestCode = reminderRequestCode(invoiceId),
                 triggerAtMillis = dueDate - THREE_DAYS_MS,
-                title = "Invoice Reminder",
-                message = "Invoice for $clientName is due in 3 days."
+                title = context.getString(R.string.notif_invoice_due_soon_title),
+                message = context.getString(R.string.notif_invoice_due_soon_body, clientName, formattedAmount)
             )
         }
 
@@ -55,8 +63,8 @@ class InvoiceNotificationScheduler(
             scheduleWorker(
                 requestCode = overdueRequestCode(invoiceId),
                 triggerAtMillis = dueDate + ONE_DAY_MS,
-                title = "Invoice Overdue",
-                message = "Invoice for $clientName is overdue."
+                title = context.getString(R.string.notif_invoice_overdue_title),
+                message = context.getString(R.string.notif_invoice_overdue_body, clientName, formattedAmount)
             )
         }
     }
@@ -70,6 +78,7 @@ class InvoiceNotificationScheduler(
             schedule(
                 invoiceId = invoice.id,
                 clientName = invoice.clientName,
+                amount = invoice.amount,
                 dueDate = invoice.dueDate,
                 isPaid = invoice.isPaid,
                 invoiceRemindersEnabled = invoiceRemindersEnabled,
@@ -160,4 +169,3 @@ class InvoiceNotificationScheduler(
         const val ONE_DAY_MS = 24L * 60 * 60 * 1000
     }
 }
-
