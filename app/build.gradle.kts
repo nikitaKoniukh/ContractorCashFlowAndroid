@@ -44,6 +44,7 @@ android {
     
     lint {
         disable.add("FlowOperatorInvokedInComposition")
+        disable.add("PackageName")
     }
 }
 
