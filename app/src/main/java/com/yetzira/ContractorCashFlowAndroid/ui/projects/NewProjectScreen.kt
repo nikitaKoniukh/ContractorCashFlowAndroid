@@ -1,20 +1,31 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.projects
-
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,20 +34,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
-import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewProjectScreen(
@@ -44,149 +53,227 @@ fun NewProjectScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val clients by viewModel.existingClients.collectAsState()
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
-
-    var name by rememberSaveable { mutableStateOf("") }
-    var budget by rememberSaveable { mutableStateOf("") }
-    var useExistingClient by rememberSaveable { mutableStateOf(true) }
-    var selectedClientName by rememberSaveable { mutableStateOf("") }
-    var newClientName by rememberSaveable { mutableStateOf("") }
-    var newClientEmail by rememberSaveable { mutableStateOf("") }
-    var newClientPhone by rememberSaveable { mutableStateOf("") }
-    var newClientAddress by rememberSaveable { mutableStateOf("") }
-    var newClientNotes by rememberSaveable { mutableStateOf("") }
-
-    val clientName = if (useExistingClient) selectedClientName else newClientName
-    val budgetValue = parseAmountInput(budget) ?: 0.0
-    val canSave = name.isNotBlank() && clientName.isNotBlank() && budgetValue > 0.0
-    val duplicateClient = !useExistingClient && clients.any { it.name.equals(newClientName, ignoreCase = true) }
-
+    var name       by rememberSaveable { mutableStateOf("") }
+    var clientName by rememberSaveable { mutableStateOf("") }
+    var budget     by rememberSaveable { mutableStateOf("") }
+    var notes      by rememberSaveable { mutableStateOf("") }
+    var isActive   by rememberSaveable { mutableStateOf(true) }
+    val canSave = name.trim().isNotEmpty()
+    val bgColor = MaterialTheme.colorScheme.surfaceContainerHighest
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
+        containerColor = bgColor,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.projects_new_project)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.projects_new_project),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 navigationIcon = {
-                    TextButton(onClick = onBack) { Text(stringResource(R.string.common_back)) }
+                    TextButton(onClick = onBack) {
+                        Text(
+                            text = stringResource(R.string.common_cancel),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 },
                 actions = {
                     TextButton(
                         onClick = {
                             viewModel.createProject(
-                                name = name,
+                                name = name.trim(),
                                 budgetText = budget,
-                                useExistingClient = useExistingClient,
-                                selectedClientName = selectedClientName,
-                                newClientName = newClientName,
-                                newClientEmail = newClientEmail,
-                                newClientPhone = newClientPhone,
-                                newClientAddress = newClientAddress,
-                                newClientNotes = newClientNotes,
+                                useExistingClient = false,
+                                selectedClientName = "",
+                                newClientName = clientName.trim(),
+                                newClientEmail = "",
+                                newClientPhone = "",
+                                newClientAddress = "",
+                                newClientNotes = "",
+                                notes = notes.trim(),
+                                isActive = isActive,
                                 onSuccess = onBack
                             )
                         },
                         enabled = canSave
                     ) {
-                        Text(stringResource(R.string.common_save))
+                        Text(
+                            text = stringResource(R.string.common_save),
+                            color = if (canSave) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        )
                     }
                 }
             )
         }
     ) { innerPadding ->
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
+                .background(bgColor)
                 .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ModernTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = stringResource(R.string.projects_name),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            ModernTextField(
-                value = budget,
-                onValueChange = { budget = formatAmountInput(it) },
-                label = stringResource(R.string.projects_budget),
-                modifier = Modifier.fillMaxWidth(),
-                suffix = { Text(currency.symbol) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true
-            )
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(stringResource(R.string.projects_use_existing_client))
-                Switch(checked = useExistingClient, onCheckedChange = { useExistingClient = it })
-            }
-
-            if (useExistingClient) {
-                ModernDropdown(
-                    label = stringResource(R.string.projects_select_client),
-                    options = clients.map { it.name },
-                    selected = selectedClientName,
-                    onSelected = { selectedClientName = it },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                ModernTextField(
-                    value = newClientName,
-                    onValueChange = { newClientName = it },
-                    label = stringResource(R.string.projects_client_name),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                if (duplicateClient) {
-                    Text(
-                        text = stringResource(R.string.projects_duplicate_client_warning),
-                        color = Color(0xFFFF9500),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
-                AnimatedVisibility(visible = true) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        ModernTextField(
-                            value = newClientEmail,
-                            onValueChange = { newClientEmail = it },
-                            label = stringResource(R.string.projects_client_email),
-                            modifier = Modifier.fillMaxWidth(),
+            val isTablet = maxWidth >= 600.dp
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Column(
+                    modifier = Modifier
+                        .then(
+                            if (isTablet) Modifier.widthIn(max = 600.dp)
+                            else Modifier.fillMaxWidth()
+                        )
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    // Section 1: Project info (no header)
+                    IosFormSection {
+                        IosTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            placeholder = stringResource(R.string.projects_name),
                             singleLine = true
                         )
-                        ModernTextField(
-                            value = newClientPhone,
-                            onValueChange = { newClientPhone = it },
-                            label = stringResource(R.string.projects_client_phone),
-                            modifier = Modifier.fillMaxWidth(),
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        IosTextField(
+                            value = clientName,
+                            onValueChange = { clientName = it },
+                            placeholder = stringResource(R.string.projects_client_name),
                             singleLine = true
                         )
-                        ModernTextField(
-                            value = newClientAddress,
-                            onValueChange = { newClientAddress = it },
-                            label = stringResource(R.string.projects_client_address),
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                    }
+                    // Section 2: Budget
+                    IosFormSection(header = stringResource(R.string.projects_budget)) {
+                        IosTextField(
+                            value = budget,
+                            onValueChange = { budget = formatAmountInput(it) },
+                            placeholder = "0",
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            prefix = currency.symbol
                         )
-                        ModernTextField(
-                            value = newClientNotes,
-                            onValueChange = { newClientNotes = it },
-                            label = stringResource(R.string.projects_client_notes),
-                            modifier = Modifier.fillMaxWidth()
+                    }
+                    // Section 3: Notes
+                    IosFormSection(header = stringResource(R.string.projects_notes)) {
+                        IosTextField(
+                            value = notes,
+                            onValueChange = { notes = it },
+                            placeholder = stringResource(R.string.projects_notes_placeholder),
+                            singleLine = false,
+                            minLines = 4,
+                            maxLines = Int.MAX_VALUE
                         )
+                    }
+                    // Section 4: Status
+                    IosFormSection(header = stringResource(R.string.projects_status)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.projects_active),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Switch(
+                                checked = isActive,
+                                onCheckedChange = { isActive = it }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-
-
-
+// ─── Reusable iOS-style form helpers ──────────────────────────────────────────
+@Composable
+private fun IosFormSection(
+    header: String? = null,
+    content: @Composable () -> Unit
+) {
+    Column {
+        if (header != null) {
+            Text(
+                text = header.uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, bottom = 6.dp)
+            )
+        }
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            content()
+        }
+    }
+}
+@Composable
+private fun IosTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    prefix: String? = null
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            color = MaterialTheme.colorScheme.onSurface
+        ),
+        placeholder = {
+            Text(
+                text = placeholder,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        prefix = if (prefix != null) {
+            {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = prefix,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.width(4.dp))
+                }
+            }
+        } else null,
+        singleLine = singleLine,
+        minLines = minLines,
+        maxLines = maxLines,
+        keyboardOptions = keyboardOptions,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor   = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor  = Color.Transparent,
+            focusedIndicatorColor   = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor  = Color.Transparent,
+        )
+    )
+}

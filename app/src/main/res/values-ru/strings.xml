@@ -21,6 +21,7 @@
     <string name="tab_settings_description">Вкладка параметров</string>
 
     <string name="common_back">Назад</string>
+    <string name="common_cancel">Отмена</string>
     <string name="common_save">Сохранить</string>
     <string name="common_delete">Удалить</string>
     <string name="common_undo">Отменить</string>
@@ -37,6 +38,9 @@
     <string name="projects_select_client">Выберите существующего клиента</string>
     <string name="projects_use_existing_client">Использовать существующего клиента</string>
     <string name="projects_budget">Бюджет</string>
+    <string name="projects_notes">Заметки</string>
+    <string name="projects_notes_placeholder">Добавить заметки…</string>
+    <string name="projects_status">Статус</string>
     <string name="projects_client_email">Электронная почта клиента</string>
     <string name="projects_client_phone">Телефон клиента</string>
     <string name="projects_client_address">Адрес клиента</string>

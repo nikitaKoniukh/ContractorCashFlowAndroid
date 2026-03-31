@@ -20,6 +20,7 @@
     <string name="tab_settings_description">Settings tab</string>
 
     <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
     <string name="common_save">Save</string>
     <string name="common_delete">Delete</string>
     <string name="common_undo">Undo</string>
@@ -36,6 +37,9 @@
     <string name="projects_select_client">Select existing client</string>
     <string name="projects_use_existing_client">Use existing client</string>
     <string name="projects_budget">Budget</string>
+    <string name="projects_notes">Notes</string>
+    <string name="projects_notes_placeholder">Add notes…</string>
+    <string name="projects_status">Status</string>
     <string name="projects_client_email">Client email</string>
     <string name="projects_client_phone">Client phone</string>
     <string name="projects_client_address">Client address</string>

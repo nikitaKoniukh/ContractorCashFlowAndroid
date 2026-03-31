@@ -118,14 +118,16 @@ class ProjectViewModel(
         newClientPhone: String,
         newClientAddress: String,
         newClientNotes: String,
+        notes: String = "",
+        isActive: Boolean = true,
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
             val budget = parseAmountInput(budgetText) ?: 0.0
             val clientName = if (useExistingClient) selectedClientName else newClientName
-            if (name.isBlank() || clientName.isBlank() || budget <= 0.0) return@launch
+            if (name.isBlank()) return@launch
 
-            if (!useExistingClient) {
+            if (!useExistingClient && newClientName.isNotBlank()) {
                 clientDao.insert(
                     ClientEntity(
                         name = newClientName,
@@ -141,7 +143,9 @@ class ProjectViewModel(
                 ProjectEntity(
                     name = name,
                     clientName = clientName,
-                    budget = budget
+                    budget = budget,
+                    isActive = isActive,
+                    notes = notes
                 )
             )
             onSuccess()

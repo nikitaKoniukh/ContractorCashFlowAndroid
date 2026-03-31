@@ -21,6 +21,7 @@
     <string name="tab_settings_description">כרטיסיית הגדרות</string>
 
     <string name="common_back">חזור</string>
+    <string name="common_cancel">ביטול</string>
     <string name="common_save">שמור</string>
     <string name="common_delete">מחק</string>
     <string name="common_undo">בטל</string>
@@ -37,6 +38,9 @@
     <string name="projects_select_client">בחר לקוח קיים</string>
     <string name="projects_use_existing_client">השתמש בלקוח קיים</string>
     <string name="projects_budget">תקציב</string>
+    <string name="projects_notes">הערות</string>
+    <string name="projects_notes_placeholder">הוסף הערות…</string>
+    <string name="projects_status">סטטוס</string>
     <string name="projects_client_email">אימייל של הלקוח</string>
     <string name="projects_client_phone">טלפון של הלקוח</string>
     <string name="projects_client_address">כתובת של הלקוח</string>

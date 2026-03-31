@@ -13,6 +13,7 @@ data class ProjectEntity(
     val budget: Double,
     val createdDate: Long = System.currentTimeMillis(),
     val isActive: Boolean = true,
+    val notes: String = "",
     val lastModified: Long = System.currentTimeMillis()
 )
 

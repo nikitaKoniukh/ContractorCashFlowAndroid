@@ -43,6 +43,7 @@ class FirestoreSyncService(
             "budget" to project.budget,
             "createdDate" to project.createdDate,
             "isActive" to project.isActive,
+            "notes" to project.notes,
             "lastModified" to project.lastModified
         )
     )
@@ -346,7 +347,7 @@ class FirestoreSyncService(
 
     private fun toProjectEntity(document: DocumentSnapshot): ProjectEntity? {
         val name = document.getString("name") ?: return null
-        val clientName = document.getString("clientName") ?: return null
+        val clientName = document.getString("clientName") ?: ""
         return ProjectEntity(
             id = document.id,
             name = name,
@@ -354,6 +355,7 @@ class FirestoreSyncService(
             budget = document.getDouble("budget") ?: 0.0,
             createdDate = document.getLong("createdDate") ?: System.currentTimeMillis(),
             isActive = document.getBoolean("isActive") ?: true,
+            notes = document.getString("notes") ?: "",
             lastModified = document.getLong("lastModified") ?: 0L
         )
     }
