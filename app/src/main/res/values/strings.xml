@@ -117,6 +117,11 @@
     <string name="expenses_budget_warning_critical">Project budget reached 100% utilization.</string>
 
     <string name="invoices_new">New Invoice</string>
+    <string name="invoices_section_details">Invoice Details</string>
+    <string name="invoices_detail_client">Client Name</string>
+    <string name="invoices_detail_due_date">Due Date</string>
+    <string name="invoices_detail_paid">Paid</string>
+    <string name="invoices_delete_confirm">Delete this invoice? This cannot be undone.</string>
     <string name="invoices_edit">Edit Invoice</string>
     <string name="invoices_deleted">Invoice deleted</string>
     <string name="invoices_search_placeholder">Search by client name</string>

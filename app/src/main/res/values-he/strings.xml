@@ -364,6 +364,11 @@
     <string name="expenses_detail_description">תיאור</string>
     <string name="expenses_detail_date">תאריך</string>
     <string name="expenses_delete_confirm">למחוק הוצאה? פעולה זו בלתי הפיכה.</string>
+    <string name="invoices_section_details">פרטי חשבונית</string>
+    <string name="invoices_detail_client">שם לקוח</string>
+    <string name="invoices_detail_due_date">תאריך פירעון</string>
+    <string name="invoices_detail_paid">שולם</string>
+    <string name="invoices_delete_confirm">למחוק חשבונית? פעולה זו בלתי הפיכה.</string>
 </resources>
 
 

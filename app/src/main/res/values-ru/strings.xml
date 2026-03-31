@@ -364,6 +364,11 @@
     <string name="expenses_detail_description">Описание</string>
     <string name="expenses_detail_date">Дата</string>
     <string name="expenses_delete_confirm">Удалить расход? Это нельзя отменить.</string>
+    <string name="invoices_section_details">Детали счета</string>
+    <string name="invoices_detail_client">Имя клиента</string>
+    <string name="invoices_detail_due_date">Дата оплаты</string>
+    <string name="invoices_detail_paid">Оплачено</string>
+    <string name="invoices_delete_confirm">Удалить счет? Это нельзя отменить.</string>
 </resources>
 
 

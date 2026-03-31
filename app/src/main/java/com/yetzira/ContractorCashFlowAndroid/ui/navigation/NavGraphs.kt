@@ -32,6 +32,7 @@ import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpensesListScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.NewExpenseScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.EditInvoiceScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceDetailScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceViewModelFactory
@@ -105,7 +106,7 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
                 onAddExpense = { navController.navigate(ExpenseRoutes.NEW) },
                 onAddInvoice = { navController.navigate(InvoiceRoutes.NEW) },
                 onOpenExpense = { expenseId -> navController.navigate(ExpenseRoutes.detail(expenseId)) },
-                onOpenInvoice = { invoiceId -> navController.navigate(InvoiceRoutes.edit(invoiceId)) }
+                onOpenInvoice = { invoiceId -> navController.navigate(InvoiceRoutes.detail(invoiceId)) }
             )
         }
 
@@ -251,7 +252,23 @@ fun NavGraphBuilder.invoicesGraph(navController: NavController) {
             InvoicesListScreen(
                 viewModel = viewModel,
                 onCreate = { navController.navigate(InvoiceRoutes.NEW) },
-                onEdit = { invoiceId -> navController.navigate(InvoiceRoutes.edit(invoiceId)) }
+                onEdit = { invoiceId -> navController.navigate(InvoiceRoutes.detail(invoiceId)) }
+            )
+        }
+
+        composable(
+            route = InvoiceRoutes.DETAIL,
+            arguments = listOf(navArgument("invoiceId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { InvoiceViewModelFactory(context, AppDatabase.getInstance(context)) }
+            val viewModel: InvoiceViewModel = viewModel(factory = factory)
+            val invoiceId = backStackEntry.arguments?.getString("invoiceId").orEmpty()
+            InvoiceDetailScreen(
+                invoiceId = invoiceId,
+                viewModel = viewModel,
+                onEdit = { id -> navController.navigate(InvoiceRoutes.edit(id)) },
+                onBack = { navController.popBackStack() }
             )
         }
 
