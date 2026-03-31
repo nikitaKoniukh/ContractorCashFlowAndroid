@@ -169,22 +169,23 @@ class SettingsViewModel(
                     showStatus(R.string.settings_status_signed_in_sync_unavailable)
                     return@onSuccess
                 }
-                // Automatically push all existing local data to Firestore on first sign-in
+                // Automatically sync all data with Firestore on sign-in:
+                // push local → cloud, then pull cloud → local.
                 showStatus(R.string.settings_status_signed_in_uploading)
                 syncState.value = CloudSyncState.SYNCING
-                val pushResult = runCatching {
+                val syncResult = runCatching {
                     withTimeout(CLOUD_SYNC_TIMEOUT_MS) {
-                        firestoreSyncService.pushAllData().getOrThrow()
+                        firestoreSyncService.fullSync().getOrThrow()
                     }
                 }
-                if (pushResult.isSuccess) {
-                    Log.d(SETTINGS_AUTH_LOG_TAG, "Auto push-on-sign-in succeeded")
+                if (syncResult.isSuccess) {
+                    Log.d(SETTINGS_AUTH_LOG_TAG, "Auto full-sync-on-sign-in succeeded")
                     syncState.value = CloudSyncState.DONE
                     showStatus(R.string.settings_status_signed_in_synced)
                 } else {
-                    val err = pushResult.exceptionOrNull()?.message
+                    val err = syncResult.exceptionOrNull()?.message
                         ?: stringResolver.getString(R.string.settings_status_upload_failed)
-                    Log.e(SETTINGS_AUTH_LOG_TAG, "Auto push-on-sign-in failed: $err")
+                    Log.e(SETTINGS_AUTH_LOG_TAG, "Auto full-sync-on-sign-in failed: $err")
                     syncState.value = CloudSyncState.FAILED
                     showStatus(R.string.settings_status_signed_in_sync_failed, err)
                 }
