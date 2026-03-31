@@ -1,4 +1,5 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.projects
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewProjectScreen(
@@ -56,13 +58,16 @@ fun NewProjectScreen(
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
+
     var name       by rememberSaveable { mutableStateOf("") }
     var clientName by rememberSaveable { mutableStateOf("") }
     var budget     by rememberSaveable { mutableStateOf("") }
     var notes      by rememberSaveable { mutableStateOf("") }
     var isActive   by rememberSaveable { mutableStateOf(true) }
+
     val canSave = name.trim().isNotEmpty()
     val bgColor = MaterialTheme.colorScheme.surfaceContainerHighest
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
@@ -135,7 +140,6 @@ fun NewProjectScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // Section 1: Project info (no header)
                     IosFormSection {
                         IosTextField(
                             value = name,
@@ -154,7 +158,7 @@ fun NewProjectScreen(
                             singleLine = true
                         )
                     }
-                    // Section 2: Budget
+
                     IosFormSection(header = stringResource(R.string.projects_budget)) {
                         IosTextField(
                             value = budget,
@@ -165,7 +169,7 @@ fun NewProjectScreen(
                             prefix = currency.symbol
                         )
                     }
-                    // Section 3: Notes
+
                     IosFormSection(header = stringResource(R.string.projects_notes)) {
                         IosTextField(
                             value = notes,
@@ -176,7 +180,7 @@ fun NewProjectScreen(
                             maxLines = Int.MAX_VALUE
                         )
                     }
-                    // Section 4: Status
+
                     IosFormSection(header = stringResource(R.string.projects_status)) {
                         Row(
                             modifier = Modifier
@@ -201,7 +205,7 @@ fun NewProjectScreen(
         }
     }
 }
-// ─── Reusable iOS-style form helpers ──────────────────────────────────────────
+
 @Composable
 private fun IosFormSection(
     header: String? = null,
@@ -225,6 +229,7 @@ private fun IosFormSection(
         }
     }
 }
+
 @Composable
 private fun IosTextField(
     value: String,
