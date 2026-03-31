@@ -357,6 +357,9 @@
     <string name="projects_budget_spent">Потрачено</string>
     <string name="projects_budget_remaining">Остаток</string>
     <string name="projects_budget_of_budget">%1$.1f%% бюджета</string>
+    <string name="clients_info_section">Информация о клиенте</string>
+    <string name="clients_delete">Удалить клиента</string>
+    <string name="clients_delete_confirm">Удалить %s? Это действие нельзя отменить.</string>
 </resources>
 
 

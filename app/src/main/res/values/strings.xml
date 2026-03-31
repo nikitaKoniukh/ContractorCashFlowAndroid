@@ -135,6 +135,9 @@
     <string name="clients_empty_body">Add your first client to manage contacts.</string>
     <string name="clients_detail_title">Client Details</string>
     <string name="clients_not_found">Client not found</string>
+    <string name="clients_info_section">Client Information</string>
+    <string name="clients_delete">Delete Client</string>
+    <string name="clients_delete_confirm">Delete %s? This action cannot be undone.</string>
     <string name="clients_name">Name</string>
     <string name="clients_email">Email</string>
     <string name="clients_phone">Phone</string>

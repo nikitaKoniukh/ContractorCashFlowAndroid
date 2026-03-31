@@ -127,9 +127,16 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
             route = ProjectRoutes.CLIENT_DETAIL,
             arguments = listOf(navArgument("clientName") { type = NavType.StringType })
         ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { ClientViewModelFactory(com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase.getInstance(context)) }
+            val clientsViewModel: ClientViewModel = viewModel(factory = factory)
             val clientName = Uri.decode(backStackEntry.arguments?.getString("clientName").orEmpty())
+            val listState by clientsViewModel.listUiState.collectAsState()
+            val matchedClient = listState.clients.firstOrNull { it.name.equals(clientName, ignoreCase = true) }
             ClientDetailScreen(
-                clientName = clientName,
+                clientId = matchedClient?.id ?: "",
+                viewModel = clientsViewModel,
+                onEdit = { id -> navController.navigate(ClientRoutes.edit(id)) },
                 onBack = { navController.popBackStack() }
             )
         }

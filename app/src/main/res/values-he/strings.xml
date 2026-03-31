@@ -357,6 +357,9 @@
     <string name="projects_budget_spent">הוצאה</string>
     <string name="projects_budget_remaining">נותר</string>
     <string name="projects_budget_of_budget">%1$.1f%% מהתקציב</string>
+    <string name="clients_info_section">מידע לקוח</string>
+    <string name="clients_delete">מחק לקוח</string>
+    <string name="clients_delete_confirm">למחוק את %s? פעולה זו בלתי הפיכה.</string>
 </resources>
 
 
