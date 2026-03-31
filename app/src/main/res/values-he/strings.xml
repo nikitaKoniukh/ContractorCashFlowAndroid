@@ -346,6 +346,13 @@
     <string name="scan_receipt_hint">נתונים שחולצו — בדוק וערוך לפני שמירה</string>
     <string name="scan_notes_label">הערות</string>
     <string name="expenses_form_notes_label">הערות (אופציונלי)</string>
+    <string name="common_cancel">ביטול</string>
+    <string name="projects_notes">הערות</string>
+    <string name="projects_notes_placeholder">הוסף הערות…</string>
+    <string name="projects_status">סטטוס</string>
+    <string name="projects_info_section">מידע על פרוייקט</string>
+    <string name="projects_status_active">פרוייקט פעיל</string>
+    <string name="projects_status_inactive">פרוייקט לא פעיל</string>
 </resources>
 
 

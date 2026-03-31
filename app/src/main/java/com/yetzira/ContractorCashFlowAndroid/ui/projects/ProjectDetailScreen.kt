@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.projects
 
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
@@ -503,89 +505,44 @@ private fun ProjectInfoSection(
     onClientClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_info_section).uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp, bottom = 6.dp)
+        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = projectName,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
+            Column(modifier = Modifier.fillMaxWidth()) {
+                ProjectInfoRow(
+                    label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_name),
+                    value = projectName
                 )
-                StatusBadge(active = isActive)
-            }
-
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .width(18.dp)
-                        .height(18.dp)
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                ProjectInfoRow(
+                    label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_client_name),
+                    value = clientName,
+                    valueColor = MaterialTheme.colorScheme.primary,
+                    onClick = onClientClick
                 )
-                TextButton(
-                    onClick = onClientClick,
-                    modifier = Modifier.padding(0.dp)
-                ) {
-                    Text(
-                        text = clientName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = formatCurrencyAmount(budget, currency),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                Column {
-                    Text(
-                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_created_date),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = formatDate(createdDate),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                ProjectInfoRow(
+                    label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget),
+                    value = formatCurrencyAmount(budget, currency)
+                )
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                ProjectStatusRow(isActive = isActive)
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                ProjectInfoRow(
+                    label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_created_date),
+                    value = formatLongDate(createdDate)
+                )
             }
         }
     }
@@ -885,6 +842,75 @@ private fun InvoiceStatusBadge(invoice: InvoiceEntity) {
             .padding(horizontal = 8.dp, vertical = 3.dp)
     )
 }
+
+@Composable
+private fun ProjectInfoRow(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    valueColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: (() -> Unit)? = null
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            color = valueColor
+        )
+    }
+}
+
+@Composable
+private fun ProjectStatusRow(isActive: Boolean, modifier: Modifier = Modifier) {
+    val statusColor = if (isActive) Color(0xFF34C759) else Color(0xFF8E8E93)
+    val statusLabel = stringResource(
+        if (isActive) com.yetzira.ContractorCashFlowAndroid.R.string.projects_status_active
+        else com.yetzira.ContractorCashFlowAndroid.R.string.projects_status_inactive
+    )
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_status),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(statusColor, CircleShape)
+            )
+            Text(
+                text = statusLabel,
+                style = MaterialTheme.typography.bodyLarge,
+                color = statusColor
+            )
+        }
+    }
+}
+
+private fun formatLongDate(timestamp: Long): String =
+    SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(Date(timestamp))
 
 private fun formatDate(timestamp: Long): String =
     SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))

@@ -346,6 +346,13 @@
     <string name="scan_receipt_hint">Извлечённые данные — проверьте и отредактируйте перед сохранением</string>
     <string name="scan_notes_label">Заметки</string>
     <string name="expenses_form_notes_label">Заметки (необязательно)</string>
+    <string name="common_cancel">Отмена</string>
+    <string name="projects_notes">Заметки</string>
+    <string name="projects_notes_placeholder">Добавить заметки…</string>
+    <string name="projects_status">Статус</string>
+    <string name="projects_info_section">Информация о проекте</string>
+    <string name="projects_status_active">Активный проект</string>
+    <string name="projects_status_inactive">Неактивный проект</string>
 </resources>
 
 

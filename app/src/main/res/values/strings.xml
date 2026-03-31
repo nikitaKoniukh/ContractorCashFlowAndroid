@@ -40,6 +40,9 @@
     <string name="projects_notes">Notes</string>
     <string name="projects_notes_placeholder">Add notes…</string>
     <string name="projects_status">Status</string>
+    <string name="projects_info_section">Project Information</string>
+    <string name="projects_status_active">Active Project</string>
+    <string name="projects_status_inactive">Inactive Project</string>
     <string name="projects_client_email">Client email</string>
     <string name="projects_client_phone">Client phone</string>
     <string name="projects_client_address">Client address</string>
