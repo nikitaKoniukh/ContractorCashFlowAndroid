@@ -102,7 +102,7 @@ fun ProjectDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(text = state.project?.name ?: stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_detail_title)) },
+                title = { Text(text = state.project?.name ?: "") },
                 navigationIcon = {
                     TextButton(onClick = onBack) { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_back)) }
                 },

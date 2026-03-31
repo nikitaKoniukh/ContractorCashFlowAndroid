@@ -79,13 +79,16 @@ private fun KablanProNavigationContent(
     val backStackEntry by (navController as androidx.navigation.NavHostController).currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val screenTitle = stringResource(id = titleResForRoute(currentRoute))
+    val hideShellTopBar = currentRoute in routesWithOwnTopBar
 
     androidx.compose.material3.Scaffold(
         topBar = {
-            KablanProTopBar(
-                title = screenTitle,
-                onMenuClick = onMenuClick
-            )
+            if (!hideShellTopBar) {
+                KablanProTopBar(
+                    title = screenTitle,
+                    onMenuClick = onMenuClick
+                )
+            }
         }
     ) { paddingValues ->
         androidx.compose.foundation.layout.Column(
@@ -146,6 +149,23 @@ private fun titleResForRoute(route: String?): Int {
         else -> com.yetzira.ContractorCashFlowAndroid.R.string.app_name
     }
 }
+
+/** Routes where the screen provides its own TopAppBar (back / save / menu). */
+private val routesWithOwnTopBar = setOf(
+    ProjectRoutes.DETAIL,
+    ProjectRoutes.NEW,
+    ProjectRoutes.EDIT,
+    ProjectRoutes.CLIENT_DETAIL,
+    ExpenseRoutes.NEW,
+    ExpenseRoutes.EDIT,
+    InvoiceRoutes.NEW,
+    InvoiceRoutes.EDIT,
+    LaborRoutes.ADD,
+    LaborRoutes.EDIT,
+    ClientRoutes.NEW,
+    ClientRoutes.DETAIL,
+    ClientRoutes.EDIT,
+)
 
 private fun getGraphRoute(tab: TabDestination): String = when (tab) {
     TabDestination.PROJECTS -> ProjectRoutes.GRAPH
