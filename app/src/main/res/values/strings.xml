@@ -84,6 +84,10 @@
 
     <string name="expenses_new">New Expense</string>
     <string name="expenses_edit">Edit Expense</string>
+    <string name="expenses_section_details">Expense Details</string>
+    <string name="expenses_detail_description">Description</string>
+    <string name="expenses_detail_date">Date</string>
+    <string name="expenses_delete_confirm">Delete this expense? This cannot be undone.</string>
     <string name="expenses_deleted">Expense deleted</string>
     <string name="expenses_search_placeholder">Search by description</string>
     <string name="expenses_filter_button">Filter</string>

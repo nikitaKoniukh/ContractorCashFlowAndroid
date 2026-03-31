@@ -25,6 +25,7 @@ import com.yetzira.ContractorCashFlowAndroid.ui.clients.ClientsListScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.EditClientScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.clients.NewClientScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.EditExpenseScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseDetailScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.expenses.ExpenseViewModelFactory
@@ -103,7 +104,7 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
                 onOpenClient = { clientName -> navController.navigate(ProjectRoutes.clientDetail(clientName)) },
                 onAddExpense = { navController.navigate(ExpenseRoutes.NEW) },
                 onAddInvoice = { navController.navigate(InvoiceRoutes.NEW) },
-                onOpenExpense = { expenseId -> navController.navigate(ExpenseRoutes.edit(expenseId)) },
+                onOpenExpense = { expenseId -> navController.navigate(ExpenseRoutes.detail(expenseId)) },
                 onOpenInvoice = { invoiceId -> navController.navigate(InvoiceRoutes.edit(invoiceId)) }
             )
         }
@@ -156,8 +157,24 @@ fun NavGraphBuilder.expensesGraph(navController: NavController) {
             ExpensesListScreen(
                 viewModel = viewModel,
                 onCreateExpense = { navController.navigate(ExpenseRoutes.NEW) },
-                onEditExpense = { expenseId -> navController.navigate(ExpenseRoutes.edit(expenseId)) },
+                onEditExpense = { expenseId -> navController.navigate(ExpenseRoutes.detail(expenseId)) },
                 onScanReceipt = { navController.navigate(ExpenseRoutes.SCAN) }
+            )
+        }
+
+        composable(
+            route = ExpenseRoutes.DETAIL,
+            arguments = listOf(navArgument("expenseId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { ExpenseViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: ExpenseViewModel = viewModel(factory = factory)
+            val expenseId = backStackEntry.arguments?.getString("expenseId").orEmpty()
+            ExpenseDetailScreen(
+                expenseId = expenseId,
+                viewModel = viewModel,
+                onEdit = { id -> navController.navigate(ExpenseRoutes.edit(id)) },
+                onBack = { navController.popBackStack() }
             )
         }
 

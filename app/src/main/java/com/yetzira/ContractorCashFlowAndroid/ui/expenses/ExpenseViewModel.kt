@@ -154,6 +154,15 @@ class ExpenseViewModel(
         }
     }
 
+    fun deleteExpenseById(expenseId: String, onDone: () -> Unit) {
+        viewModelScope.launch {
+            val expense = repository.getExpenseById(expenseId) ?: return@launch
+            recentlyDeletedExpense = expense
+            repository.deleteExpense(expense)
+            onDone()
+        }
+    }
+
     fun undoDeleteExpense() {
         val toRestore = recentlyDeletedExpense ?: return
         viewModelScope.launch {

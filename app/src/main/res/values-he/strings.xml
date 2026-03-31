@@ -360,6 +360,10 @@
     <string name="clients_info_section">מידע לקוח</string>
     <string name="clients_delete">מחק לקוח</string>
     <string name="clients_delete_confirm">למחוק את %s? פעולה זו בלתי הפיכה.</string>
+    <string name="expenses_section_details">פרטי הוצאה</string>
+    <string name="expenses_detail_description">תיאור</string>
+    <string name="expenses_detail_date">תאריך</string>
+    <string name="expenses_delete_confirm">למחוק הוצאה? פעולה זו בלתי הפיכה.</string>
 </resources>
 
 

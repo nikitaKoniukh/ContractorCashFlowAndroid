@@ -128,6 +128,7 @@ private fun titleResForRoute(route: String?): Int {
 
         route == ExpenseRoutes.LIST || route == ExpenseRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_expenses
         route == ExpenseRoutes.NEW -> com.yetzira.ContractorCashFlowAndroid.R.string.expenses_new
+        route == ExpenseRoutes.DETAIL -> com.yetzira.ContractorCashFlowAndroid.R.string.expenses_section_details
         route == ExpenseRoutes.EDIT -> com.yetzira.ContractorCashFlowAndroid.R.string.expenses_edit
 
         route == InvoiceRoutes.LIST || route == InvoiceRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_invoices
@@ -159,6 +160,7 @@ private val routesWithOwnTopBar = setOf(
     ProjectRoutes.EDIT,
     ProjectRoutes.CLIENT_DETAIL,
     ExpenseRoutes.NEW,
+    ExpenseRoutes.DETAIL,
     ExpenseRoutes.EDIT,
     InvoiceRoutes.NEW,
     InvoiceRoutes.EDIT,

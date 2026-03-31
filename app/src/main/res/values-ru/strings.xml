@@ -360,6 +360,10 @@
     <string name="clients_info_section">Информация о клиенте</string>
     <string name="clients_delete">Удалить клиента</string>
     <string name="clients_delete_confirm">Удалить %s? Это действие нельзя отменить.</string>
+    <string name="expenses_section_details">Детали расхода</string>
+    <string name="expenses_detail_description">Описание</string>
+    <string name="expenses_detail_date">Дата</string>
+    <string name="expenses_delete_confirm">Удалить расход? Это нельзя отменить.</string>
 </resources>
 
 
