@@ -454,9 +454,9 @@ private fun FinancialSummaryCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Column {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_income),
                         style = MaterialTheme.typography.bodySmall,
@@ -469,7 +469,7 @@ private fun FinancialSummaryCard(
                         color = Color(0xFF34C759)
                     )
                 }
-                Column {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expenses),
                         style = MaterialTheme.typography.bodySmall,
@@ -482,7 +482,7 @@ private fun FinancialSummaryCard(
                         color = Color(0xFFFF3B30)
                     )
                 }
-                Column {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_profit_margin),
                         style = MaterialTheme.typography.bodySmall,
