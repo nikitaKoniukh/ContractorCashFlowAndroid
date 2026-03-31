@@ -353,6 +353,10 @@
     <string name="projects_info_section">Информация о проекте</string>
     <string name="projects_status_active">Активный проект</string>
     <string name="projects_status_inactive">Неактивный проект</string>
+    <string name="projects_budget_utilization">Использование бюджета</string>
+    <string name="projects_budget_spent">Потрачено</string>
+    <string name="projects_budget_remaining">Остаток</string>
+    <string name="projects_budget_of_budget">%1$.1f%% бюджета</string>
 </resources>
 
 

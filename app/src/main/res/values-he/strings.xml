@@ -353,6 +353,10 @@
     <string name="projects_info_section">מידע על פרוייקט</string>
     <string name="projects_status_active">פרוייקט פעיל</string>
     <string name="projects_status_inactive">פרוייקט לא פעיל</string>
+    <string name="projects_budget_utilization">ניצול תקציב</string>
+    <string name="projects_budget_spent">הוצאה</string>
+    <string name="projects_budget_remaining">נותר</string>
+    <string name="projects_budget_of_budget">%1$.1f%% מהתקציב</string>
 </resources>
 
 

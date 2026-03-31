@@ -262,7 +262,12 @@ fun ProjectDetailScreen(
             }
 
             item {
-                BudgetUsageBar(utilization = state.budgetUtilization)
+                BudgetUsageBar(
+                    utilization = state.budgetUtilization,
+                    budget = project.budget,
+                    totalExpenses = state.totalExpenses,
+                    currency = currency
+                )
             }
 
             item {
@@ -549,49 +554,100 @@ private fun ProjectInfoSection(
 }
 
 @Composable
-private fun BudgetUsageBar(utilization: Double, modifier: Modifier = Modifier) {
-    val color = when {
-        utilization < 50 -> Color(0xFF34C759)
+private fun BudgetUsageBar(
+    utilization: Double,
+    budget: Double,
+    totalExpenses: Double,
+    currency: CurrencyOption,
+    modifier: Modifier = Modifier
+) {
+    val remaining = (budget - totalExpenses).coerceAtLeast(0.0)
+    val barColor = when {
+        utilization < 50  -> Color(0xFF34C759)
         utilization <= 80 -> Color(0xFFFF9500)
-        else -> Color(0xFFFF3B30)
+        else              -> Color(0xFFFF3B30)
     }
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget_utilization).uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp, bottom = 6.dp)
+        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget_usage),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "${String.format(Locale.US, "%.1f", utilization)}%",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = color
-                )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Spent row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget_spent),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = formatCurrencyAmount(totalExpenses, currency),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                // Progress row
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget_of_budget, utilization.toFloat()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    LinearProgressIndicator(
+                        progress = { (utilization / 100.0).coerceIn(0.0, 1.0).toFloat() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = barColor,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                // Remaining row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_budget_remaining),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = formatCurrencyAmount(remaining, currency),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF34C759)
+                    )
+                }
             }
-            LinearProgressIndicator(
-                progress = { (utilization / 100.0).coerceIn(0.0, 1.0).toFloat() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(5.dp)),
-                color = color
-            )
         }
     }
 }

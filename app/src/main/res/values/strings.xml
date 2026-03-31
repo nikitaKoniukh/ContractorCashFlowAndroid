@@ -65,6 +65,10 @@
     <string name="projects_profit_margin">Profit margin</string>
     <string name="projects_created_date">Created</string>
     <string name="projects_budget_usage">Budget usage</string>
+    <string name="projects_budget_utilization">Budget Utilization</string>
+    <string name="projects_budget_spent">Spent</string>
+    <string name="projects_budget_remaining">Remaining</string>
+    <string name="projects_budget_of_budget">%1$.1f%% of budget</string>
     <string name="projects_category_breakdown">Expense categories</string>
     <string name="projects_expenses_section">Expenses</string>
     <string name="projects_invoices_section">Invoices</string>
