@@ -57,7 +57,6 @@ import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
-import com.yetzira.ContractorCashFlowAndroid.ui.components.StatCardView
 import com.yetzira.ContractorCashFlowAndroid.ui.components.StatPill
 import com.yetzira.ContractorCashFlowAndroid.ui.components.WorkerAvatar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
@@ -202,7 +201,8 @@ fun LaborListScreen(
                     )
                 }
 
-                item { Spacer(modifier = Modifier.size(24.dp)) }
+                // Extra bottom space so the final card clears the FAB area.
+                item { Spacer(modifier = Modifier.size(96.dp)) }
             }
         }
     }
@@ -272,14 +272,14 @@ private fun SummaryCard(summary: LaborSummaryUi, currency: CurrencyOption) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            StatCardView(
+            AllTimeMetricCard(
                 label = stringResource(R.string.labor_summary_total_cost),
                 value = formatCurrencyAmount(summary.totalLaborCost, currency),
                 icon = Icons.Default.AttachMoney,
                 color = KablanProColors.BudgetBlue,
                 modifier = Modifier.weight(1f)
             )
-            StatCardView(
+            AllTimeMetricCard(
                 label = stringResource(R.string.labor_summary_total_workers),
                 value = "${summary.workerCount}",
                 icon = Icons.Default.Group,
@@ -288,37 +288,69 @@ private fun SummaryCard(summary: LaborSummaryUi, currency: CurrencyOption) {
             )
         }
 
-        // Row 2: Total Days + Total Hours (only when > 0)
-        val showDays = summary.daysWorked > 0
-        val showHours = summary.totalHours > 0
-        if (showDays || showHours) {
+        // Row 2: keep the bottom row visible so ALL TIME is always a 2x2 grid.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            AllTimeMetricCard(
+                label = stringResource(R.string.labor_summary_total_days),
+                value = "${summary.daysWorked}",
+                icon = Icons.Default.CalendarToday,
+                color = KablanProColors.PendingOrange,
+                modifier = Modifier.weight(1f)
+            )
+            AllTimeMetricCard(
+                label = stringResource(R.string.labor_summary_total_hours),
+                value = "${summary.totalHours.toInt()}",
+                icon = Icons.Default.Schedule,
+                color = KablanProColors.HourlyTeal,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun AllTimeMetricCard(
+    label: String,
+    value: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (showDays) {
-                    StatCardView(
-                        label = stringResource(R.string.labor_summary_total_days),
-                        value = "${summary.daysWorked}",
-                        icon = Icons.Default.CalendarToday,
-                        color = KablanProColors.PendingOrange,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                if (showHours) {
-                    StatCardView(
-                        label = stringResource(R.string.labor_summary_total_hours),
-                        value = "${summary.totalHours.toInt()}",
-                        icon = Icons.Default.Schedule,
-                        color = KablanProColors.HourlyTeal,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                // Fill remaining space when only one card is shown
-                if (showDays != showHours) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
