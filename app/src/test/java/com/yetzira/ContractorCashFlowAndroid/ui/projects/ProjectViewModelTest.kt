@@ -105,6 +105,35 @@ class ProjectViewModelTest {
         assertTrue(repo.insertedProjects.isEmpty())
     }
 
+     @Test
+    fun `createProject with duplicate typed client does not insert duplicate client`() = runTest {
+        val repo = FakeProjectRepository()
+        val clientDao = FakeClientDao(
+            initial = listOf(ClientEntity(id = "c1", name = "Gindi", email = "gindi@g.com"))
+        )
+        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), clientDao)
+
+        var successCalled = false
+        viewModel.createProject(
+            name = "Tel Aviv",
+            budgetText = "1000",
+            useExistingClient = false,
+            selectedClientName = "",
+            newClientName = "Gindi",
+            newClientEmail = "another@g.com",
+            newClientPhone = "",
+            newClientAddress = "",
+            newClientNotes = "",
+            onSuccess = { successCalled = true }
+        )
+        advanceUntilIdle()
+
+        assertTrue(successCalled)
+        assertEquals(0, clientDao.insertedClients.size)
+        assertEquals(1, repo.insertedProjects.size)
+        assertEquals("Gindi", repo.insertedProjects.first().clientName)
+    }
+
     @Test
     fun `delete and undo project restores item`() = runTest {
         val project = ProjectEntity(id = "p1", name = "A", clientName = "B", budget = 100.0)
@@ -239,14 +268,19 @@ class ProjectViewModelTest {
         }
     }
 
-    private class FakeClientDao : ClientDao {
-        private val clients = MutableStateFlow(emptyList<ClientEntity>())
+    private class FakeClientDao(
+        initial: List<ClientEntity> = emptyList()
+    ) : ClientDao {
+        private val clients = MutableStateFlow(initial)
         val insertedClients = mutableListOf<ClientEntity>()
 
         override fun getAll(): Flow<List<ClientEntity>> = clients
 
         override suspend fun getById(id: String): ClientEntity? =
             clients.value.firstOrNull { it.id == id }
+
+        override suspend fun findByNameIgnoreCase(name: String): ClientEntity? =
+            clients.value.firstOrNull { it.name.equals(name, ignoreCase = true) }
 
         override fun search(query: String): Flow<List<ClientEntity>> {
             return clients.map { list ->

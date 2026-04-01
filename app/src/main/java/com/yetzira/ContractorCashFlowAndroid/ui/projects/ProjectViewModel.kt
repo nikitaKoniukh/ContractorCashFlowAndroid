@@ -124,28 +124,35 @@ class ProjectViewModel(
     ) {
         viewModelScope.launch {
             val budget = parseAmountInput(budgetText) ?: 0.0
-            val clientName = if (useExistingClient) selectedClientName else newClientName
-            if (name.isBlank()) return@launch
+            val normalizedName = name.trim()
+            val normalizedSelectedClientName = selectedClientName.trim()
+            val normalizedNewClientName = newClientName.trim()
+            val normalizedNotes = notes.trim()
+            val clientName = if (useExistingClient) normalizedSelectedClientName else normalizedNewClientName
+            if (normalizedName.isBlank() || clientName.isBlank() || budget <= 0.0) return@launch
 
-            if (!useExistingClient && newClientName.isNotBlank()) {
-                clientDao.insert(
-                    ClientEntity(
-                        name = newClientName,
-                        email = newClientEmail.ifBlank { null },
-                        phone = newClientPhone.ifBlank { null },
-                        address = newClientAddress.ifBlank { null },
-                        notes = newClientNotes.ifBlank { null }
+            if (!useExistingClient && normalizedNewClientName.isNotBlank()) {
+                val existingClient = clientDao.findByNameIgnoreCase(normalizedNewClientName)
+                if (existingClient == null) {
+                    clientDao.insert(
+                        ClientEntity(
+                            name = normalizedNewClientName,
+                            email = newClientEmail.trim().ifBlank { null },
+                            phone = newClientPhone.trim().ifBlank { null },
+                            address = newClientAddress.trim().ifBlank { null },
+                            notes = newClientNotes.trim().ifBlank { null }
+                        )
                     )
-                )
+                }
             }
 
             repository.insertProject(
                 ProjectEntity(
-                    name = name,
+                    name = normalizedName,
                     clientName = clientName,
                     budget = budget,
                     isActive = isActive,
-                    notes = notes
+                    notes = normalizedNotes
                 )
             )
             onSuccess()

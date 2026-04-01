@@ -16,6 +16,9 @@ interface ClientDao {
     @Query("SELECT * FROM clients WHERE id = :id")
     suspend fun getById(id: String): ClientEntity?
 
+    @Query("SELECT * FROM clients WHERE LOWER(name) = LOWER(:name) LIMIT 1")
+    suspend fun findByNameIgnoreCase(name: String): ClientEntity?
+
     @Query("SELECT * FROM clients WHERE name LIKE '%' || :query || '%' OR email LIKE '%' || :query || '%' OR phone LIKE '%' || :query || '%' ORDER BY name ASC")
     fun search(query: String): Flow<List<ClientEntity>>
 

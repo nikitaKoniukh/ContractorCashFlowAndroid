@@ -375,5 +375,10 @@
     <string name="invoices_detail_due_date">תאריך פירעון</string>
     <string name="invoices_detail_paid">שולם</string>
     <string name="invoices_delete_confirm">למחוק חשבונית? פעולה זו בלתי הפיכה.</string>
+    <string name="projects_select_client_prompt">בחר לקוח</string>
+    <string name="projects_client_mode_enter_name">הזן שם</string>
+    <string name="projects_client_mode_select_existing">בחר קיים</string>
+    <string name="projects_new_client_details_optional">פרטי לקוח חדש (אופציונלי)</string>
+    <string name="projects_new_client_footer">הוסף פרטי קשר עבור הלקוח החדש. פרטים אלה יישמרו וניתן יהיה לערוך אותם מאוחר יותר.</string>
 </resources>
 

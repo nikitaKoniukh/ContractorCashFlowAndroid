@@ -369,6 +369,11 @@
     <string name="invoices_detail_due_date">Дата оплаты</string>
     <string name="invoices_detail_paid">Оплачено</string>
     <string name="invoices_delete_confirm">Удалить счет? Это нельзя отменить.</string>
+    <string name="projects_select_client_prompt">Выберите клиента</string>
+    <string name="projects_client_mode_enter_name">Ввести имя</string>
+    <string name="projects_client_mode_select_existing">Выбрать существующего</string>
+    <string name="projects_new_client_details_optional">Данные нового клиента (необязательно)</string>
+    <string name="projects_new_client_footer">Добавьте контактные данные для этого нового клиента. Эти данные будут сохранены и их можно будет отредактировать позже.</string>
 </resources>
 
 

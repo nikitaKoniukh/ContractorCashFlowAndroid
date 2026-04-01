@@ -35,7 +35,10 @@
     <string name="projects_name">Project name</string>
     <string name="projects_client_name">Client name</string>
     <string name="projects_select_client">Select existing client</string>
+    <string name="projects_select_client_prompt">Select a client</string>
     <string name="projects_use_existing_client">Use existing client</string>
+    <string name="projects_client_mode_enter_name">Enter Name</string>
+    <string name="projects_client_mode_select_existing">Select Existing</string>
     <string name="projects_budget">Budget</string>
     <string name="projects_notes">Notes</string>
     <string name="projects_notes_placeholder">Add notes…</string>
@@ -48,6 +51,8 @@
     <string name="projects_client_address">Client address</string>
     <string name="projects_client_notes">Client notes</string>
     <string name="projects_duplicate_client_warning">A client with this name already exists.</string>
+    <string name="projects_new_client_details_optional">New Client Details (Optional)</string>
+    <string name="projects_new_client_footer">Add contact details for this new client. These details will be saved and can be edited later.</string>
     <string name="projects_expenses">Expenses</string>
     <string name="projects_income">Income</string>
     <string name="projects_balance">Balance</string>
