@@ -36,6 +36,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRep
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -50,6 +51,7 @@ fun EditProjectScreen(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.detailUiState.collectAsState()
+    val existingClients by viewModel.existingClients.collectAsState()
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
@@ -67,6 +69,18 @@ fun EditProjectScreen(
     var name by remember(project.id) { mutableStateOf(project.name) }
     var clientName by remember(project.id) { mutableStateOf(project.clientName) }
     var budget by remember(project.id) { mutableStateOf(formatAmountInput(project.budget.toLong().toString())) }
+
+    val clientOptions = remember(existingClients, clientName) {
+        val cleaned = existingClients
+            .map { it.name.trim() }
+            .filter { it.isNotBlank() }
+            .distinct()
+        if (clientName.isNotBlank() && cleaned.none { it.equals(clientName, ignoreCase = true) }) {
+            listOf(clientName) + cleaned
+        } else {
+            cleaned
+        }
+    }
 
     val budgetValue = parseAmountInput(budget) ?: 0.0
     val reducedBelowExpenses = budgetValue in 0.0..<state.totalExpenses
@@ -132,6 +146,16 @@ fun EditProjectScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
+
+            if (clientOptions.isNotEmpty()) {
+                ModernDropdown(
+                    label = stringResource(R.string.projects_select_client),
+                    options = clientOptions,
+                    selected = clientName,
+                    onSelected = { selected -> clientName = selected },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             ModernTextField(
                 value = budget,
                 onValueChange = { budget = formatAmountInput(it) },
@@ -168,5 +192,3 @@ fun EditProjectScreen(
 
 private fun formatDate(timestamp: Long): String =
     SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
-
-
