@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.StatPill
 import com.yetzira.ContractorCashFlowAndroid.ui.components.WorkerAvatar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
@@ -97,14 +96,6 @@ fun LaborListScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
         ) {
-            ModernSearchBar(
-                value = state.query,
-                onValueChange = viewModel::setSearchQuery,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                placeholder = stringResource(R.string.labor_search_placeholder)
-            )
 
             Row(
                 modifier = Modifier
