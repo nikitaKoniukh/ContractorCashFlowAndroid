@@ -207,7 +207,7 @@ private fun SummaryCard(summary: LaborSummaryUi) {
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(text = summary.periodLabel, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(text = "Total Labor Cost: ${formatMoney(summary.totalLaborCost)}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            Text(text = "Total Worker Cost: ${formatMoney(summary.totalLaborCost)}", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
 

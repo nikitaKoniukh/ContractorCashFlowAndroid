@@ -274,7 +274,7 @@ class ExpenseViewModel(
         var selectedLaborType: LaborType? = input.laborTypeSnapshot
 
         if (description.isBlank()) {
-            description = "Labor: ${workerOption.worker.workerName}"
+            description = "Worker: ${workerOption.worker.workerName}"
         }
 
         if (workerOption.laborType == LaborType.CONTRACT || workerOption.laborType == LaborType.SUBCONTRACTOR) {

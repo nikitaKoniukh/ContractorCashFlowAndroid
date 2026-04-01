@@ -42,9 +42,9 @@ fun LaborFiltersBottomSheet(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = "Labor Filters", style = MaterialTheme.typography.titleMedium)
+            Text(text = "Worker Filters", style = MaterialTheme.typography.titleMedium)
 
-            Text(text = "Labor type")
+            Text(text = "Worker type")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(
                     selected = state.laborType == null,
