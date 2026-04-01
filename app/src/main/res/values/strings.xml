@@ -180,7 +180,7 @@
     <string name="labor_deleted">Worker deleted</string>
     <string name="labor_empty_title">No workers yet</string>
     <string name="labor_empty_body">Add your first worker to track worker costs.</string>
-    <string name="labor_search_placeholder">Search by worker name</string>
+    <string name="labor_search_placeholder">Search by worker or notes</string>
     <string name="labor_worker_name">Worker name</string>
     <string name="labor_labor_type">Worker type</string>
     <string name="labor_hourly_rate">Hourly rate</string>
@@ -322,6 +322,18 @@
     <string name="labor_filters_done">Done</string>
     <string name="labor_screen_add_title">Add Worker</string>
     <string name="labor_screen_edit_title">Edit Worker</string>
+    <string name="labor_filters_on">Filters On</string>
+    <string name="labor_summary_total_cost">Worker Cost</string>
+    <string name="labor_summary_total_workers">Total Workers</string>
+    <string name="labor_summary_total_days">Total Days</string>
+    <string name="labor_summary_total_hours">Total Hours</string>
+    <string name="labor_pill_days">days</string>
+    <string name="labor_pill_hours">hours</string>
+    <string name="labor_section_workers">Workers</string>
+    <string name="labor_total_amount">Total Amount</string>
+    <string name="labor_delete_worker_title">Delete worker?</string>
+    <string name="labor_delete_worker_message">%1$s will be deleted.</string>
+    <string name="labor_delete_worker_message_with_linked">%1$s will be deleted. %2$d linked expense(s) will remain but unlinked.</string>
 
     <!-- Expense Form Strings -->
     <string name="expenses_form_units_label">Units worked</string>

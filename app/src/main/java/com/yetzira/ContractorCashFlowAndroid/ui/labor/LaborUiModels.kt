@@ -33,7 +33,10 @@ data class WorkerMetricsUi(
     val totalUnitsWorked: Double,
     val totalDaysWorked: Int,
     val associatedProjects: List<String>,
-    val linkedExpenseCount: Int
+    val linkedExpenseCount: Int,
+    val hourlyUnitsWorked: Double = 0.0,
+    val dailyUnitsWorked: Double = 0.0,
+    val projectBreakdown: List<ProjectCostUi> = emptyList()
 ) {
     val rateLabel: String
         get() = when (laborType) {
@@ -43,6 +46,11 @@ data class WorkerMetricsUi(
             null -> "-"
         }
 }
+
+data class ProjectCostUi(
+    val projectName: String,
+    val amount: Double
+)
 
 data class LaborSummaryUi(
     val totalLaborCost: Double = 0.0,

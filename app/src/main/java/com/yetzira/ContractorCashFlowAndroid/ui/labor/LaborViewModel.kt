@@ -247,16 +247,40 @@ class LaborViewModel(
         sourceExpenses: List<ExpenseEntity>,
         projects: List<ProjectEntity>
     ): WorkerMetricsUi {
+        val fallbackType = LaborType.fromString(worker.laborType)
+        val hourlyUnitsWorked = sourceExpenses
+            .filter { (LaborType.fromString(it.laborTypeSnapshot) ?: fallbackType) == LaborType.HOURLY }
+            .sumOf { it.unitsWorked ?: 0.0 }
+        val dailyUnitsWorked = sourceExpenses
+            .filter { (LaborType.fromString(it.laborTypeSnapshot) ?: fallbackType) == LaborType.DAILY }
+            .sumOf { it.unitsWorked ?: 0.0 }
+
+        val projectBreakdown = sourceExpenses
+            .groupBy { expense ->
+                projects.firstOrNull { it.id == expense.projectId }?.name ?: ""
+            }
+            .filterKeys { it.isNotBlank() }
+            .map { (projectName, expensesForProject) ->
+                ProjectCostUi(
+                    projectName = projectName,
+                    amount = expensesForProject.sumOf { it.amount }
+                )
+            }
+            .sortedBy { it.projectName.lowercase() }
+
         return WorkerMetricsUi(
             worker = worker,
-            laborType = LaborType.fromString(worker.laborType),
+            laborType = fallbackType,
             totalAmountEarned = sourceExpenses.sumOf { it.amount },
             totalUnitsWorked = sourceExpenses.sumOf { it.unitsWorked ?: 0.0 },
             totalDaysWorked = sourceExpenses.map { normalizeDay(it.date) }.distinct().size,
             associatedProjects = sourceExpenses.mapNotNull { expense ->
                 projects.firstOrNull { it.id == expense.projectId }?.name
             }.distinct().sorted(),
-            linkedExpenseCount = sourceExpenses.size
+            linkedExpenseCount = sourceExpenses.size,
+            hourlyUnitsWorked = hourlyUnitsWorked,
+            dailyUnitsWorked = dailyUnitsWorked,
+            projectBreakdown = projectBreakdown
         )
     }
 
