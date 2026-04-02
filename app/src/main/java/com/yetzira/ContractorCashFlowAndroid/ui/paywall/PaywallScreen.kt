@@ -2,17 +2,21 @@ package com.yetzira.ContractorCashFlowAndroid.ui.paywall
 
 import android.app.Activity
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -28,6 +32,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -75,169 +79,280 @@ fun PaywallScreen(
 
     val yearlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_YEARLY }
     val monthlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_MONTHLY }
-    var selectedProduct by remember(yearlyProduct, monthlyProduct) {
-        mutableStateOf(yearlyProduct ?: monthlyProduct)
+
+    val plans = remember(monthlyProduct, yearlyProduct) {
+        listOf(
+            PaywallPlanOption(
+                id = BillingProduct.PRO_MONTHLY,
+                title = "KablanPro Monthly",
+                periodLabel = "/ month",
+                hardcodedPrice = "₪69.90",
+                basePlanId = BillingProduct.MONTHLY_BASE_PLAN,
+                savingsBadge = null,
+                productDetails = monthlyProduct
+            ),
+            PaywallPlanOption(
+                id = BillingProduct.PRO_YEARLY,
+                title = "KablanPro Yearly",
+                periodLabel = "/ year",
+                hardcodedPrice = "₪349.90",
+                basePlanId = BillingProduct.YEARLY_BASE_PLAN,
+                savingsBadge = "SAVE 17%",
+                productDetails = yearlyProduct
+            )
+        )
+    }
+    var selectedPlanId by remember { mutableStateOf(BillingProduct.PRO_YEARLY) }
+
+    val selectedPlan = plans.firstOrNull { it.id == selectedPlanId }
+    val selectedProduct = selectedPlan?.productDetails
+
+    LaunchedEffect(plans) {
+        if (plans.none { it.id == selectedPlanId }) {
+            selectedPlanId = BillingProduct.PRO_YEARLY
+        }
     }
 
     var showErrorDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isProUser) {
-        if (isProUser) onDismiss()
-    }
-
-    LaunchedEffect(errorMessage) {
-        showErrorDialog = errorMessage != null
-    }
+    LaunchedEffect(isProUser) { if (isProUser) onDismiss() }
+    LaunchedEffect(errorMessage) { showErrorDialog = errorMessage != null }
 
     if (showErrorDialog && errorMessage != null) {
         AlertDialog(
-            onDismissRequest = {
-                showErrorDialog = false
-                viewModel.clearError()
-            },
+            onDismissRequest = { showErrorDialog = false; viewModel.clearError() },
             title = { Text("Error") },
             text = { Text(errorMessage.orEmpty()) },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        showErrorDialog = false
-                        viewModel.clearError()
-                    }
-                ) { Text("OK") }
+                TextButton(onClick = { showErrorDialog = false; viewModel.clearError() }) {
+                    Text("OK")
+                }
             }
         )
     }
 
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
-                    }
-                }
-            )
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        modifier = modifier
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = null,
-                tint = com.yetzira.ContractorCashFlowAndroid.ui.theme.ProGold,
-                modifier = Modifier.size(60.dp)
-            )
+            // ── Sheet drag handle ──────────────────────────────────────────
             Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Upgrade to Pro",
-                style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BalanceTextStyle
+            Box(
+                modifier = Modifier
+                    .size(width = 40.dp, height = 4.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        shape = CircleShape
+                    )
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = limitReachedMessage ?: "Unlock unlimited projects, expenses, invoices, and workers.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier.fillMaxWidth()
+            // ── Close button ───────────────────────────────────────────────
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.End
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    PaywallFeatureRow(Icons.Default.Folder, "Unlimited Projects", "1", "Unlimited")
-                    PaywallFeatureRow(Icons.Default.AttachMoney, "Unlimited Expenses", "1", "Unlimited")
-                    PaywallFeatureRow(Icons.Default.Description, "Unlimited Invoices", "1", "Unlimited")
-                    PaywallFeatureRow(Icons.Default.Group, "Unlimited Workers", "1", "Unlimited")
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            // ── Hero icon ──────────────────────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .size(88.dp)
+                    .background(
+                        color = com.yetzira.ContractorCashFlowAndroid.ui.theme.ProGold.copy(alpha = 0.15f),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = com.yetzira.ContractorCashFlowAndroid.ui.theme.ProGold,
+                    modifier = Modifier.size(52.dp)
+                )
+            }
 
-            if (isLoading) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Upgrade to Pro",
+                style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BalanceTextStyle,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = limitReachedMessage
+                    ?: "Run more projects and manage your full crew — no limits holding you back.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // ── Feature comparison table ───────────────────────────────────
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    // Column headers
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(
+                            text = "Free",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(52.dp),
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Pro",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.width(52.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    PaywallFeatureRow(
+                        icon = Icons.Default.Folder,
+                        title = "Projects",
+                        freeValue = "1",
+                        proValue = "∞"
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    PaywallFeatureRow(
+                        icon = Icons.Default.Group,
+                        title = "Workers",
+                        freeValue = "2",
+                        proValue = "∞"
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    PaywallFeatureRow(
+                        icon = Icons.Default.AttachMoney,
+                        title = "Expenses",
+                        subtitle = "always free",
+                        freeValue = "check",
+                        proValue = "check"
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    PaywallFeatureRow(
+                        icon = Icons.Default.Description,
+                        title = "Invoices",
+                        subtitle = "always free",
+                        freeValue = "check",
+                        proValue = "check"
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Plan cards ─────────────────────────────────────────────────
+            if (isLoading && products.isEmpty()) {
                 CircularProgressIndicator()
             } else {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 ) {
-                    monthlyProduct?.let { product ->
+                    plans.forEach { plan ->
                         PaywallProductCard(
-                            product = product,
-                            basePlanId = BillingProduct.MONTHLY_BASE_PLAN,
-                            isSelected = selectedProduct?.productId == product.productId,
-                            savingsBadge = null,
-                            onClick = { selectedProduct = product }
-                        )
-                    }
-                    yearlyProduct?.let { product ->
-                        PaywallProductCard(
-                            product = product,
-                            basePlanId = BillingProduct.YEARLY_BASE_PLAN,
-                            isSelected = selectedProduct?.productId == product.productId,
-                            savingsBadge = "SAVE",
-                            onClick = { selectedProduct = product }
+                            plan = plan,
+                            isSelected = selectedPlanId == plan.id,
+                            onClick = { selectedPlanId = plan.id }
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
+            // ── Subscribe button ───────────────────────────────────────────
             Button(
                 onClick = {
-                    val product = selectedProduct ?: return@Button
-                    val basePlanId = when (product.productId) {
-                        BillingProduct.PRO_MONTHLY -> BillingProduct.MONTHLY_BASE_PLAN
-                        BillingProduct.PRO_YEARLY -> BillingProduct.YEARLY_BASE_PLAN
-                        else -> return@Button
+                    val product = selectedProduct
+                    val basePlanId = selectedPlan?.basePlanId
+                    if (product != null && basePlanId != null) {
+                        activity?.let { viewModel.launchPurchaseFlow(it, product, basePlanId) }
                     }
-                    activity?.let { viewModel.launchPurchaseFlow(it, product, basePlanId) }
                 },
-                enabled = selectedProduct != null && !isPurchasing,
+                enabled = !isPurchasing,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp)
+                    .padding(horizontal = 16.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 if (isPurchasing) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(22.dp),
                         color = MaterialTheme.colorScheme.onPrimary,
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Subscribe", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                    Text(
+                        text = "Subscribe Now",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        letterSpacing = 0.3.sp
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = { viewModel.restorePurchases() }) {
-                Text("Restore Purchases", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = "Restore Purchases",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "Terms of Service",
+                    text = "Terms of Use",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "·",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -248,65 +363,119 @@ fun PaywallScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(28.dp))
         }
     }
 }
+
+// ── Feature row ────────────────────────────────────────────────────────────────
 
 @Composable
 private fun PaywallFeatureRow(
     icon: ImageVector,
     title: String,
-    freeLimit: String,
-    proLimit: String
+    subtitle: String? = null,
+    freeValue: String,
+    proValue: String
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(28.dp)
-        )
-        Text(text = title, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = proLimit,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF34C759)
+        // Icon in soft circle
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
             )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // Title + optional subtitle
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Free: $freeLimit",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
             )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Free value cell
+        Box(modifier = Modifier.width(52.dp), contentAlignment = Alignment.Center) {
+            if (freeValue == "check") {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = Color(0xFF8E8E93),
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
+                Text(
+                    text = freeValue,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        // Pro value cell
+        Box(modifier = Modifier.width(52.dp), contentAlignment = Alignment.Center) {
+            if (proValue == "check") {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = Color(0xFF59B865),
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
+                Text(
+                    text = proValue,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF59B865),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
 
+// ── Plan card ──────────────────────────────────────────────────────────────────
+
 @Composable
 private fun PaywallProductCard(
-    product: ProductDetails,
-    basePlanId: String,
+    plan: PaywallPlanOption,
     isSelected: Boolean,
-    savingsBadge: String?,
     onClick: () -> Unit
 ) {
-    val pricingPhase = product.subscriptionOfferDetails
-        ?.firstOrNull { it.basePlanId == basePlanId }
+    val pricingPhase = plan.productDetails
+        ?.subscriptionOfferDetails
+        ?.firstOrNull { it.basePlanId == plan.basePlanId }
         ?.pricingPhases
         ?.pricingPhaseList
         ?.firstOrNull()
-
-    val displayPrice = pricingPhase?.formattedPrice.orEmpty()
-    val period = when (basePlanId) {
-        BillingProduct.MONTHLY_BASE_PLAN -> "/ month"
-        BillingProduct.YEARLY_BASE_PLAN -> "/ year"
-        else -> ""
-    }
+    val displayPrice = pricingPhase?.formattedPrice ?: plan.hardcodedPrice
 
     OutlinedCard(
         onClick = onClick,
@@ -315,30 +484,39 @@ private fun PaywallProductCard(
             color = if (isSelected) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+                    else Color.Transparent
+                )
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = product.name,
+                        text = plan.title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
-                    if (savingsBadge != null) {
+                    if (plan.savingsBadge != null) {
                         Surface(
-                            shape = RoundedCornerShape(4.dp),
+                            shape = RoundedCornerShape(6.dp),
                             color = Color(0xFF34C759)
                         ) {
                             Text(
-                                text = savingsBadge,
+                                text = plan.savingsBadge,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
@@ -348,19 +526,39 @@ private fun PaywallProductCard(
                     }
                 }
                 Text(
-                    text = "$displayPrice $period",
+                    text = "$displayPrice ${plan.periodLabel}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Icon(
-                imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                contentDescription = null,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp)
-            )
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(26.dp)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.RadioButtonUnchecked,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.size(26.dp)
+                )
+            }
         }
     }
 }
 
+// ── Data class ─────────────────────────────────────────────────────────────────
+
+private data class PaywallPlanOption(
+    val id: String,
+    val title: String,
+    val periodLabel: String,
+    val hardcodedPrice: String,
+    val basePlanId: String,
+    val savingsBadge: String?,
+    val productDetails: ProductDetails?
+)

@@ -3,7 +3,6 @@ package com.yetzira.ContractorCashFlowAndroid.ui.settings
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
@@ -59,6 +58,9 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.billing.BillingProduct
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
@@ -103,6 +105,11 @@ fun SettingsScreen(
         "KablanPro ${packageInfo.versionName}.${androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(packageInfo)}"
     }
     val coroutineScope = rememberCoroutineScope()
+    val purchaseViewModel: PurchaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = remember { PurchaseViewModelFactory(context) }
+    )
+    val isProUser by purchaseViewModel.isProUser.collectAsState()
+    val activePurchase by purchaseViewModel.activePurchase.collectAsState()
     val credentialManager = remember(context) { CredentialManager.create(context) }
     val googleSignInSetupIncompleteMessage = stringResource(R.string.settings_google_sign_in_setup_incomplete)
     val googleSignInSetupMissingClientIdMessage = stringResource(R.string.settings_google_sign_in_setup_missing_client_id)
@@ -438,13 +445,18 @@ fun SettingsScreen(
 
             AnalyticsCard {
                 SectionTitle(stringResource(R.string.settings_section_subscription))
-                if (state.subscription.isPro) {
+                if (isProUser) {
+                    val planLabel = when {
+                        activePurchase?.products?.contains(BillingProduct.PRO_YEARLY) == true -> "Pro Yearly"
+                        activePurchase?.products?.contains(BillingProduct.PRO_MONTHLY) == true -> "Pro Monthly"
+                        else -> state.subscription.planName
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = stringResource(R.string.settings_subscription_pro_badge), style = MaterialTheme.typography.headlineSmall)
                         Spacer(modifier = Modifier.width(10.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = state.subscription.planName,
+                                text = planLabel,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -459,13 +471,7 @@ fun SettingsScreen(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
-                        onClick = {
-                            val intent = Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("https://play.google.com/store/account/subscriptions")
-                            )
-                            context.startActivity(intent)
-                        },
+                        onClick = { purchaseViewModel.openManageSubscriptions(context) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(stringResource(R.string.settings_manage_subscription))
