@@ -176,24 +176,48 @@ class ExpenseViewModel(
             val parsedAmount = parseAmountInput(state.amount) ?: 0.0
             if (state.description.isBlank() || parsedAmount <= 0.0) return@launch
 
-            val entity = ExpenseEntity(
-                id = state.expenseId ?: java.util.UUID.randomUUID().toString(),
-                category = state.category.name,
-                amount = parsedAmount,
-                descriptionText = state.description,
-                date = state.date,
-                projectId = state.projectId,
-                workerId = state.workerId,
-                unitsWorked = state.unitsWorked.toDoubleOrNull(),
-                laborTypeSnapshot = state.laborTypeSnapshot?.name,
-                notes = state.notes.ifBlank { null },
-                receiptImageUri = state.receiptImageUri
-            )
-
-            if (state.expenseId == null) {
-                repository.insertExpense(entity)
+            // Multi-date save for daily labor
+            if (state.useMultiDatePicker && state.selectedDates.isNotEmpty()) {
+                val dayCount = state.selectedDayCount
+                val dailyRate = parsedAmount / dayCount
+                
+                for (dateMillis in state.selectedDates) {
+                    val entity = ExpenseEntity(
+                        id = java.util.UUID.randomUUID().toString(),
+                        category = state.category.name,
+                        amount = dailyRate,
+                        descriptionText = state.description,
+                        date = dateMillis,
+                        projectId = state.projectId,
+                        workerId = state.workerId,
+                        unitsWorked = 1.0,
+                        laborTypeSnapshot = state.laborTypeSnapshot?.name,
+                        notes = state.notes.ifBlank { null },
+                        receiptImageUri = state.receiptImageUri
+                    )
+                    repository.insertExpense(entity)
+                }
             } else {
-                repository.updateExpense(entity)
+                // Single expense save
+                val entity = ExpenseEntity(
+                    id = state.expenseId ?: java.util.UUID.randomUUID().toString(),
+                    category = state.category.name,
+                    amount = parsedAmount,
+                    descriptionText = state.description,
+                    date = state.date,
+                    projectId = state.projectId,
+                    workerId = state.workerId,
+                    unitsWorked = state.unitsWorked.toDoubleOrNull(),
+                    laborTypeSnapshot = state.laborTypeSnapshot?.name,
+                    notes = state.notes.ifBlank { null },
+                    receiptImageUri = state.receiptImageUri
+                )
+
+                if (state.expenseId == null) {
+                    repository.insertExpense(entity)
+                } else {
+                    repository.updateExpense(entity)
+                }
             }
 
             val budgetResult = evaluateBudgetWarning(state.projectId)
@@ -210,9 +234,10 @@ class ExpenseViewModel(
         projectId: String? = null,
         workerId: String? = null,
         unitsWorked: String? = null,
-        laborTypeSnapshot: LaborType? = current.laborTypeSnapshot
+        laborTypeSnapshot: LaborType? = current.laborTypeSnapshot,
+        selectedDates: List<Long>? = null
     ): ExpenseFormUiState {
-        val updated = current.copy(
+        var updated = current.copy(
             category = category ?: current.category,
             amount = amount ?: current.amount,
             description = description ?: current.description,
@@ -220,8 +245,30 @@ class ExpenseViewModel(
             projectId = projectId ?: current.projectId,
             workerId = workerId ?: current.workerId,
             unitsWorked = unitsWorked ?: current.unitsWorked,
-            laborTypeSnapshot = laborTypeSnapshot
+            laborTypeSnapshot = laborTypeSnapshot,
+            selectedDates = selectedDates ?: current.selectedDates
         )
+
+        // If category changed away from LABOR, clear labor-specific fields
+        if (category != null && category != ExpenseCategory.LABOR && updated.category != ExpenseCategory.LABOR) {
+            updated = updated.copy(
+                workerId = null,
+                unitsWorked = "",
+                laborTypeSnapshot = null,
+                notes = "",
+                selectedDates = emptyList()
+            )
+        }
+
+        // If labor type changed and multi-date is now active, clear units; if hourly, clear dates
+        if (laborTypeSnapshot != null && laborTypeSnapshot != current.laborTypeSnapshot) {
+            if (laborTypeSnapshot == LaborType.DAILY) {
+                updated = updated.copy(unitsWorked = "")
+            } else if (laborTypeSnapshot == LaborType.HOURLY) {
+                updated = updated.copy(selectedDates = emptyList())
+            }
+        }
+
         return recalculateLaborDependentFields(updated)
     }
 
@@ -255,7 +302,8 @@ class ExpenseViewModel(
             return input.copy(
                 isAmountReadOnly = false,
                 laborTypeSnapshot = null,
-                canSave = input.description.isNotBlank() && (parseAmountInput(input.amount) ?: 0.0) > 0.0
+                canSave = input.description.isNotBlank() && (parseAmountInput(input.amount) ?: 0.0) > 0.0,
+                selectedDates = emptyList()
             )
         }
 
@@ -264,7 +312,8 @@ class ExpenseViewModel(
             return input.copy(
                 isAmountReadOnly = false,
                 laborTypeSnapshot = null,
-                canSave = input.description.isNotBlank() && (parseAmountInput(input.amount) ?: 0.0) > 0.0
+                canSave = false,
+                selectedDates = emptyList()
             )
         }
 
@@ -274,7 +323,7 @@ class ExpenseViewModel(
         var selectedLaborType: LaborType? = input.laborTypeSnapshot
 
         if (description.isBlank()) {
-            description = "Worker: ${workerOption.worker.workerName}"
+            description = workerOption.worker.workerName
         }
 
         if (workerOption.laborType == LaborType.SUBCONTRACTOR) {
@@ -300,9 +349,18 @@ class ExpenseViewModel(
                 else -> null
             }
 
-            val units = input.unitsWorked.toDoubleOrNull() ?: 0.0
-            if (rate != null && units > 0.0) {
-                amount = formatAmountInput((rate * units).toLong().toString())
+            if (selectedLaborType == LaborType.DAILY && input.selectedDates.isNotEmpty()) {
+                // Multi-day: total = rate * dayCount
+                if (rate != null && rate > 0.0) {
+                    val totalAmount = rate * input.selectedDates.size
+                    amount = formatAmountInput(totalAmount.toLong().toString())
+                }
+            } else {
+                // Single day or hourly: standard calculation
+                val units = input.unitsWorked.toDoubleOrNull() ?: 0.0
+                if (rate != null && units > 0.0) {
+                    amount = formatAmountInput((rate * units).toLong().toString())
+                }
             }
         }
 
@@ -310,7 +368,14 @@ class ExpenseViewModel(
             workerOption.hourlyRate != null && workerOption.dailyRate != null &&
                 (selectedLaborType != LaborType.HOURLY && selectedLaborType != LaborType.DAILY)
 
-        val canSave = !requiresLaborModeSelection && description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0
+        // For daily with multi-date, require at least one selected date
+        val multiDateValid = if (selectedLaborType == LaborType.DAILY && input.useMultiDatePicker) {
+            input.selectedDates.isNotEmpty()
+        } else {
+            true
+        }
+
+        val canSave = !requiresLaborModeSelection && description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0 && multiDateValid
 
         return input.copy(
             amount = amount,

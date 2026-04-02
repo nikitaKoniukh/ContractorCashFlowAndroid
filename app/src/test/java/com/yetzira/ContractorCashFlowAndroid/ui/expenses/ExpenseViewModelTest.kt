@@ -55,7 +55,7 @@ class ExpenseViewModelTest {
         assertEquals("4.500", updated.amount)
         assertTrue(updated.isAmountReadOnly)
         assertEquals(LaborType.SUBCONTRACTOR, updated.laborTypeSnapshot)
-        assertTrue(updated.description.startsWith("Worker:"))
+        assertEquals("Contractor", updated.description)
     }
 
     @Test

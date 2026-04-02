@@ -365,6 +365,9 @@
     <string name="expenses_form_date_label">Date</string>
     <string name="expenses_form_project_label">Project (optional)</string>
     <string name="expenses_form_no_project">No project</string>
+    <string name="expenses_form_select_days">Select one or more days</string>
+    <string name="expenses_form_selected_dates">Selected dates:</string>
+    <string name="expenses_form_notes_label">Notes (optional)</string>
     <string name="expenses_filters_category_label">Category</string>
     <string name="expenses_filters_all">All</string>
     <string name="expenses_filters_clear">Clear All</string>
@@ -400,5 +403,4 @@
     <string name="scan_receipt_attached">Receipt attached</string>
     <string name="scan_receipt_hint">Extracted data — review and edit before saving</string>
     <string name="scan_notes_label">Notes</string>
-    <string name="expenses_form_notes_label">Notes (optional)</string>
 </resources>

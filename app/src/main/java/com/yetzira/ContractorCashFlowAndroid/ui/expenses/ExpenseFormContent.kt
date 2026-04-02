@@ -36,6 +36,8 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.toFormattedCurrency
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
 import java.text.SimpleDateFormat
@@ -48,6 +50,9 @@ fun ExpenseFormContent(
     state: ExpenseFormUiState,
     currency: CurrencyOption,
     onStateChange: (ExpenseFormUiState) -> Unit,
+    onUnitsWorkedChanged: (String) -> Unit = { },
+    onDateAdded: (Long) -> Unit = { },
+    onDateRemoved: (Long) -> Unit = { },
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -80,7 +85,14 @@ fun ExpenseFormContent(
                         onSelected = { selectedName ->
                             val selected = ExpenseCategory.entries.find { it.name == selectedName }
                             if (selected != null) {
-                                onStateChange(state.copy(category = selected))
+                                onStateChange(state.copy(
+                                    category = selected,
+                                    workerId = null,
+                                    unitsWorked = "",
+                                    laborTypeSnapshot = null,
+                                    notes = "",
+                                    selectedDates = emptyList()
+                                ))
                             }
                         },
                         modifier = Modifier.fillMaxWidth()
@@ -94,7 +106,12 @@ fun ExpenseFormContent(
                             onSelected = { workerName ->
                                 val worker = state.workers.find { it.worker.workerName == workerName }
                                 if (worker != null) {
-                                    onStateChange(state.copy(workerId = worker.worker.id, laborTypeSnapshot = null))
+                                    onStateChange(state.copy(
+                                        workerId = worker.worker.id,
+                                        laborTypeSnapshot = null,
+                                        unitsWorked = "",
+                                        selectedDates = emptyList()
+                                    ))
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -125,7 +142,11 @@ fun ExpenseFormContent(
                                             dailyLabel -> LaborType.DAILY
                                             else -> null
                                         }
-                                        onStateChange(state.copy(laborTypeSnapshot = selectedMode))
+                                        onStateChange(state.copy(
+                                            laborTypeSnapshot = selectedMode,
+                                            unitsWorked = "",
+                                            selectedDates = emptyList()
+                                        ))
                                     },
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -150,15 +171,11 @@ fun ExpenseFormContent(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
-                            if (effectiveLaborType == LaborType.HOURLY || effectiveLaborType == LaborType.DAILY) {
+                            if (effectiveLaborType == LaborType.HOURLY) {
                                 ModernTextField(
                                     value = state.unitsWorked,
                                     onValueChange = { onStateChange(state.copy(unitsWorked = it)) },
-                                    label = if (effectiveLaborType == LaborType.DAILY) {
-                                        stringResource(R.string.expenses_form_days_worked_label)
-                                    } else {
-                                        stringResource(R.string.expenses_form_hours_worked_label)
-                                    },
+                                    label = stringResource(R.string.expenses_form_hours_worked_label),
                                     modifier = Modifier.fillMaxWidth(),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                     singleLine = true
@@ -166,50 +183,121 @@ fun ExpenseFormContent(
                             }
                         }
                     }
-                }
-            }
-        }
 
-        item {
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ModernTextField(
-                        value = state.description,
-                        onValueChange = { onStateChange(state.copy(description = it)) },
-                        label = stringResource(R.string.expenses_form_description_label),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
+                    // For labor: show notes field; for others: show description
+                    if (state.category == ExpenseCategory.LABOR) {
+                        ModernTextField(
+                            value = state.notes,
+                            onValueChange = { onStateChange(state.copy(notes = it)) },
+                            label = stringResource(R.string.expenses_form_notes_label),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = false,
+                            minLines = 2
+                        )
+                    } else {
+                        ModernTextField(
+                            value = state.description,
+                            onValueChange = { onStateChange(state.copy(description = it)) },
+                            label = stringResource(R.string.expenses_form_description_label),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
 
-                    ModernTextField(
-                        value = state.amount,
-                        onValueChange = {
-                            if (!state.isAmountReadOnly) {
-                                onStateChange(state.copy(amount = formatAmountInput(it)))
+                    if (state.useMultiDatePicker) {
+                        // Multi-date picker UI
+                        Card(
+                            shape = RoundedCornerShape(8.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.expenses_form_amount_label),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                    Text(
+                                        text = (parseAmountInput(state.amount) ?: 0.0).toFormattedCurrency(currency),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (state.amount.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = if (state.selectedDates.isEmpty()) Icons.Default.CalendarToday else Icons.Default.CalendarToday,
+                                        contentDescription = null,
+                                        tint = if (state.selectedDates.isEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = if (state.selectedDates.isEmpty()) {
+                                            stringResource(R.string.expenses_form_select_days)
+                                        } else {
+                                            "${state.selectedDayCount} day${if (state.selectedDayCount == 1) "" else "s"} selected"
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (state.selectedDates.isEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
-                        },
-                        label = stringResource(R.string.expenses_form_amount_label),
-                        modifier = Modifier.fillMaxWidth(),
-                        suffix = { Text(currency.symbol) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        readOnly = state.isAmountReadOnly
-                    )
+                        }
 
-                    DatePickerField(
-                        date = state.date,
-                        onDateSelected = { onStateChange(state.copy(date = it)) }
-                    )
+                        // Simple date selection display
+                        Text(
+                            text = stringResource(R.string.expenses_form_selected_dates),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (state.selectedDates.isNotEmpty()) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                state.selectedDates.forEach { dateMillis ->
+                                    Text(
+                                        text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(dateMillis)),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        // Single date/amount picker mode
+                        ModernTextField(
+                            value = state.amount,
+                            onValueChange = {
+                                if (!state.isAmountReadOnly) {
+                                    onStateChange(state.copy(amount = formatAmountInput(it)))
+                                }
+                            },
+                            label = stringResource(R.string.expenses_form_amount_label),
+                            modifier = Modifier.fillMaxWidth(),
+                            suffix = { Text(currency.symbol) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            singleLine = true,
+                            readOnly = state.isAmountReadOnly
+                        )
+
+                        DatePickerField(
+                            date = state.date,
+                            onDateSelected = { onStateChange(state.copy(date = it)) }
+                        )
+                    }
                 }
             }
         }
@@ -241,32 +329,6 @@ fun ExpenseFormContent(
                             onStateChange(state.copy(projectId = selectedProject?.id))
                         },
                         modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
-        }
-
-        // Notes field
-        item {
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ModernTextField(
-                        value = state.notes,
-                        onValueChange = { onStateChange(state.copy(notes = it)) },
-                        label = stringResource(R.string.expenses_form_notes_label),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = false,
-                        minLines = 3
                     )
                 }
             }
@@ -311,17 +373,17 @@ fun ExpenseFormContent(
 @Composable
 private fun DatePickerField(date: Long, onDateSelected: (Long) -> Unit) {
     val context = LocalContext.current
-    androidx.compose.foundation.layout.Row(
+    Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        androidx.compose.foundation.layout.Row(
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.weight(1f)
         ) {
-            androidx.compose.material3.Icon(
+            Icon(
                 imageVector = Icons.Default.CalendarToday,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,

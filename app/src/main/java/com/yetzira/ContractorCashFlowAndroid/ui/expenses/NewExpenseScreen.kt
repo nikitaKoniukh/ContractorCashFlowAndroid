@@ -85,7 +85,7 @@ fun NewExpenseScreen(
     }
 
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -114,7 +114,20 @@ fun NewExpenseScreen(
         ExpenseFormContent(
             state = formState,
             currency = currency,
-            onStateChange = { updated -> formState = viewModel.updateForm(updated) },
+            onStateChange = { updated -> 
+                formState = viewModel.updateForm(updated)
+            },
+            onUnitsWorkedChanged = { newUnits ->
+                formState = viewModel.updateForm(formState.copy(unitsWorked = newUnits))
+            },
+            onDateAdded = { dateMillis ->
+                val updatedDates = formState.selectedDates + dateMillis
+                formState = viewModel.updateForm(formState.copy(selectedDates = updatedDates))
+            },
+            onDateRemoved = { dateMillis ->
+                val updatedDates = formState.selectedDates.filter { it != dateMillis }
+                formState = viewModel.updateForm(formState.copy(selectedDates = updatedDates))
+            },
             modifier = Modifier.padding(innerPadding).padding(16.dp)
         )
     }

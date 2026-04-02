@@ -64,6 +64,9 @@ class UserPreferencesRepository(context: Context) :
         val SUBSCRIPTION_IS_PRO = booleanPreferencesKey("subscription_is_pro")
         val SUBSCRIPTION_PLAN_NAME = stringPreferencesKey("subscription_plan_name")
         val SUBSCRIPTION_RENEWAL_DATE = longPreferencesKey("subscription_renewal_date")
+        val SAVED_EXPENSE_COUNT = longPreferencesKey("saved_expense_count")
+        val HAS_RATED = booleanPreferencesKey("has_rated")
+        val DECLINED_REVIEW_AFTER_EXPENSES = booleanPreferencesKey("declined_review_after_expenses")
     }
 
     // Flow getters
@@ -104,6 +107,18 @@ class UserPreferencesRepository(context: Context) :
 
     override val subscriptionRenewalDate: Flow<Long?> = dataStore.data.map { preferences ->
         preferences[SUBSCRIPTION_RENEWAL_DATE]
+    }
+
+    val savedExpenseCount: Flow<Long?> = dataStore.data.map { preferences ->
+        preferences[SAVED_EXPENSE_COUNT]
+    }
+
+    val hasRated: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[HAS_RATED] ?: false
+    }
+
+    val declinedReviewAfterExpenses: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[DECLINED_REVIEW_AFTER_EXPENSES] ?: false
     }
 
     // Suspend setters
@@ -165,6 +180,24 @@ class UserPreferencesRepository(context: Context) :
 
     suspend fun clearSubscription() {
         setSubscription(isPro = false, planName = null, renewalDate = null)
+    }
+
+    suspend fun setSavedExpenseCount(count: Long) {
+        dataStore.edit { preferences ->
+            preferences[SAVED_EXPENSE_COUNT] = count
+        }
+    }
+
+    suspend fun setHasRated(hasRated: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[HAS_RATED] = hasRated
+        }
+    }
+
+    suspend fun setDeclinedReviewAfterExpenses(declined: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[DECLINED_REVIEW_AFTER_EXPENSES] = declined
+        }
     }
 }
 

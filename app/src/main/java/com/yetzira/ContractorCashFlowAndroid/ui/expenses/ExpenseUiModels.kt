@@ -51,8 +51,15 @@ data class ExpenseFormUiState(
     val projects: List<ProjectEntity> = emptyList(),
     val workers: List<WorkerOptionUi> = emptyList(),
     val isAmountReadOnly: Boolean = false,
-    val canSave: Boolean = false
-)
+    val canSave: Boolean = false,
+    val selectedDates: List<Long> = emptyList()
+) {
+    val useMultiDatePicker: Boolean
+        get() = category == ExpenseCategory.LABOR && laborTypeSnapshot == LaborType.DAILY
+
+    val selectedDayCount: Int
+        get() = selectedDates.size
+}
 
 sealed class ExpenseSaveResult {
     data object None : ExpenseSaveResult()

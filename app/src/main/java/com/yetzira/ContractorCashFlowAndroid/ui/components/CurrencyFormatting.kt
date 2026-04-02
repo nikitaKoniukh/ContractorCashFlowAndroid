@@ -43,3 +43,7 @@ fun formatCurrencyAmount(amount: Double, currency: CurrencyOption): String {
     return "${formatAmountWithGrouping(amount)} ${currency.symbol}"
 }
 
+fun Double.toFormattedCurrency(currency: CurrencyOption): String {
+    return formatCurrencyAmount(this, currency)
+}
+
