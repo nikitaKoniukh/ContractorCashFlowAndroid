@@ -107,41 +107,47 @@ fun ExpensesListScreen(
             if (state.expenses.isEmpty()) {
                 EmptyExpensesState(onCreateExpense = onCreateExpense)
             } else {
+                val sections = remember(state.expenses) { groupExpensesByDate(state.expenses) }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(top = 14.dp, bottom = 92.dp)
                 ) {
-                    items(state.expenses, key = { it.expense.id }) { item ->
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = { value ->
-                                if (value != SwipeToDismissBoxValue.Settled) {
-                                    pendingDelete = item
-                                    return@rememberSwipeToDismissBoxState false
-                                }
-                                true
-                            }
-                        )
+                    sections.forEach { section ->
+                        item(key = "header_${section.dayStartMillis}") {
+                            ExpenseDateSectionHeader(labelRes = section.labelRes, dateFallback = section.dateFallback)
+                        }
 
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            backgroundContent = {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(MaterialTheme.colorScheme.errorContainer)
-                                        .padding(horizontal = 16.dp),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
-                                    Text(text = stringResource(R.string.common_delete))
+                        items(section.items, key = { it.expense.id }) { item ->
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { value ->
+                                    if (value != SwipeToDismissBoxValue.Settled) {
+                                        pendingDelete = item
+                                        return@rememberSwipeToDismissBoxState false
+                                    }
+                                    true
                                 }
-                            },
-                            content = {
-                                ExpenseRow(item = item, onClick = { onEditExpense(item.expense.id) })
-                                
-                            }
-                        )
+                            )
+
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                backgroundContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(MaterialTheme.colorScheme.errorContainer)
+                                            .padding(horizontal = 16.dp),
+                                        contentAlignment = Alignment.CenterEnd
+                                    ) {
+                                        Text(text = stringResource(R.string.common_delete))
+                                    }
+                                },
+                                content = {
+                                    ExpenseRow(item = item, onClick = { onEditExpense(item.expense.id) })
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -183,6 +189,18 @@ fun ExpensesListScreen(
             }
         )
     }
+}
+
+@Composable
+private fun ExpenseDateSectionHeader(labelRes: Int?, dateFallback: String) {
+    val label = labelRes?.let { stringResource(it) } ?: dateFallback
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+    )
 }
 
 @Composable
@@ -310,4 +328,48 @@ private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
 
 
 private fun formatDate(timestamp: Long): String = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
+
+private data class ExpenseDateSection(
+    val dayStartMillis: Long,
+    val labelRes: Int?,
+    val dateFallback: String,
+    val items: List<ExpenseListItemUi>
+)
+
+private fun groupExpensesByDate(expenses: List<ExpenseListItemUi>): List<ExpenseDateSection> {
+    if (expenses.isEmpty()) return emptyList()
+
+    val grouped = linkedMapOf<Long, MutableList<ExpenseListItemUi>>()
+    expenses.forEach { item ->
+        val dayStart = normalizeDay(item.expense.date)
+        grouped.getOrPut(dayStart) { mutableListOf() }.add(item)
+    }
+
+    return grouped.map { (dayStart, items) ->
+        val todayStart = normalizeDay(System.currentTimeMillis())
+        val yesterdayStart = normalizeDay(System.currentTimeMillis() - 86_400_000L)
+        val labelRes = when (dayStart) {
+            todayStart -> R.string.common_today
+            yesterdayStart -> R.string.common_yesterday
+            else -> null
+        }
+        ExpenseDateSection(
+            dayStartMillis = dayStart,
+            labelRes = labelRes,
+            dateFallback = formatDate(dayStart),
+            items = items
+        )
+    }
+}
+
+private fun normalizeDay(timestamp: Long): Long {
+    val cal = Calendar.getInstance().apply {
+        timeInMillis = timestamp
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+    return cal.timeInMillis
+}
 

@@ -26,6 +26,8 @@
     <string name="common_undo">Undo</string>
     <string name="common_edit">Edit</string>
     <string name="common_more">More</string>
+    <string name="common_today">Today</string>
+    <string name="common_yesterday">Yesterday</string>
 
     <string name="projects_new_project">New Project</string>
     <string name="projects_search_placeholder">Search by project or client</string>
