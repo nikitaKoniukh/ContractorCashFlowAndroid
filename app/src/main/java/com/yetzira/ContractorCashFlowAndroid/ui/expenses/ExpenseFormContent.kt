@@ -2,7 +2,10 @@ package com.yetzira.ContractorCashFlowAndroid.ui.expenses
 
 import android.app.DatePickerDialog
 import android.net.Uri as AndroidUri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,6 +24,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,7 +62,6 @@ fun ExpenseFormContent(
     onDateRemoved: (Long) -> Unit = { },
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -280,54 +286,19 @@ fun ExpenseFormContent(
                             }
                         }
 
-                        // Simple date selection display
-                        Text(
-                            text = stringResource(R.string.expenses_form_selected_dates),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        TextButton(
-                            onClick = {
-                                val cal = Calendar.getInstance().apply { timeInMillis = state.date }
-                                DatePickerDialog(
-                                    context,
-                                    { _, year, month, day ->
-                                        val picked = Calendar.getInstance().apply {
-                                            set(year, month, day, 0, 0, 0)
-                                            set(Calendar.MILLISECOND, 0)
-                                        }.timeInMillis
-                                        onDateAdded(picked)
-                                    },
-                                    cal.get(Calendar.YEAR),
-                                    cal.get(Calendar.MONTH),
-                                    cal.get(Calendar.DAY_OF_MONTH)
-                                ).show()
-                            }
-                        ) {
-                            Text(stringResource(R.string.expenses_form_add_day))
-                        }
-                        if (state.selectedDates.isNotEmpty()) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                state.selectedDates.forEach { dateMillis ->
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(dateMillis)),
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
-                                        TextButton(onClick = { onDateRemoved(dateMillis) }) {
-                                            Text(stringResource(R.string.action_delete))
-                                        }
-                                    }
+                        EmbeddedMultiDatePicker(
+                            selectedDates = state.selectedDates,
+                            initialMonthMillis = state.selectedDates.firstOrNull() ?: state.date,
+                            onToggleDate = { dateMillis, isSelected ->
+                                if (isSelected) {
+                                    onDateRemoved(dateMillis)
+                                } else {
+                                    onDateAdded(dateMillis)
                                 }
                             }
-                        }
+                        )
+
+                        // Date selection is handled directly in the embedded calendar picker.
                     } else {
                         // Single date/amount picker mode
                         ModernTextField(
@@ -420,6 +391,156 @@ fun ExpenseFormContent(
             }
         }
     }
+}
+
+@Composable
+private fun EmbeddedMultiDatePicker(
+    selectedDates: List<Long>,
+    initialMonthMillis: Long,
+    onToggleDate: (Long, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var displayedMonthStart by remember(initialMonthMillis) { mutableStateOf(startOfMonth(initialMonthMillis)) }
+    val calendar = remember { Calendar.getInstance() }
+    val monthLabel = remember(displayedMonthStart) {
+        SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date(displayedMonthStart))
+    }
+
+    val firstDayOfWeek = calendar.firstDayOfWeek
+    val dayHeaders = listOf(
+        Calendar.SUNDAY,
+        Calendar.MONDAY,
+        Calendar.TUESDAY,
+        Calendar.WEDNESDAY,
+        Calendar.THURSDAY,
+        Calendar.FRIDAY,
+        Calendar.SATURDAY
+    ).let { days ->
+        val startIdx = days.indexOf(firstDayOfWeek).coerceAtLeast(0)
+        (days.drop(startIdx) + days.take(startIdx)).map { day ->
+            calendar.set(Calendar.DAY_OF_WEEK, day)
+            SimpleDateFormat("EE", Locale.getDefault()).format(calendar.time).take(2)
+        }
+    }
+
+    val cells = remember(displayedMonthStart, firstDayOfWeek) {
+        buildMonthCells(displayedMonthStart, firstDayOfWeek)
+    }
+
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(onClick = {
+                    val cal = Calendar.getInstance().apply { timeInMillis = displayedMonthStart }
+                    cal.add(Calendar.MONTH, -1)
+                    displayedMonthStart = startOfMonth(cal.timeInMillis)
+                }) {
+                    Text("<")
+                }
+                Text(text = monthLabel, style = MaterialTheme.typography.titleSmall)
+                TextButton(onClick = {
+                    val cal = Calendar.getInstance().apply { timeInMillis = displayedMonthStart }
+                    cal.add(Calendar.MONTH, 1)
+                    displayedMonthStart = startOfMonth(cal.timeInMillis)
+                }) {
+                    Text(">")
+                }
+            }
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                dayHeaders.forEach { header ->
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(text = header, style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+
+            cells.chunked(7).forEach { week ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    week.forEach { dateMillis ->
+                        val selected = dateMillis != null && selectedDates.contains(dateMillis)
+                        val backgroundColor = if (selected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(2.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(backgroundColor)
+                                .clickable(enabled = dateMillis != null) {
+                                    if (dateMillis != null) {
+                                        onToggleDate(dateMillis, selected)
+                                    }
+                                }
+                                .padding(vertical = 10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (dateMillis == null) "" else dayOfMonth(dateMillis).toString(),
+                                color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun buildMonthCells(monthStartMillis: Long, firstDayOfWeek: Int): List<Long?> {
+    val cal = Calendar.getInstance().apply { timeInMillis = monthStartMillis }
+    val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+    val firstWeekDayOfMonth = cal.get(Calendar.DAY_OF_WEEK)
+    val leadingCells = (firstWeekDayOfMonth - firstDayOfWeek + 7) % 7
+
+    val cells = mutableListOf<Long?>()
+    repeat(leadingCells) { cells.add(null) }
+
+    for (day in 1..daysInMonth) {
+        cal.set(Calendar.DAY_OF_MONTH, day)
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        cells.add(cal.timeInMillis)
+    }
+
+    while (cells.size % 7 != 0) {
+        cells.add(null)
+    }
+    return cells
+}
+
+private fun startOfMonth(millis: Long): Long {
+    val cal = Calendar.getInstance().apply { timeInMillis = millis }
+    cal.set(Calendar.DAY_OF_MONTH, 1)
+    cal.set(Calendar.HOUR_OF_DAY, 0)
+    cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0)
+    cal.set(Calendar.MILLISECOND, 0)
+    return cal.timeInMillis
+}
+
+private fun dayOfMonth(millis: Long): Int {
+    val cal = Calendar.getInstance().apply { timeInMillis = millis }
+    return cal.get(Calendar.DAY_OF_MONTH)
 }
 
 @Composable
