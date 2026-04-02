@@ -367,6 +367,7 @@
     <string name="expenses_form_no_project">No project</string>
     <string name="expenses_form_select_days">Select one or more days</string>
     <string name="expenses_form_selected_dates">Selected dates:</string>
+    <string name="expenses_form_add_day">Add day</string>
     <string name="expenses_form_notes_label">Notes (optional)</string>
     <string name="expenses_filters_category_label">Category</string>
     <string name="expenses_filters_all">All</string>

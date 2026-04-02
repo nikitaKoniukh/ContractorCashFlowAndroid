@@ -121,7 +121,7 @@ fun NewExpenseScreen(
                 formState = viewModel.updateForm(formState.copy(unitsWorked = newUnits))
             },
             onDateAdded = { dateMillis ->
-                val updatedDates = formState.selectedDates + dateMillis
+                val updatedDates = (formState.selectedDates + dateMillis).distinct().sorted()
                 formState = viewModel.updateForm(formState.copy(selectedDates = updatedDates))
             },
             onDateRemoved = { dateMillis ->

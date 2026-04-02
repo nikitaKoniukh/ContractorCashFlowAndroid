@@ -55,6 +55,7 @@ fun ExpenseFormContent(
     onDateRemoved: (Long) -> Unit = { },
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -196,7 +197,7 @@ fun ExpenseFormContent(
                             if (effectiveLaborType == LaborType.HOURLY) {
                                 ModernTextField(
                                     value = state.unitsWorked,
-                                    onValueChange = { onStateChange(state.copy(unitsWorked = it)) },
+                                    onValueChange = onUnitsWorkedChanged,
                                     label = stringResource(R.string.expenses_form_hours_worked_label),
                                     modifier = Modifier.fillMaxWidth(),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -285,16 +286,45 @@ fun ExpenseFormContent(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        TextButton(
+                            onClick = {
+                                val cal = Calendar.getInstance().apply { timeInMillis = state.date }
+                                DatePickerDialog(
+                                    context,
+                                    { _, year, month, day ->
+                                        val picked = Calendar.getInstance().apply {
+                                            set(year, month, day, 0, 0, 0)
+                                            set(Calendar.MILLISECOND, 0)
+                                        }.timeInMillis
+                                        onDateAdded(picked)
+                                    },
+                                    cal.get(Calendar.YEAR),
+                                    cal.get(Calendar.MONTH),
+                                    cal.get(Calendar.DAY_OF_MONTH)
+                                ).show()
+                            }
+                        ) {
+                            Text(stringResource(R.string.expenses_form_add_day))
+                        }
                         if (state.selectedDates.isNotEmpty()) {
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 state.selectedDates.forEach { dateMillis ->
-                                    Text(
-                                        text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(dateMillis)),
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(dateMillis)),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        TextButton(onClick = { onDateRemoved(dateMillis) }) {
+                                            Text(stringResource(R.string.action_delete))
+                                        }
+                                    }
                                 }
                             }
                         }
