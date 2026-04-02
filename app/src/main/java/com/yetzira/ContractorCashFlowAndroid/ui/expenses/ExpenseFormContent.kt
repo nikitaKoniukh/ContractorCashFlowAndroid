@@ -121,27 +121,54 @@ fun ExpenseFormContent(
                         if (worker != null) {
                             val hasHourly = worker.hourlyRate != null
                             val hasDaily = worker.dailyRate != null
+                            val hasSubcontractor = worker.contractPrice != null
                             val selectedLaborMode = state.laborTypeSnapshot
 
-                            if (hasHourly && hasDaily) {
+                            // Build list of available labor types for this worker
+                            val availableLaborTypes = mutableListOf<LaborType>()
+                            if (hasHourly) availableLaborTypes.add(LaborType.HOURLY)
+                            if (hasDaily) availableLaborTypes.add(LaborType.DAILY)
+                            if (hasSubcontractor) availableLaborTypes.add(LaborType.SUBCONTRACTOR)
+
+                            // Always show labor type selector if multiple options available or to allow override
+                            if (availableLaborTypes.size > 1 || availableLaborTypes.size == 1) {
                                 val hourlyLabel = stringResource(R.string.expenses_form_labor_mode_hourly)
                                 val dailyLabel = stringResource(R.string.expenses_form_labor_mode_daily)
+                                val subcontractorLabel = stringResource(R.string.labor_type_subcontractor)
+
+                                val typeOptions = availableLaborTypes.map { type ->
+                                    when (type) {
+                                        LaborType.HOURLY -> hourlyLabel
+                                        LaborType.DAILY -> dailyLabel
+                                        LaborType.SUBCONTRACTOR -> subcontractorLabel
+                                    }
+                                }
+
+                                val labelToTypeMap = mapOf(
+                                    hourlyLabel to LaborType.HOURLY,
+                                    dailyLabel to LaborType.DAILY,
+                                    subcontractorLabel to LaborType.SUBCONTRACTOR
+                                )
+
                                 val selectedModeLabel = when (selectedLaborMode) {
                                     LaborType.HOURLY -> hourlyLabel
                                     LaborType.DAILY -> dailyLabel
-                                    else -> ""
+                                    LaborType.SUBCONTRACTOR -> subcontractorLabel
+                                    else -> if (availableLaborTypes.isNotEmpty()) {
+                                        when (availableLaborTypes.first()) {
+                                            LaborType.HOURLY -> hourlyLabel
+                                            LaborType.DAILY -> dailyLabel
+                                            LaborType.SUBCONTRACTOR -> subcontractorLabel
+                                        }
+                                    } else ""
                                 }
 
                                 ModernDropdown(
                                     label = stringResource(R.string.expenses_form_labor_mode_label),
-                                    options = listOf(hourlyLabel, dailyLabel),
+                                    options = typeOptions,
                                     selected = selectedModeLabel,
                                     onSelected = { modeLabel ->
-                                        val selectedMode = when (modeLabel) {
-                                            hourlyLabel -> LaborType.HOURLY
-                                            dailyLabel -> LaborType.DAILY
-                                            else -> null
-                                        }
+                                        val selectedMode = labelToTypeMap[modeLabel] ?: availableLaborTypes.firstOrNull()
                                         onStateChange(state.copy(
                                             laborTypeSnapshot = selectedMode,
                                             unitsWorked = "",
@@ -152,12 +179,7 @@ fun ExpenseFormContent(
                                 )
                             }
 
-                            val effectiveLaborType = when {
-                                hasHourly && hasDaily -> selectedLaborMode
-                                hasHourly -> LaborType.HOURLY
-                                hasDaily -> LaborType.DAILY
-                                else -> worker.laborType
-                            }
+                            val effectiveLaborType = selectedLaborMode ?: availableLaborTypes.firstOrNull()
                             val effectiveRate = when (effectiveLaborType) {
                                 LaborType.HOURLY -> worker.hourlyRate
                                 LaborType.DAILY -> worker.dailyRate

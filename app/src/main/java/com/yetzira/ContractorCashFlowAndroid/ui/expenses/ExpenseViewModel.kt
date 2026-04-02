@@ -326,23 +326,37 @@ class ExpenseViewModel(
             description = workerOption.worker.workerName
         }
 
-        if (workerOption.laborType == LaborType.SUBCONTRACTOR) {
-            selectedLaborType = workerOption.laborType
+        // Determine available labor types for this worker
+        val hasHourly = workerOption.hourlyRate != null
+        val hasDaily = workerOption.dailyRate != null
+        val hasSubcontractor = workerOption.contractPrice != null
+
+        // Build available types list
+        val availableTypes = mutableListOf<LaborType>()
+        if (hasHourly) availableTypes.add(LaborType.HOURLY)
+        if (hasDaily) availableTypes.add(LaborType.DAILY)
+        if (hasSubcontractor) availableTypes.add(LaborType.SUBCONTRACTOR)
+
+        // Determine effective labor type
+        selectedLaborType = when {
+            // User explicitly selected a type that's available
+            input.laborTypeSnapshot != null && input.laborTypeSnapshot in availableTypes -> input.laborTypeSnapshot
+            // Auto-select single available type
+            availableTypes.size == 1 -> availableTypes.first()
+            // Multiple available, need user selection
+            availableTypes.size > 1 && input.laborTypeSnapshot == null -> null
+            // Fallback
+            else -> availableTypes.firstOrNull()
+        }
+
+        // Calculate amount and set read-only based on selected type
+        if (selectedLaborType == LaborType.SUBCONTRACTOR) {
+            // Subcontractor: fixed price, read-only
             val contractRate = workerOption.contractPrice ?: 0.0
             amount = formatAmountInput(contractRate.toLong().toString())
             readOnly = true
         } else {
-            val hasHourly = workerOption.hourlyRate != null
-            val hasDaily = workerOption.dailyRate != null
-            selectedLaborType = when {
-                hasHourly && hasDaily && (selectedLaborType == LaborType.HOURLY || selectedLaborType == LaborType.DAILY) -> selectedLaborType
-                hasHourly && hasDaily -> null
-                hasHourly -> LaborType.HOURLY
-                hasDaily -> LaborType.DAILY
-                workerOption.laborType == LaborType.HOURLY || workerOption.laborType == LaborType.DAILY -> workerOption.laborType
-                else -> null
-            }
-
+            // Hourly or Daily: calculate from rate and units/days
             val rate = when (selectedLaborType) {
                 LaborType.HOURLY -> workerOption.hourlyRate
                 LaborType.DAILY -> workerOption.dailyRate
@@ -364,18 +378,15 @@ class ExpenseViewModel(
             }
         }
 
-        val requiresLaborModeSelection =
-            workerOption.hourlyRate != null && workerOption.dailyRate != null &&
-                (selectedLaborType != LaborType.HOURLY && selectedLaborType != LaborType.DAILY)
-
-        // For daily with multi-date, require at least one selected date
+        // Validation checks
+        val requiresLaborTypeSelection = selectedLaborType == null && availableTypes.size > 1
         val multiDateValid = if (selectedLaborType == LaborType.DAILY && input.useMultiDatePicker) {
             input.selectedDates.isNotEmpty()
         } else {
             true
         }
 
-        val canSave = !requiresLaborModeSelection && description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0 && multiDateValid
+        val canSave = !requiresLaborTypeSelection && description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0 && multiDateValid
 
         return input.copy(
             amount = amount,
