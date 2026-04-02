@@ -106,7 +106,7 @@ private fun KablanProNavigationContent(
                 projectsGraph(navController)
                 expensesGraph(navController)
                 invoicesGraph(navController)
-                laborGraph(navController)
+                laborGraph(navController, onMenuClick)
                 clientsGraph(navController)
                 analyticsGraph(navController)
                 settingsGraph(navController)
@@ -166,6 +166,7 @@ private val routesWithOwnTopBar = setOf(
     InvoiceRoutes.NEW,
     InvoiceRoutes.DETAIL,
     InvoiceRoutes.EDIT,
+    LaborRoutes.LIST,
     LaborRoutes.ADD,
     LaborRoutes.EDIT,
     ClientRoutes.NEW,

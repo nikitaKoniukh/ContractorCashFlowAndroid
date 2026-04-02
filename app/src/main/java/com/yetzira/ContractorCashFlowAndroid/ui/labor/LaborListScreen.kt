@@ -43,16 +43,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.TopAppBar
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
@@ -68,6 +73,7 @@ import com.yetzira.ContractorCashFlowAndroid.ui.theme.SectionHeaderStyle
 @Composable
 fun LaborListScreen(
     viewModel: LaborViewModel,
+    onMenuClick: () -> Unit,
     onAdd: () -> Unit,
     onEdit: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -84,6 +90,49 @@ fun LaborListScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text(text = stringResource(R.string.tab_labor)) },
+                navigationIcon = {
+                    IconButton(onClick = onMenuClick) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = stringResource(id = R.string.menu_open)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showFilters = true }) {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "Filter"
+                        )
+                    }
+                    Box {
+                        IconButton(onClick = { showSortMenu = true }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Sort,
+                                contentDescription = "Sort"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false }
+                        ) {
+                            LaborSortOption.entries.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option.name) },
+                                    onClick = {
+                                        viewModel.setSort(option)
+                                        showSortMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = onAdd) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Worker")
@@ -97,30 +146,6 @@ fun LaborListScreen(
                 .padding(horizontal = 16.dp)
         ) {
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TextButton(onClick = { showFilters = true }) {
-                    Text(if (state.filters.isActive) "Filters On" else "Filter")
-                }
-                Box {
-                    TextButton(onClick = { showSortMenu = true }) { Text(state.sort.name) }
-                    DropdownMenu(expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
-                        LaborSortOption.entries.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option.name) },
-                                onClick = {
-                                    viewModel.setSort(option)
-                                    showSortMenu = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
