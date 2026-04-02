@@ -121,7 +121,7 @@ fun LaborListScreen(
                         ) {
                             LaborSortOption.entries.forEach { option ->
                                 DropdownMenuItem(
-                                    text = { Text(option.name) },
+                                    text = { Text(stringResource(option.labelResId)) },
                                     onClick = {
                                         viewModel.setSort(option)
                                         showSortMenu = false

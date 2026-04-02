@@ -323,6 +323,10 @@
     <string name="labor_screen_add_title">Add Worker</string>
     <string name="labor_screen_edit_title">Edit Worker</string>
     <string name="labor_filters_on">Filters On</string>
+    <string name="labor_sort_recently_added">Recently added</string>
+    <string name="labor_sort_worker_name">Worker name</string>
+    <string name="labor_sort_total_earned_high_to_low">Total earned: high to low</string>
+    <string name="labor_sort_total_earned_low_to_high">Total earned: low to high</string>
     <string name="labor_summary_total_cost">Worker Cost</string>
     <string name="labor_summary_total_workers">Total Workers</string>
     <string name="labor_summary_total_days">Total Days</string>

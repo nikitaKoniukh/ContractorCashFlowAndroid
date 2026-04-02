@@ -1,13 +1,15 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.labor
 
+import androidx.annotation.StringRes
+import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 
-enum class LaborSortOption {
-    RECENTLY_ADDED,
-    WORKER_NAME,
-    TOTAL_EARNED_HIGH_TO_LOW,
-    TOTAL_EARNED_LOW_TO_HIGH
+enum class LaborSortOption(@StringRes val labelResId: Int) {
+    RECENTLY_ADDED(R.string.labor_sort_recently_added),
+    WORKER_NAME(R.string.labor_sort_worker_name),
+    TOTAL_EARNED_HIGH_TO_LOW(R.string.labor_sort_total_earned_high_to_low),
+    TOTAL_EARNED_LOW_TO_HIGH(R.string.labor_sort_total_earned_low_to_high)
 }
 
 data class LaborMonthOption(
