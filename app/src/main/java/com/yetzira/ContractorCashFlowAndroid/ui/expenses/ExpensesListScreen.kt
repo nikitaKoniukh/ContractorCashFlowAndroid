@@ -45,6 +45,9 @@ fun ExpensesListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showFilters by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<ExpenseListItemUi?>(null) }
+    val context = LocalContext.current
+    val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
 
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -115,7 +118,12 @@ fun ExpensesListScreen(
                 ) {
                     sections.forEach { section ->
                         item(key = "header_${section.dayStartMillis}") {
-                            ExpenseDateSectionHeader(labelRes = section.labelRes, dateFallback = section.dateFallback)
+                            ExpenseDateSectionHeader(
+                                labelRes = section.labelRes,
+                                dateFallback = section.dateFallback,
+                                dayTotal = section.dayTotal,
+                                currency = currency
+                            )
                         }
 
                         items(section.items, key = { it.expense.id }) { item ->
@@ -192,15 +200,33 @@ fun ExpensesListScreen(
 }
 
 @Composable
-private fun ExpenseDateSectionHeader(labelRes: Int?, dateFallback: String) {
+private fun ExpenseDateSectionHeader(
+    labelRes: Int?,
+    dateFallback: String,
+    dayTotal: Double,
+    currency: CurrencyOption
+) {
     val label = labelRes?.let { stringResource(it) } ?: dateFallback
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
-    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp, bottom = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.Gray,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = formatCurrencyAmount(dayTotal, currency),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 @Composable
@@ -312,7 +338,7 @@ private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
                     Text(
                         text = formatDate(item.expense.date),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.Gray
                     )
                 }
 
@@ -333,6 +359,7 @@ private data class ExpenseDateSection(
     val dayStartMillis: Long,
     val labelRes: Int?,
     val dateFallback: String,
+    val dayTotal: Double,
     val items: List<ExpenseListItemUi>
 )
 
@@ -357,6 +384,7 @@ private fun groupExpensesByDate(expenses: List<ExpenseListItemUi>): List<Expense
             dayStartMillis = dayStart,
             labelRes = labelRes,
             dateFallback = formatDate(dayStart),
+            dayTotal = items.sumOf { it.expense.amount },
             items = items
         )
     }
