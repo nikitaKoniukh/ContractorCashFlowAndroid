@@ -277,7 +277,7 @@ class ExpenseViewModel(
             description = "Worker: ${workerOption.worker.workerName}"
         }
 
-        if (workerOption.laborType == LaborType.CONTRACT || workerOption.laborType == LaborType.SUBCONTRACTOR) {
+        if (workerOption.laborType == LaborType.SUBCONTRACTOR) {
             selectedLaborType = workerOption.laborType
             val contractRate = workerOption.contractPrice ?: 0.0
             amount = formatAmountInput(contractRate.toLong().toString())

@@ -46,7 +46,7 @@ class LaborViewModelTest {
         val jan3 = jan2 + 86_400_000L
         val workers = listOf(
             LaborDetailsEntity(id = "w1", workerName = "Alex", laborType = LaborType.HOURLY.name),
-            LaborDetailsEntity(id = "w2", workerName = "Ben", laborType = LaborType.CONTRACT.name)
+            LaborDetailsEntity(id = "w2", workerName = "Ben", laborType = LaborType.SUBCONTRACTOR.name)
         )
         val expenses = listOf(
             ExpenseEntity(
@@ -67,7 +67,7 @@ class LaborViewModelTest {
                 descriptionText = "Labor 2",
                 date = jan3,
                 workerId = "w2",
-                laborTypeSnapshot = LaborType.CONTRACT.name,
+                laborTypeSnapshot = LaborType.SUBCONTRACTOR.name,
                 projectId = "p2"
             )
         )

@@ -35,7 +35,7 @@ class EntityEnumsTest {
     fun `labor type fromString resolves known enum names`() {
         assertEquals(LaborType.HOURLY, LaborType.fromString("HOURLY"))
         assertEquals(LaborType.DAILY, LaborType.fromString("DAILY"))
-        assertEquals(LaborType.CONTRACT, LaborType.fromString("CONTRACT"))
+        assertEquals(LaborType.SUBCONTRACTOR, LaborType.fromString("CONTRACT"))
         assertEquals(LaborType.SUBCONTRACTOR, LaborType.fromString("SUBCONTRACTOR"))
     }
 
@@ -43,12 +43,10 @@ class EntityEnumsTest {
     fun `labor type rules are mapped correctly`() {
         assertTrue(LaborType.HOURLY.usesQuantity)
         assertTrue(LaborType.DAILY.usesQuantity)
-        assertFalse(LaborType.CONTRACT.usesQuantity)
         assertFalse(LaborType.SUBCONTRACTOR.usesQuantity)
 
         assertEquals("/hr", LaborType.HOURLY.rateSuffix)
         assertEquals("/day", LaborType.DAILY.rateSuffix)
-        assertEquals("", LaborType.CONTRACT.rateSuffix)
         assertEquals("", LaborType.SUBCONTRACTOR.rateSuffix)
     }
 }

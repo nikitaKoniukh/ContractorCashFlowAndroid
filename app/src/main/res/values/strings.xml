@@ -316,7 +316,6 @@
     <string name="labor_form_type_label">Worker Type</string>
     <string name="labor_type_hourly">Hourly</string>
     <string name="labor_type_daily">Daily</string>
-    <string name="labor_type_contract">Contract</string>
     <string name="labor_type_subcontractor">Subcontractor</string>
     <string name="labor_filters_sheet_title">Worker Filters</string>
     <string name="labor_filters_title">Worker type</string>

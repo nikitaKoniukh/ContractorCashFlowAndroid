@@ -140,7 +140,7 @@ fun ExpenseFormContent(
                             val effectiveRate = when (effectiveLaborType) {
                                 LaborType.HOURLY -> worker.hourlyRate
                                 LaborType.DAILY -> worker.dailyRate
-                                LaborType.CONTRACT, LaborType.SUBCONTRACTOR -> worker.contractPrice
+                                LaborType.SUBCONTRACTOR -> worker.contractPrice
                                 null -> null
                             }
 

@@ -26,12 +26,12 @@ class ExpenseViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     @Test
-    fun `updateForm for contract worker auto-fills amount and read-only`() {
+    fun `updateForm for subcontractor worker auto-fills amount and read-only`() {
         val viewModel = ExpenseViewModel(FakeExpenseRepository())
         val worker = LaborDetailsEntity(
             id = "w1",
             workerName = "Contractor",
-            laborType = LaborType.CONTRACT.name,
+            laborType = LaborType.SUBCONTRACTOR.name,
             contractPrice = 4500.0,
             createdDate = 1L
         )
@@ -42,7 +42,7 @@ class ExpenseViewModelTest {
             workers = listOf(
                 WorkerOptionUi(
                     worker = worker,
-                    laborType = LaborType.CONTRACT,
+                    laborType = LaborType.SUBCONTRACTOR,
                     hourlyRate = null,
                     dailyRate = null,
                     contractPrice = 4500.0
@@ -54,7 +54,7 @@ class ExpenseViewModelTest {
 
         assertEquals("4.500", updated.amount)
         assertTrue(updated.isAmountReadOnly)
-        assertEquals(LaborType.CONTRACT, updated.laborTypeSnapshot)
+        assertEquals(LaborType.SUBCONTRACTOR, updated.laborTypeSnapshot)
         assertTrue(updated.description.startsWith("Worker:"))
     }
 

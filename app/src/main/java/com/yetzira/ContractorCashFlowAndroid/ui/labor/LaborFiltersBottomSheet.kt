@@ -374,7 +374,6 @@ private fun laborTypeLabel(type: LaborType): String {
     return when (type) {
         LaborType.HOURLY -> stringResource(R.string.labor_type_hourly)
         LaborType.DAILY -> stringResource(R.string.labor_type_daily)
-        LaborType.CONTRACT -> stringResource(R.string.labor_type_contract)
         LaborType.SUBCONTRACTOR -> stringResource(R.string.labor_type_subcontractor)
     }
 }

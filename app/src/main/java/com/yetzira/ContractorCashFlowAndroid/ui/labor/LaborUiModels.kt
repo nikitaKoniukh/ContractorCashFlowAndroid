@@ -44,7 +44,7 @@ data class WorkerMetricsUi(
         get() = when (laborType) {
             LaborType.HOURLY -> "${worker.hourlyRate ?: 0.0}${laborType.rateSuffix}"
             LaborType.DAILY -> "${worker.dailyRate ?: 0.0}${laborType.rateSuffix}"
-            LaborType.CONTRACT, LaborType.SUBCONTRACTOR -> "${worker.contractPrice ?: 0.0}"
+            LaborType.SUBCONTRACTOR -> "${worker.contractPrice ?: 0.0}"
             null -> "-"
         }
 }

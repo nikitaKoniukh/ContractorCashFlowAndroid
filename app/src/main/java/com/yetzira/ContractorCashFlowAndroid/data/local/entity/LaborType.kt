@@ -15,11 +15,6 @@ enum class LaborType(
         usesQuantity = true,
         rateSuffix = "/day"
     ),
-    CONTRACT(
-        displayName = "חוזה",
-        usesQuantity = false,
-        rateSuffix = ""
-    ),
     SUBCONTRACTOR(
         displayName = "קבלן משנה",
         usesQuantity = false,
@@ -28,7 +23,10 @@ enum class LaborType(
 
     companion object {
         fun fromString(value: String?): LaborType? =
-            values().find { it.name == value }
+            when (value) {
+                "CONTRACT" -> SUBCONTRACTOR
+                else -> entries.find { it.name == value }
+            }
     }
 }
 

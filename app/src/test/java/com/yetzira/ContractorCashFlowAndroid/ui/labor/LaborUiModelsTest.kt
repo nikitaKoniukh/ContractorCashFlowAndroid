@@ -42,11 +42,11 @@ class LaborUiModelsTest {
 
         val hourly = WorkerMetricsUi(worker, LaborType.HOURLY, 0.0, 0.0, 0, emptyList(), 0)
         val daily = WorkerMetricsUi(worker, LaborType.DAILY, 0.0, 0.0, 0, emptyList(), 0)
-        val contract = WorkerMetricsUi(worker, LaborType.CONTRACT, 0.0, 0.0, 0, emptyList(), 0)
+        val subcontractor = WorkerMetricsUi(worker, LaborType.SUBCONTRACTOR, 0.0, 0.0, 0, emptyList(), 0)
 
         assertEquals("75.0/hr", hourly.rateLabel)
         assertEquals("500.0/day", daily.rateLabel)
-        assertEquals("4000.0", contract.rateLabel)
+        assertEquals("4000.0", subcontractor.rateLabel)
     }
 }
 
