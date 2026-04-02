@@ -217,7 +217,7 @@ private fun ExpenseDateSectionHeader(
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.SemiBold
         )
         Text(
@@ -338,7 +338,7 @@ private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
                     Text(
                         text = formatDate(item.expense.date),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
