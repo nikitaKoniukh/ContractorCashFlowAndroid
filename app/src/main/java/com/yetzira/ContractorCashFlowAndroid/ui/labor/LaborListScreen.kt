@@ -23,6 +23,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -61,9 +62,14 @@ import androidx.compose.material3.TopAppBar
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierLimit
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.components.StatPill
 import com.yetzira.ContractorCashFlowAndroid.ui.components.WorkerAvatar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.BodyMediumSemibold
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors
@@ -85,7 +91,25 @@ fun LaborListScreen(
 
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val purchaseManager = remember(context) { PurchaseManagerProvider.getInstance(context.applicationContext) }
+    val purchaseViewModel: PurchaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = remember { PurchaseViewModelFactory(context) }
+    )
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
+    var showPaywall by remember { mutableStateOf(false) }
+    var paywallMessage by remember { mutableStateOf<String?>(null) }
+
+    val onAddAttempt = {
+        if (purchaseManager.canCreateWorker(state.workers.size)) {
+            onAdd()
+        } else {
+            paywallMessage = context.getString(
+                R.string.paywall_limit_workers,
+                FreeTierLimit.MAX_WORKERS
+            )
+            showPaywall = true
+        }
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -134,7 +158,7 @@ fun LaborListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAdd) {
+            FloatingActionButton(onClick = onAddAttempt) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Worker")
             }
         }
@@ -263,6 +287,16 @@ fun LaborListScreen(
                 TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
             }
         )
+    }
+
+    if (showPaywall) {
+        ModalBottomSheet(onDismissRequest = { showPaywall = false }) {
+            PaywallScreen(
+                viewModel = purchaseViewModel,
+                onDismiss = { showPaywall = false },
+                limitReachedMessage = paywallMessage
+            )
+        }
     }
 }
 

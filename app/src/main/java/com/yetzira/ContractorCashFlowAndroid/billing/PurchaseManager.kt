@@ -266,10 +266,10 @@ class PurchaseManager(
         _isProUser.value || currentCount < FreeTierLimit.MAX_PROJECTS
 
     fun canCreateExpense(currentCount: Int): Boolean =
-        _isProUser.value || currentCount < FreeTierLimit.MAX_EXPENSES
+        true
 
     fun canCreateInvoice(currentCount: Int): Boolean =
-        _isProUser.value || currentCount < FreeTierLimit.MAX_INVOICES
+        true
 
     fun canCreateWorker(currentCount: Int): Boolean =
         _isProUser.value || currentCount < FreeTierLimit.MAX_WORKERS

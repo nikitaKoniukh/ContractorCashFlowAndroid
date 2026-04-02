@@ -31,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -61,8 +62,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierLimit
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,20 +81,38 @@ fun ProjectsListScreen(
 ) {
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val purchaseManager = remember(context) { PurchaseManagerProvider.getInstance(context.applicationContext) }
+    val purchaseViewModel: PurchaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = remember { PurchaseViewModelFactory(context) }
+    )
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val uiState by viewModel.projectsUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var pendingDelete by remember { mutableStateOf<ProjectListItemUi?>(null) }
+    var showPaywall by remember { mutableStateOf(false) }
+    var paywallMessage by remember { mutableStateOf<String?>(null) }
     val deletedSuffix = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_deleted)
     val undoLabel = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_undo)
+
+    val onCreateProjectAttempt = {
+        if (purchaseManager.canCreateProject(uiState.projects.size)) {
+            onCreateProject()
+        } else {
+            paywallMessage = context.getString(
+                com.yetzira.ContractorCashFlowAndroid.R.string.paywall_limit_projects,
+                FreeTierLimit.MAX_PROJECTS
+            )
+            showPaywall = true
+        }
+    }
 
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(onClick = onCreateProject) {
+            FloatingActionButton(onClick = onCreateProjectAttempt) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_new_project)
@@ -112,7 +136,7 @@ fun ProjectsListScreen(
             )
 
             if (uiState.projects.isEmpty()) {
-                EmptyProjectsState(onCreateProject = onCreateProject)
+                EmptyProjectsState(onCreateProject = onCreateProjectAttempt)
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -186,6 +210,16 @@ fun ProjectsListScreen(
                 }
             }
         )
+    }
+
+    if (showPaywall) {
+        ModalBottomSheet(onDismissRequest = { showPaywall = false }) {
+            PaywallScreen(
+                viewModel = purchaseViewModel,
+                onDismiss = { showPaywall = false },
+                limitReachedMessage = paywallMessage
+            )
+        }
     }
 }
 

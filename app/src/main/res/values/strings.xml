@@ -28,6 +28,10 @@
     <string name="common_more">More</string>
     <string name="common_today">Today</string>
     <string name="common_yesterday">Yesterday</string>
+    <string name="paywall_limit_projects">You\'ve reached the free project limit (%1$d). Upgrade to Pro for unlimited projects.</string>
+    <string name="paywall_limit_workers">You\'ve reached the free worker limit (%1$d). Upgrade to Pro for unlimited workers.</string>
+    <string name="paywall_limit_expenses">Upgrade to Pro to unlock advanced expense features.</string>
+    <string name="paywall_limit_invoices">Upgrade to Pro to unlock advanced invoice features.</string>
 
     <string name="projects_new_project">New Project</string>
     <string name="projects_search_placeholder">Search by project or client</string>

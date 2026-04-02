@@ -13,8 +13,6 @@ object BillingProduct {
 
 object FreeTierLimit {
     const val MAX_PROJECTS = 1
-    const val MAX_EXPENSES = 1
-    const val MAX_INVOICES = 1
-    const val MAX_WORKERS = 1
+    const val MAX_WORKERS = 2
 }
 

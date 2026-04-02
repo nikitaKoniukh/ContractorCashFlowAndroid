@@ -25,10 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DocumentScanner
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,7 +51,22 @@ fun ExpensesListScreen(
     var pendingDelete by remember { mutableStateOf<ExpenseListItemUi?>(null) }
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
+    val purchaseManager = remember(context) { PurchaseManagerProvider.getInstance(context.applicationContext) }
+    val purchaseViewModel: PurchaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = remember { PurchaseViewModelFactory(context) }
+    )
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
+    var showPaywall by remember { mutableStateOf(false) }
+    var paywallMessage by remember { mutableStateOf<String?>(null) }
+
+    val onCreateExpenseAttempt = {
+        if (purchaseManager.canCreateExpense(state.expenses.size)) {
+            onCreateExpense()
+        } else {
+            paywallMessage = context.getString(R.string.paywall_limit_expenses)
+            showPaywall = true
+        }
+    }
 
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -67,7 +86,7 @@ fun ExpensesListScreen(
                         contentDescription = stringResource(R.string.scan_title)
                     )
                 }
-                FloatingActionButton(onClick = onCreateExpense) {
+                FloatingActionButton(onClick = onCreateExpenseAttempt) {
                     Icon(
                         Icons.Default.Add,
                         contentDescription = "New Expense"
@@ -108,7 +127,7 @@ fun ExpensesListScreen(
             }
 
             if (state.expenses.isEmpty()) {
-                EmptyExpensesState(onCreateExpense = onCreateExpense)
+                EmptyExpensesState(onCreateExpense = onCreateExpenseAttempt)
             } else {
                 val sections = remember(state.expenses) { groupExpensesByDate(state.expenses) }
                 LazyColumn(
@@ -196,6 +215,16 @@ fun ExpensesListScreen(
                 }
             }
         )
+    }
+
+    if (showPaywall) {
+        ModalBottomSheet(onDismissRequest = { showPaywall = false }) {
+            PaywallScreen(
+                viewModel = purchaseViewModel,
+                onDismiss = { showPaywall = false },
+                limitReachedMessage = paywallMessage
+            )
+        }
     }
 }
 
