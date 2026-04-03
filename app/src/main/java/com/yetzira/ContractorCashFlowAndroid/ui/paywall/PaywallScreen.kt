@@ -1,6 +1,9 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.paywall
 
 import android.app.Activity
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +61,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.billingclient.api.ProductDetails
 import com.yetzira.ContractorCashFlowAndroid.billing.BillingProduct
@@ -143,6 +149,7 @@ fun PaywallScreen(
     }
 
     var showErrorDialog by remember { mutableStateOf(false) }
+    var legalUrl by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(isProUser) { if (isProUser) onDismiss() }
     LaunchedEffect(errorMessage) { showErrorDialog = errorMessage != null }
@@ -370,7 +377,7 @@ fun PaywallScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = { }) {
+                TextButton(onClick = { legalUrl = PAYWALL_TERMS_OF_USE_URL }) {
                     Text(
                         text = "Terms of Use",
                         style = MaterialTheme.typography.bodySmall,
@@ -382,7 +389,7 @@ fun PaywallScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
-                TextButton(onClick = { }) {
+                TextButton(onClick = { legalUrl = PAYWALL_PRIVACY_POLICY_URL }) {
                     Text(
                         text = "Privacy Policy",
                         style = MaterialTheme.typography.bodySmall,
@@ -392,6 +399,70 @@ fun PaywallScreen(
             }
 
             Spacer(modifier = Modifier.height(10.dp))
+        }
+    }
+
+    legalUrl?.let { url ->
+        LegalWebDialog(
+            url = url,
+            onDismiss = { legalUrl = null }
+        )
+    }
+}
+
+@Composable
+private fun LegalWebDialog(
+    url: String,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close"
+                        )
+                    }
+                    Text(
+                        text = if (url.contains("privacy")) "Privacy Policy" else "Terms of Use",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    factory = { context ->
+                        WebView(context).apply {
+                            webViewClient = object : WebViewClient() {
+                                override fun shouldOverrideUrlLoading(
+                                    view: WebView,
+                                    request: WebResourceRequest
+                                ): Boolean = false
+                            }
+                            loadUrl(url)
+                        }
+                    },
+                    update = { webView ->
+                        if (webView.url != url) webView.loadUrl(url)
+                    }
+                )
+            }
         }
     }
 }
@@ -599,3 +670,9 @@ private data class PaywallPlanOption(
     val savingsBadge: String?,
     val productDetails: ProductDetails?
 )
+
+private const val PAYWALL_TERMS_OF_USE_URL =
+    "https://nikitakoniukh.github.io/KablanProAndroid/terms-of-use.html"
+private const val PAYWALL_PRIVACY_POLICY_URL =
+    "https://nikitakoniukh.github.io/KablanProAndroid/privacy.html"
+
