@@ -131,6 +131,13 @@ tasks.matching { it.name in setOf("assembleDebug", "installDebug") }.configureEa
 }
 
 val duplicateBuildArtifactNameRegex = Regex(""".*\s2(\..+)?$""")
+val duplicateBuildArtifactIgnoredPathMarkers = listOf(
+    "/test-results",
+    "/reports",
+    "/gmpAppId",
+    "/kspCaches/debugUnitTest",
+    "/kotlin/compileDebugUnitTestKotlin"
+)
 
 val verifyNoDuplicateBuildArtifacts by tasks.registering {
     group = "verification"
@@ -142,7 +149,13 @@ val verifyNoDuplicateBuildArtifacts by tasks.registering {
 
         val duplicates = buildDirFile
             .walkTopDown()
-            .filter { it.name.matches(duplicateBuildArtifactNameRegex) }
+            .filter { file ->
+                val relativePath = file.relativeTo(buildDirFile).invariantSeparatorsPath
+                val isIgnored = duplicateBuildArtifactIgnoredPathMarkers.any { marker ->
+                    relativePath.contains(marker.trimStart('/'))
+                }
+                file.name.matches(duplicateBuildArtifactNameRegex) && !isIgnored
+            }
             .toList()
 
         if (duplicates.isNotEmpty()) {

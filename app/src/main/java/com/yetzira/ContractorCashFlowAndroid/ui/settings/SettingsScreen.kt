@@ -10,26 +10,37 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,6 +54,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -65,8 +79,6 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
-import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -101,8 +113,8 @@ fun SettingsScreen(
             context.packageManager.getPackageInfo(context.packageName, 0)
         }
     }
-    val appVersionLabel = remember(packageInfo) {
-        "KablanPro ${packageInfo.versionName}.${androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(packageInfo)}"
+    val appVersionValue = remember(packageInfo) {
+        "${packageInfo.versionName} (${androidx.core.content.pm.PackageInfoCompat.getLongVersionCode(packageInfo)})"
     }
     val coroutineScope = rememberCoroutineScope()
     val purchaseViewModel: PurchaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -262,8 +274,9 @@ fun SettingsScreen(
     }
 
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
+        containerColor = SettingsPageBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
@@ -272,47 +285,33 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            AnalyticsCard {
-                SectionTitle(stringResource(R.string.settings_section_account))
+            SettingsSectionHeader(stringResource(R.string.settings_section_account))
+            SettingsGroupCard {
                 if (state.isAuthenticated) {
-                    Text(
-                        text = state.userEmail ?: stringResource(R.string.settings_signed_in),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(top = 8.dp)
+                    SettingsValueRow(
+                        title = state.userEmail ?: stringResource(R.string.settings_signed_in),
+                        value = stringResource(R.string.settings_signed_in),
+                        leadingIcon = Icons.Default.Info
                     )
-                    OutlinedButton(
-                        onClick = viewModel::signOut,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp)
-                    ) {
-                        Text(stringResource(R.string.settings_sign_out))
-                    }
+                    SettingsRowDivider()
+                    SettingsActionRow(
+                        title = stringResource(R.string.settings_sign_out),
+                        leadingIcon = Icons.Default.Description,
+                        titleColor = SettingsActionBlue,
+                        onClick = viewModel::signOut
+                    )
                 } else {
-                    Text(
-                        text = stringResource(R.string.settings_sign_in_prompt),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    googleSignInSetupError?.let { setupError ->
-                        Text(
-                            text = setupError,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-                    Button(
+                    SettingsActionRow(
+                        title = stringResource(R.string.settings_sign_in_with_google),
+                        leadingIcon = Icons.Default.Info,
+                        titleColor = SettingsActionBlue,
                         onClick = {
                             val serverClientId = webClientId
                             if (serverClientId.isNullOrBlank()) {
-                                viewModel.onGoogleSignInFailed(
-                                    googleSignInSetupMissingClientIdMessage
-                                )
-                                return@Button
+                                viewModel.onGoogleSignInFailed(googleSignInSetupMissingClientIdMessage)
+                                return@SettingsActionRow
                             }
                             coroutineScope.launch {
                                 runCatching {
@@ -324,25 +323,15 @@ fun SettingsScreen(
                                     val request = GetCredentialRequest.Builder()
                                         .addCredentialOption(googleIdOption)
                                         .build()
-                                    credentialManager.getCredential(
-                                        context = context,
-                                        request = request
-                                    )
+                                    credentialManager.getCredential(context = context, request = request)
                                 }.onSuccess { response ->
                                     val credential = response.credential
                                     if (credential is CustomCredential) {
                                         val isGoogleCredentialType = credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL ||
                                             credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_SIWG_CREDENTIAL
                                         if (isGoogleCredentialType) {
-                                            val token = runCatching {
-                                                GoogleIdTokenCredential.createFrom(credential.data).idToken
-                                            }.getOrElse { parseError ->
-                                                throw parseError
-                                            }
-                                            Log.d(
-                                                SETTINGS_AUTH_LOG_TAG,
-                                                "CredentialManager sign-in success tokenLength=${token.length}"
-                                            )
+                                            val token = GoogleIdTokenCredential.createFrom(credential.data).idToken
+                                            Log.d(SETTINGS_AUTH_LOG_TAG, "CredentialManager sign-in success tokenLength=${token.length}")
                                             viewModel.signInWithGoogleIdToken(token)
                                         } else {
                                             viewModel.onGoogleSignInFailed(googleSignInUnsupportedCredentialMessage)
@@ -360,22 +349,66 @@ fun SettingsScreen(
                                     viewModel.onGoogleSignInFailed(message)
                                 }
                             }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp),
-                        enabled = googleSignInSetupError == null
-                    ) {
-                        Text(stringResource(R.string.settings_sign_in_with_google))
-                    }
+                        }
+                    )
+                }
+            }
+            if (!state.isAuthenticated) {
+                Text(
+                    text = stringResource(R.string.settings_sign_in_prompt),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SettingsSecondaryText,
+                    modifier = Modifier.padding(horizontal = 6.dp)
+                )
+                googleSignInSetupError?.let { setupError ->
+                    Text(
+                        text = setupError,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 6.dp)
+                    )
                 }
             }
 
-            SettingsDropdownCard(
+            SettingsSectionHeader(stringResource(R.string.settings_section_subscription))
+            SettingsGroupCard {
+                val planLabel = when {
+                    activePurchase?.products?.contains(BillingProduct.PRO_YEARLY) == true -> "Pro Yearly"
+                    activePurchase?.products?.contains(BillingProduct.PRO_MONTHLY) == true -> "Pro Monthly"
+                    else -> stringResource(R.string.settings_subscription_free)
+                }
+                SettingsValueRow(
+                    title = "Current Plan",
+                    value = planLabel,
+                    leadingIcon = Icons.Default.Description
+                )
+                SettingsRowDivider()
+                if (isProUser) {
+                    SettingsActionRow(
+                        title = stringResource(R.string.settings_manage_subscription),
+                        leadingIcon = Icons.Default.EmojiEvents,
+                        titleColor = SettingsActionBlue,
+                        onClick = { purchaseViewModel.openManageSubscriptions(context) }
+                    )
+                } else {
+                    SettingsActionRow(
+                        title = stringResource(R.string.settings_upgrade_pro),
+                        leadingIcon = Icons.Default.EmojiEvents,
+                        iconTint = SettingsProGold,
+                        titleColor = SettingsProGold,
+                        onClick = { showPaywall = true }
+                    )
+                }
+            }
+
+            SettingsPickerSection(
                 title = stringResource(R.string.settings_section_language),
+                rowTitle = stringResource(R.string.settings_section_language),
                 selectedLabel = state.selectedLanguage.displayName,
                 options = AppLanguageOption.entries.toList(),
                 optionLabel = { it.displayName },
+                leadingIcon = Icons.Default.Language,
+                description = "Choose the app language. Layout direction updates automatically for RTL languages.",
                 onOptionSelected = { language ->
                     LocaleHelper.saveLanguage(context, language.code)
                     viewModel.setLanguage(language)
@@ -383,28 +416,33 @@ fun SettingsScreen(
                 }
             )
 
-            SettingsDropdownCard(
+            SettingsPickerSection(
                 title = stringResource(R.string.settings_section_currency),
+                rowTitle = stringResource(R.string.settings_section_currency),
                 selectedLabel = "${state.selectedCurrency.code} (${state.selectedCurrency.symbol})",
                 options = CurrencyOption.entries.toList(),
                 optionLabel = { "${it.code} (${it.symbol})" },
+                leadingIcon = Icons.Default.AttachMoney,
+                description = "Currency used for displaying amounts throughout the app.",
                 onOptionSelected = viewModel::setCurrency
             )
 
-            SettingsDropdownCard(
+            SettingsPickerSection(
                 title = stringResource(R.string.settings_section_theme),
+                rowTitle = stringResource(R.string.settings_section_theme),
                 selectedLabel = themeLabels[state.selectedThemeMode]
                     ?: stringResource(R.string.settings_theme_system),
                 options = ThemeModeOption.entries.toList(),
                 optionLabel = { themeLabels[it] ?: it.name },
+                leadingIcon = Icons.Default.Palette,
                 onOptionSelected = viewModel::setThemeMode
             )
 
-            // ── Notifications section with explanation-dialog-gated toggles ──
-            AnalyticsCard {
-                SectionTitle(stringResource(R.string.settings_section_notifications))
+            SettingsSectionHeader(stringResource(R.string.settings_section_notifications))
+            SettingsGroupCard {
                 SettingsSwitchRow(
                     title = stringResource(R.string.settings_invoice_reminders),
+                    leadingIcon = Icons.Default.CalendarMonth,
                     checked = state.invoiceRemindersEnabled,
                     onCheckedChange = { wantsEnabled ->
                         if (wantsEnabled) {
@@ -414,8 +452,10 @@ fun SettingsScreen(
                         }
                     }
                 )
+                SettingsRowDivider()
                 SettingsSwitchRow(
                     title = stringResource(R.string.settings_overdue_alerts),
+                    leadingIcon = Icons.Default.Notifications,
                     checked = state.overdueAlertsEnabled,
                     onCheckedChange = { wantsEnabled ->
                         if (wantsEnabled) {
@@ -425,8 +465,10 @@ fun SettingsScreen(
                         }
                     }
                 )
+                SettingsRowDivider()
                 SettingsSwitchRow(
                     title = stringResource(R.string.settings_budget_warnings),
+                    leadingIcon = Icons.Default.Description,
                     checked = state.budgetWarningsEnabled,
                     onCheckedChange = { wantsEnabled ->
                         if (wantsEnabled) {
@@ -436,100 +478,58 @@ fun SettingsScreen(
                         }
                     }
                 )
-                Text(
-                    text = stringResource(R.string.settings_notifications_footer),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp)
+            }
+            Text(
+                text = stringResource(R.string.settings_notifications_footer),
+                style = MaterialTheme.typography.bodySmall,
+                color = SettingsSecondaryText,
+                modifier = Modifier.padding(horizontal = 6.dp)
+            )
+
+            SettingsSectionHeader("Data")
+            SettingsGroupCard {
+                SettingsActionRow(
+                    title = stringResource(R.string.settings_sync_button_idle),
+                    leadingIcon = Icons.Default.CloudSync,
+                    titleColor = SettingsActionBlue,
+                    onClick = viewModel::runCloudSync
+                )
+                SettingsRowDivider()
+                SettingsActionRow(
+                    title = stringResource(R.string.settings_export_button),
+                    leadingIcon = Icons.Default.Sync,
+                    titleColor = SettingsActionBlue,
+                    onClick = { exportLauncher.launch(viewModel.suggestedExportFileName()) }
+                )
+            }
+            Text(
+                text = stringResource(R.string.settings_export_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = SettingsSecondaryText,
+                modifier = Modifier.padding(horizontal = 6.dp)
+            )
+
+            SettingsSectionHeader("About")
+            SettingsGroupCard {
+                SettingsValueRow(
+                    title = "About",
+                    value = "KablanPro",
+                    leadingIcon = Icons.Default.Info
+                )
+                SettingsRowDivider()
+                SettingsValueRow(
+                    title = "App Version",
+                    value = appVersionValue,
+                    leadingIcon = Icons.Default.Description
                 )
             }
 
-            AnalyticsCard {
-                SectionTitle(stringResource(R.string.settings_section_subscription))
-                if (isProUser) {
-                    val planLabel = when {
-                        activePurchase?.products?.contains(BillingProduct.PRO_YEARLY) == true -> "Pro Yearly"
-                        activePurchase?.products?.contains(BillingProduct.PRO_MONTHLY) == true -> "Pro Monthly"
-                        else -> state.subscription.planName
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = stringResource(R.string.settings_subscription_pro_badge), style = MaterialTheme.typography.headlineSmall)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = planLabel,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            state.subscription.renewalDate?.let { renewalDate ->
-                                Text(
-                                    text = stringResource(R.string.settings_subscription_renews, formatDate(renewalDate)),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = { purchaseViewModel.openManageSubscriptions(context) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.settings_manage_subscription))
-                    }
-                } else {
-                    Text(
-                        text = stringResource(R.string.settings_subscription_free),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_subscription_upgrade_text),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Button(
-                        onClick = { showPaywall = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.settings_upgrade_pro))
-                    }
-                }
-            }
-
-            AnalyticsCard {
-                SectionTitle(stringResource(R.string.settings_section_cloud_sync))
-                SyncActionButton(
-                    state = state.cloudSyncState,
-                    onClick = viewModel::runCloudSync,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            AnalyticsCard {
-                SectionTitle(stringResource(R.string.settings_section_export))
+            state.subscription.renewalDate?.let { renewalDate ->
                 Text(
-                    text = stringResource(R.string.settings_export_description),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = { exportLauncher.launch(viewModel.suggestedExportFileName()) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.settings_export_button))
-                }
-            }
-
-            AnalyticsCard {
-                SectionTitle(stringResource(R.string.settings_section_about))
-                Text(
-                    text = appVersionLabel,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                    text = stringResource(R.string.settings_subscription_renews, formatDate(renewalDate)),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = SettingsSecondaryText,
+                    modifier = Modifier.padding(horizontal = 6.dp)
                 )
             }
         }
@@ -544,25 +544,185 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun <T> SettingsDropdownCard(
+private fun SettingsSectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        color = SettingsSecondaryText,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.padding(horizontal = 6.dp)
+    )
+}
+
+@Composable
+private fun SettingsGroupCard(content: @Composable ColumnScope.() -> Unit) {
+    Surface(
+        color = Color.White,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(22.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp), content = content)
+    }
+}
+
+@Composable
+private fun SettingsRowDivider() {
+    HorizontalDivider(
+        color = SettingsDivider,
+        modifier = Modifier.padding(start = 52.dp)
+    )
+}
+
+@Composable
+private fun SettingsActionRow(
     title: String,
+    leadingIcon: ImageVector,
+    titleColor: Color = MaterialTheme.colorScheme.onSurface,
+    iconTint: Color = SettingsActionBlue,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = leadingIcon,
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.width(30.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = titleColor,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun SettingsValueRow(
+    title: String,
+    value: String,
+    leadingIcon: ImageVector
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = leadingIcon,
+            contentDescription = null,
+            tint = SettingsActionBlue,
+            modifier = Modifier.width(30.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = SettingsSecondaryText
+        )
+    }
+}
+
+@Composable
+private fun <T> SettingsPickerSection(
+    title: String,
+    rowTitle: String,
     selectedLabel: String,
     options: List<T>,
     optionLabel: (T) -> String,
+    leadingIcon: ImageVector,
+    description: String? = null,
     onOptionSelected: (T) -> Unit
 ) {
-    AnalyticsCard {
-        SectionTitle(title)
-        ModernDropdown(
-            label = title,
-            options = options.map { optionLabel(it) },
-            selected = selectedLabel,
-            onSelected = { selectedOptionLabel ->
-                options.find { optionLabel(it) == selectedOptionLabel }?.let { onOptionSelected(it) }
-            },
+    var showPicker by remember { mutableStateOf(false) }
+
+    SettingsSectionHeader(title)
+    SettingsGroupCard {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 12.dp)
+                .clickable { showPicker = true }
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = leadingIcon,
+                contentDescription = null,
+                tint = SettingsActionBlue,
+                modifier = Modifier.width(30.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = rowTitle,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = selectedLabel,
+                style = MaterialTheme.typography.bodyMedium,
+                color = SettingsSecondaryText
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = SettingsSecondaryText,
+                modifier = Modifier.padding(start = 6.dp)
+            )
+        }
+    }
+
+    description?.let {
+        Text(
+            text = it,
+            style = MaterialTheme.typography.bodySmall,
+            color = SettingsSecondaryText,
+            modifier = Modifier.padding(horizontal = 6.dp)
+        )
+    }
+
+    if (showPicker) {
+        AlertDialog(
+            onDismissRequest = { showPicker = false },
+            title = { Text(text = rowTitle) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    options.forEach { option ->
+                        val label = optionLabel(option)
+                        TextButton(
+                            onClick = {
+                                onOptionSelected(option)
+                                showPicker = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (label == selectedLabel) SettingsActionBlue else MaterialTheme.colorScheme.onSurface,
+                                fontWeight = if (label == selectedLabel) FontWeight.SemiBold else FontWeight.Normal
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPicker = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
         )
     }
 }
@@ -570,70 +730,41 @@ private fun <T> SettingsDropdownCard(
 @Composable
 private fun SettingsSwitchRow(
     title: String,
+    leadingIcon: ImageVector,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Icon(
+            imageVector = leadingIcon,
+            contentDescription = null,
+            tint = SettingsActionBlue,
+            modifier = Modifier.width(30.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f)
         )
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.scale(0.75f)
+        )
     }
 }
 
-@Composable
-private fun SyncActionButton(
-    state: CloudSyncState,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val label = when (state) {
-        CloudSyncState.IDLE -> stringResource(R.string.settings_sync_button_idle)
-        CloudSyncState.SYNCING -> stringResource(R.string.settings_sync_button_syncing)
-        CloudSyncState.DONE -> stringResource(R.string.settings_sync_button_done)
-        CloudSyncState.FAILED -> stringResource(R.string.settings_sync_button_failed)
-    }
-
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        enabled = state != CloudSyncState.SYNCING
-    ) {
-        if (state == CloudSyncState.SYNCING) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .width(18.dp)
-                    .height(18.dp),
-                strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        } else {
-            androidx.compose.material3.Icon(
-                imageVector = Icons.Default.Sync,
-                contentDescription = label,
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(label)
-    }
-}
-
-@Composable
-private fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleLarge,
-        fontWeight = FontWeight.Bold
-    )
-}
+private val SettingsPageBackground = Color(0xFFF2F2F7)
+private val SettingsSecondaryText = Color(0xFF8E8E93)
+private val SettingsDivider = Color(0xFFE5E5EA)
+private val SettingsActionBlue = Color(0xFF2F80ED)
+private val SettingsProGold = Color(0xFFE6C229)
 
 private fun formatDate(timestamp: Long?): String {
     if (timestamp == null) return "—"
