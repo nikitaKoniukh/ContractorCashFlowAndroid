@@ -16,10 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Check
@@ -167,12 +165,11 @@ fun PaywallScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // ── Close button ────────────────────────────────────────────────
             Row(
@@ -190,54 +187,54 @@ fun PaywallScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // ── Hero icon (crown) ──────────────────────────────────────────
             Box(
-                modifier = Modifier.size(88.dp),
+                modifier = Modifier.size(64.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.EmojiEvents,
                     contentDescription = null,
                     tint = com.yetzira.ContractorCashFlowAndroid.ui.theme.ProGold,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier.size(44.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Upgrade to Pro",
                 style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BalanceTextStyle,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 24.dp),
-                fontSize = 50.sp,
-                lineHeight = 52.sp
+                modifier = Modifier.padding(horizontal = 20.dp),
+                fontSize = 34.sp,
+                lineHeight = 36.sp
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = limitReachedMessage
                     ?: "Run more projects and manage your full crew — no limits holding you back.",
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp),
-                lineHeight = 40.sp
+                modifier = Modifier.padding(horizontal = 20.dp),
+                lineHeight = 22.sp
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // ── Feature comparison table ───────────────────────────────────
             Surface(
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
                     // Column headers
                     Row(
                         modifier = Modifier
@@ -247,23 +244,23 @@ fun PaywallScreen(
                     ) {
                         Text(
                             text = "Features",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = "Free",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.width(64.dp),
+                            modifier = Modifier.width(52.dp),
                             textAlign = TextAlign.Center
                         )
                         Text(
                             text = "Pro",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.width(64.dp),
+                            modifier = Modifier.width(52.dp),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -300,14 +297,14 @@ fun PaywallScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // ── Plan cards ─────────────────────────────────────────────────
             if (isLoading && products.isEmpty()) {
                 CircularProgressIndicator()
             } else {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
@@ -321,7 +318,7 @@ fun PaywallScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // ── Subscribe button ───────────────────────────────────────────
             Button(
@@ -335,8 +332,8 @@ fun PaywallScreen(
                 enabled = !isPurchasing,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp),
-                shape = RoundedCornerShape(20.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 if (isPurchasing) {
                     CircularProgressIndicator(
@@ -348,23 +345,23 @@ fun PaywallScreen(
                     Text(
                         text = "Subscribe Now",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         letterSpacing = 0.3.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = { viewModel.restorePurchases() }) {
                 Text(
                     text = "Restore Purchases",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -372,22 +369,22 @@ fun PaywallScreen(
             ) {
                 Text(
                     text = "Terms of Use",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
                 )
                 Text(
                     text = "·",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
                 Text(
                     text = "Privacy Policy",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
                 )
             }
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
@@ -405,13 +402,13 @@ private fun PaywallFeatureRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 14.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Icon in soft circle
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(28.dp)
                 .background(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                     shape = CircleShape
@@ -422,17 +419,17 @@ private fun PaywallFeatureRow(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(16.dp)
             )
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
         // Title + optional subtitle
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium
             )
             if (subtitle != null) {
@@ -445,18 +442,18 @@ private fun PaywallFeatureRow(
         }
 
         // Free value cell
-        Box(modifier = Modifier.width(64.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.width(52.dp), contentAlignment = Alignment.Center) {
             if (freeValue == "check") {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
                     tint = Color(0xFF8E8E93),
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             } else {
                 Text(
                     text = freeValue,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
@@ -464,18 +461,18 @@ private fun PaywallFeatureRow(
         }
 
         // Pro value cell
-        Box(modifier = Modifier.width(64.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.width(52.dp), contentAlignment = Alignment.Center) {
             if (proValue == "check") {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
                     tint = Color(0xFF59B865),
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             } else {
                 Text(
                     text = proValue,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF59B865),
                     textAlign = TextAlign.Center
@@ -508,7 +505,7 @@ private fun PaywallProductCard(
             color = if (isSelected) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
         ),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -518,7 +515,7 @@ private fun PaywallProductCard(
                     if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.08f)
                     else Color.Transparent
                 )
-                .padding(horizontal = 18.dp, vertical = 16.dp),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
@@ -526,12 +523,12 @@ private fun PaywallProductCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = plan.title,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     if (plan.savingsBadge != null) {
@@ -544,14 +541,14 @@ private fun PaywallProductCard(
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
                             )
                         }
                     }
                 }
                 Text(
                     text = "$displayPrice ${plan.periodLabel}",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -559,7 +556,7 @@ private fun PaywallProductCard(
             if (isSelected) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(32.dp)
                         .background(MaterialTheme.colorScheme.primary, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -567,17 +564,17 @@ private fun PaywallProductCard(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             } else {
                 Surface(
                     modifier = Modifier
-                        .size(40.dp)
-                        .padding(4.dp),
+                        .size(32.dp)
+                        .padding(3.dp),
                     shape = CircleShape,
                     color = Color.Transparent,
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f))
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f))
                 ) {}
             }
         }
