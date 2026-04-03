@@ -130,7 +130,8 @@ tasks.matching { it.name in setOf("assembleDebug", "installDebug") }.configureEa
     dependsOn("testDebugUnitTest")
 }
 
-val duplicateBuildArtifactNameRegex = Regex(""".*\s2(\..+)?$""")
+// Match Finder-style duplicate suffixes like " 2", " 3", etc. before optional extension.
+val duplicateBuildArtifactNameRegex = Regex(""".*\s\d+(\..+)?$""")
 val duplicateBuildArtifactRiskPathMarkers = listOf(
     "intermediates/project_dex_archive",
     "intermediates/javac",
