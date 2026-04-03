@@ -131,42 +131,60 @@ tasks.matching { it.name in setOf("assembleDebug", "installDebug") }.configureEa
 }
 
 val duplicateBuildArtifactNameRegex = Regex(""".*\s2(\..+)?$""")
-val duplicateBuildArtifactIgnoredPathMarkers = listOf(
-    "/test-results",
-    "/reports",
-    "/gmpAppId",
-    "/kspCaches/debugUnitTest",
-    "/kotlin/compileDebugUnitTestKotlin"
+val duplicateBuildArtifactRiskPathMarkers = listOf(
+    "intermediates/project_dex_archive",
+    "intermediates/javac",
+    "intermediates/runtime_app_classes_jar",
+    "intermediates/compile_app_classes_jar",
+    "intermediates/compile_and_runtime_not_namespaced_r_class_jar",
+    "intermediates/dex"
 )
+val duplicateBuildArtifactRiskExtensions = setOf("jar", "class", "dex", "apk", "aar")
 
 val verifyNoDuplicateBuildArtifacts by tasks.registering {
     group = "verification"
-    description = "Fails if Finder-style duplicate artifacts (e.g. '* 2.jar') exist in app/build."
+    description = "Removes Finder-style duplicate artifacts (e.g. '* 2.jar') from risky build outputs and fails only if cleanup cannot resolve them."
 
     doLast {
         val buildDirFile = layout.buildDirectory.asFile.get()
         if (!buildDirFile.exists()) return@doLast
 
-        val duplicates = buildDirFile
+        fun findRiskDuplicates() = buildDirFile
             .walkTopDown()
             .filter { file ->
                 val relativePath = file.relativeTo(buildDirFile).invariantSeparatorsPath
-                val isIgnored = duplicateBuildArtifactIgnoredPathMarkers.any { marker ->
-                    relativePath.contains(marker.trimStart('/'))
+                val inRiskPath = duplicateBuildArtifactRiskPathMarkers.any { marker ->
+                    relativePath.contains(marker)
                 }
-                file.name.matches(duplicateBuildArtifactNameRegex) && !isIgnored
+                val isRiskFileType = file.isDirectory || file.extension.lowercase() in duplicateBuildArtifactRiskExtensions
+
+                file.name.matches(duplicateBuildArtifactNameRegex) && inRiskPath && isRiskFileType
             }
             .toList()
 
+        val duplicates = findRiskDuplicates()
         if (duplicates.isNotEmpty()) {
-            val preview = duplicates
+            duplicates.forEach { duplicate ->
+                if (duplicate.isDirectory) {
+                    duplicate.deleteRecursively()
+                } else {
+                    duplicate.delete()
+                }
+            }
+            logger.warn("Removed ${duplicates.size} duplicate build artifacts from risky output paths.")
+        }
+
+        val remainingDuplicates = findRiskDuplicates()
+
+        if (remainingDuplicates.isNotEmpty()) {
+            val preview = remainingDuplicates
                 .take(20)
                 .joinToString(separator = "\n") { "- ${it.relativeTo(project.projectDir).path}" }
-            val more = if (duplicates.size > 20) "\n...and ${duplicates.size - 20} more" else ""
+            val more = if (remainingDuplicates.size > 20) "\n...and ${remainingDuplicates.size - 20} more" else ""
 
             throw GradleException(
                 "Duplicate generated artifacts were found in app/build.\n" +
-                    "These can cause duplicate-class errors during dexing.\n" +
+                    "Automatic cleanup was attempted, but some duplicates could not be removed.\n" +
                     "Clean and rebuild: './gradlew --stop && rm -rf app/build && ./gradlew :app:assembleDebug'.\n\n" +
                     "Found:\n$preview$more"
             )
