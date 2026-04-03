@@ -70,7 +70,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.export.ProjectExportService
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -424,13 +424,11 @@ fun ProjectDetailScreen(
         }
 
         if (showPaywall) {
-            ModalBottomSheet(onDismissRequest = { showPaywall = false }) {
-                PaywallScreen(
-                    viewModel = purchaseViewModel,
-                    onDismiss = { showPaywall = false },
-                    limitReachedMessage = paywallMessage
-                )
-            }
+            PaywallSheet(
+                viewModel = purchaseViewModel,
+                onDismiss = { showPaywall = false },
+                limitReachedMessage = paywallMessage
+            )
         }
     }
 }

@@ -29,7 +29,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -62,7 +61,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -215,13 +214,11 @@ fun InvoicesListScreen(
     }
 
     if (showPaywall) {
-        ModalBottomSheet(onDismissRequest = { showPaywall = false }) {
-            PaywallScreen(
-                viewModel = purchaseViewModel,
-                onDismiss = { showPaywall = false },
-                limitReachedMessage = paywallMessage
-            )
-        }
+        PaywallSheet(
+            viewModel = purchaseViewModel,
+            onDismiss = { showPaywall = false },
+            limitReachedMessage = paywallMessage
+        )
     }
 }
 

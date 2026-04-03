@@ -23,7 +23,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -69,7 +68,7 @@ import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.components.StatPill
 import com.yetzira.ContractorCashFlowAndroid.ui.components.WorkerAvatar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.BodyMediumSemibold
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors
@@ -290,13 +289,11 @@ fun LaborListScreen(
     }
 
     if (showPaywall) {
-        ModalBottomSheet(onDismissRequest = { showPaywall = false }) {
-            PaywallScreen(
-                viewModel = purchaseViewModel,
-                onDismiss = { showPaywall = false },
-                limitReachedMessage = paywallMessage
-            )
-        }
+        PaywallSheet(
+            viewModel = purchaseViewModel,
+            onDismiss = { showPaywall = false },
+            limitReachedMessage = paywallMessage
+        )
     }
 }
 

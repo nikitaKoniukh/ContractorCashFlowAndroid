@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Folder
@@ -32,12 +34,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,6 +62,33 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.billingclient.api.ProductDetails
 import com.yetzira.ContractorCashFlowAndroid.billing.BillingProduct
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PaywallSheet(
+    viewModel: PurchaseViewModel,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    limitReachedMessage: String? = null
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        dragHandle = null,
+        modifier = modifier,
+        sheetState = sheetState
+    ) {
+        PaywallScreen(
+            viewModel = viewModel,
+            onDismiss = onDismiss,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.9f),
+            limitReachedMessage = limitReachedMessage
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,21 +174,18 @@ fun PaywallScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ── Cancel pill ────────────────────────────────────────────────
+            // ── Close button ────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 2.dp),
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.End
             ) {
-                TextButton(
-                    onClick = onDismiss,
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Text(
-                        text = "Cancel",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

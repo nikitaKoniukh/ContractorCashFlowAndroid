@@ -129,3 +129,39 @@ dependencies {
 tasks.matching { it.name in setOf("assembleDebug", "installDebug") }.configureEach {
     dependsOn("testDebugUnitTest")
 }
+
+val duplicateBuildArtifactNameRegex = Regex(""".*\s2(\..+)?$""")
+
+val verifyNoDuplicateBuildArtifacts by tasks.registering {
+    group = "verification"
+    description = "Fails if Finder-style duplicate artifacts (e.g. '* 2.jar') exist in app/build."
+
+    doLast {
+        val buildDirFile = layout.buildDirectory.asFile.get()
+        if (!buildDirFile.exists()) return@doLast
+
+        val duplicates = buildDirFile
+            .walkTopDown()
+            .filter { it.name.matches(duplicateBuildArtifactNameRegex) }
+            .toList()
+
+        if (duplicates.isNotEmpty()) {
+            val preview = duplicates
+                .take(20)
+                .joinToString(separator = "\n") { "- ${it.relativeTo(project.projectDir).path}" }
+            val more = if (duplicates.size > 20) "\n...and ${duplicates.size - 20} more" else ""
+
+            throw GradleException(
+                "Duplicate generated artifacts were found in app/build.\n" +
+                    "These can cause duplicate-class errors during dexing.\n" +
+                    "Clean and rebuild: './gradlew --stop && rm -rf app/build && ./gradlew :app:assembleDebug'.\n\n" +
+                    "Found:\n$preview$more"
+            )
+        }
+    }
+}
+
+tasks.named("preBuild") {
+    dependsOn(verifyNoDuplicateBuildArtifacts)
+}
+

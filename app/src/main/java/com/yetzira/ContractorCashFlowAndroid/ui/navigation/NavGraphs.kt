@@ -51,9 +51,6 @@ import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectsListScreen
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
-import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
-import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsViewModel
@@ -427,7 +424,7 @@ fun NavGraphBuilder.analyticsGraph(@Suppress("UNUSED_PARAMETER") navController: 
     }
 }
 
-fun NavGraphBuilder.settingsGraph(navController: NavController) {
+fun NavGraphBuilder.settingsGraph(@Suppress("UNUSED_PARAMETER") navController: NavController) {
     navigation(
         startDestination = SettingsRoutes.ROOT,
         route = SettingsRoutes.GRAPH
@@ -438,19 +435,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavController) {
             val viewModel: SettingsViewModel = viewModel(factory = factory)
 
             SettingsScreen(
-                viewModel = viewModel,
-                onOpenPaywall = { navController.navigate(SettingsRoutes.PAYWALL) }
-            )
-        }
-
-        composable(SettingsRoutes.PAYWALL) {
-            val context = LocalContext.current
-            val factory = remember { PurchaseViewModelFactory(context) }
-            val viewModel: PurchaseViewModel = viewModel(factory = factory)
-
-            PaywallScreen(
-                viewModel = viewModel,
-                onDismiss = { navController.popBackStack() }
+                viewModel = viewModel
             )
         }
     }

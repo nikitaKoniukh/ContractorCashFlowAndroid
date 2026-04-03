@@ -31,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -68,7 +67,7 @@ import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallScreen
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -213,13 +212,11 @@ fun ProjectsListScreen(
     }
 
     if (showPaywall) {
-        ModalBottomSheet(onDismissRequest = { showPaywall = false }) {
-            PaywallScreen(
-                viewModel = purchaseViewModel,
-                onDismiss = { showPaywall = false },
-                limitReachedMessage = paywallMessage
-            )
-        }
+        PaywallSheet(
+            viewModel = purchaseViewModel,
+            onDismiss = { showPaywall = false },
+            limitReachedMessage = paywallMessage
+        )
     }
 }
 

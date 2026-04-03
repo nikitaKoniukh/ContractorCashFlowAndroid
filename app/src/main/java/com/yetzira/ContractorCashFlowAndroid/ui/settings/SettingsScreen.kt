@@ -67,6 +67,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -85,7 +86,6 @@ private enum class NotificationToggleType {
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
-    onOpenPaywall: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -111,6 +111,7 @@ fun SettingsScreen(
     val isProUser by purchaseViewModel.isProUser.collectAsState()
     val activePurchase by purchaseViewModel.activePurchase.collectAsState()
     val credentialManager = remember(context) { CredentialManager.create(context) }
+    var showPaywall by remember { mutableStateOf(false) }
     val googleSignInSetupIncompleteMessage = stringResource(R.string.settings_google_sign_in_setup_incomplete)
     val googleSignInSetupMissingClientIdMessage = stringResource(R.string.settings_google_sign_in_setup_missing_client_id)
     val googleSignInUnsupportedCredentialMessage = stringResource(R.string.settings_google_sign_in_unsupported_credential)
@@ -490,7 +491,7 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
-                        onClick = onOpenPaywall,
+                        onClick = { showPaywall = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(stringResource(R.string.settings_upgrade_pro))
@@ -532,6 +533,13 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+
+    if (showPaywall) {
+        PaywallSheet(
+            viewModel = purchaseViewModel,
+            onDismiss = { showPaywall = false }
+        )
     }
 }
 
