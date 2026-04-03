@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Check
@@ -165,6 +167,7 @@ fun PaywallScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
                 .padding(horizontal = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -218,11 +221,11 @@ fun PaywallScreen(
             Text(
                 text = limitReachedMessage
                     ?: "Run more projects and manage your full crew — no limits holding you back.",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 20.dp),
-                lineHeight = 22.sp
+                lineHeight = 20.sp
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -367,21 +370,25 @@ fun PaywallScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Terms of Use",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
-                )
+                TextButton(onClick = { }) {
+                    Text(
+                        text = "Terms of Use",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    )
+                }
                 Text(
                     text = "·",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
-                Text(
-                    text = "Privacy Policy",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
-                )
+                TextButton(onClick = { }) {
+                    Text(
+                        text = "Privacy Policy",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
