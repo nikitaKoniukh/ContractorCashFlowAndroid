@@ -26,6 +26,10 @@
     <string name="common_undo">Отменить</string>
     <string name="common_edit">Редактировать</string>
     <string name="common_more">Ещё</string>
+    <string name="paywall_limit_projects">Вы достигли бесплатного лимита проектов (%1$d). Перейдите на Pro для неограниченных проектов.</string>
+    <string name="paywall_limit_workers">Вы достигли бесплатного лимита сотрудников (%1$d). Перейдите на Pro для неограниченных сотрудников.</string>
+    <string name="paywall_limit_expenses">Перейдите на Pro, чтобы открыть расширенные возможности расходов.</string>
+    <string name="paywall_limit_invoices">Перейдите на Pro, чтобы открыть расширенные возможности счетов.</string>
 
     <string name="projects_new_project">Новый проект</string>
     <string name="projects_search_placeholder">Поиск по проекту или клиенту</string>
@@ -196,7 +200,7 @@
     <string name="action_more">Ещё</string>
     <string name="menu_open">Открыть меню навигации</string>
     <string name="settings_section_account">Учётная запись</string>
-    <string name="settings_google_sign_in_setup_incomplete">Настройка входа Google неполная: отсутствует default_web_client_id в ресурсах. Пересоздайте google-services.json с OAuth-клиентом типа Web.</string>
+    <string name="settings_google_sign_in_setup_incomplete">Настройка входа Google неполная: отсутствует default_web_client_id в ресурсах. Пересоздавайте google-services.json с OAuth-клиентом типа Web.</string>
     <string name="settings_google_sign_in_setup_missing_client_id">Настройка входа Google неполная: отсутствует default_web_client_id.</string>
     <string name="settings_google_sign_in_unsupported_credential">Получен неподдерживаемый тип учетных данных</string>
     <string name="settings_google_sign_in_parse_token_failed">Не удалось разобрать Google ID token</string>
@@ -263,6 +267,38 @@
     <string name="notif_budget_alert_100_body">Проект \'%1$s\' превысил бюджет! Потрачено %2$s из %3$s</string>
 
     <!-- Paywall Strings -->
+    <!-- New paywall screen strings -->
+    <string name="paywall_screen_title">Перейти на Pro</string>
+    <string name="paywall_screen_tagline">Управляйте большим количеством проектов и командой — без ограничений.</string>
+    <string name="paywall_features_header">Функции</string>
+    <string name="paywall_features_col_free">Бесплатно</string>
+    <string name="paywall_features_col_pro">Pro</string>
+    <string name="paywall_feature_projects">Неограниченные проекты</string>
+    <string name="paywall_feature_projects_free">1</string>
+    <string name="paywall_feature_workers">Неограниченные сотрудники</string>
+    <string name="paywall_feature_workers_free">2</string>
+    <string name="paywall_feature_always_free">(всегда бесплатно)</string>
+    <string name="paywall_feature_expenses">Расходы</string>
+    <string name="paywall_feature_invoices">Счета</string>
+    <string name="paywall_feature_unlimited">Неограниченно</string>
+    <string name="paywall_plan_monthly_title">KablanPro Ежемесячно</string>
+    <string name="paywall_plan_monthly_period">/ месяц</string>
+    <string name="paywall_plan_yearly_title">KablanPro Ежегодно</string>
+    <string name="paywall_plan_yearly_period">/ год</string>
+    <string name="paywall_savings_badge_fallback">ЭКОНОМИЯ 58%%</string>
+    <string name="paywall_savings_badge_format">ЭКОНОМИЯ %d%%</string>
+    <string name="paywall_period_days">%d дней</string>
+    <string name="paywall_period_weeks">%d недель</string>
+    <string name="paywall_period_months">%d месяцев</string>
+    <string name="paywall_period_years">%d лет</string>
+    <string name="paywall_trial_label">пробный период %s</string>
+    <string name="paywall_subscribe_now">Подписаться сейчас</string>
+    <string name="paywall_restore_purchases">Восстановить покупки</string>
+    <string name="paywall_terms_of_use">Условия использования</string>
+    <string name="paywall_privacy_policy">Политика конфиденциальности</string>
+    <string name="paywall_error_title">Ошибка</string>
+    <string name="paywall_error_ok">OK</string>
+    <string name="paywall_close">Закрыть</string>
     <string name="paywall_title">Перейти на KablanPro Pro</string>
     <string name="paywall_description">Откройте премиум-возможности с настоящей подпиской Google Play.</string>
     <string name="paywall_price_label">Цена подписки: %1$s</string>

@@ -296,6 +296,38 @@
     <string name="notif_budget_alert_100_body">Project \'%1$s\' has exceeded budget! Spent %2$s of %3$s</string>
 
     <!-- Paywall Strings -->
+    <!-- New paywall screen strings -->
+    <string name="paywall_screen_title">Upgrade to Pro</string>
+    <string name="paywall_screen_tagline">Run more projects and manage your full crew — no limits holding you back.</string>
+    <string name="paywall_features_header">Features</string>
+    <string name="paywall_features_col_free">Free</string>
+    <string name="paywall_features_col_pro">Pro</string>
+    <string name="paywall_feature_projects">Unlimited Projects</string>
+    <string name="paywall_feature_projects_free">1</string>
+    <string name="paywall_feature_workers">Unlimited Workers</string>
+    <string name="paywall_feature_workers_free">2</string>
+    <string name="paywall_feature_always_free">(always free)</string>
+    <string name="paywall_feature_expenses">Expenses</string>
+    <string name="paywall_feature_invoices">Invoices</string>
+    <string name="paywall_feature_unlimited">Unlimited</string>
+    <string name="paywall_plan_monthly_title">KablanPro Monthly</string>
+    <string name="paywall_plan_monthly_period">/ month</string>
+    <string name="paywall_plan_yearly_title">KablanPro Yearly</string>
+    <string name="paywall_plan_yearly_period">/ year</string>
+    <string name="paywall_savings_badge_fallback">SAVE 58%%</string>
+    <string name="paywall_savings_badge_format">SAVE %d%%</string>
+    <string name="paywall_period_days">%d-day</string>
+    <string name="paywall_period_weeks">%d-week</string>
+    <string name="paywall_period_months">%d-month</string>
+    <string name="paywall_period_years">%d-year</string>
+    <string name="paywall_trial_label">%s free trial</string>
+    <string name="paywall_subscribe_now">Subscribe Now</string>
+    <string name="paywall_restore_purchases">Restore Purchases</string>
+    <string name="paywall_terms_of_use">Terms of Use</string>
+    <string name="paywall_privacy_policy">Privacy Policy</string>
+    <string name="paywall_error_title">Error</string>
+    <string name="paywall_error_ok">OK</string>
+    <string name="paywall_close">Close</string>
     <string name="paywall_title">Upgrade to KablanPro Pro</string>
     <string name="paywall_description">Unlock premium workflow features with a real Google Play subscription.</string>
     <string name="paywall_price_label">Subscription price: %1$s</string>

@@ -26,6 +26,10 @@
     <string name="common_undo">בטל</string>
     <string name="common_edit">ערוך</string>
     <string name="common_more">עוד</string>
+    <string name="paywall_limit_projects">הגעת למגבלת הפרויקטים בחינם (%1$d). שדרג ל-Pro לפרויקטים ללא הגבלה.</string>
+    <string name="paywall_limit_workers">הגעת למגבלת העובדים בחינם (%1$d). שדרג ל-Pro לעובדים ללא הגבלה.</string>
+    <string name="paywall_limit_expenses">שדרג ל-Pro כדי לפתוח תכונות הוצאות מתקדמות.</string>
+    <string name="paywall_limit_invoices">שדרג ל-Pro כדי לפתוח תכונות חשבוניות מתקדמות.</string>
 
     <string name="projects_new_project">פרויקט חדש</string>
     <string name="projects_search_placeholder">חיפוש לפי פרויקט או לקוח</string>
@@ -263,6 +267,38 @@
     <string name="notif_budget_alert_100_body">פרויקט \'%1$s\' חרג מהתקציב! הוצא %2$s מתוך %3$s</string>
 
     <!-- Paywall Strings -->
+    <!-- New paywall screen strings -->
+    <string name="paywall_screen_title">שדרג ל-Pro</string>
+    <string name="paywall_screen_tagline">נהל יותר פרויקטים וצוות מלא — ללא הגבלות.</string>
+    <string name="paywall_features_header">תכונות</string>
+    <string name="paywall_features_col_free">חינם</string>
+    <string name="paywall_features_col_pro">Pro</string>
+    <string name="paywall_feature_projects">פרויקטים ללא הגבלה</string>
+    <string name="paywall_feature_projects_free">1</string>
+    <string name="paywall_feature_workers">עובדים ללא הגבלה</string>
+    <string name="paywall_feature_workers_free">2</string>
+    <string name="paywall_feature_always_free">(תמיד בחינם)</string>
+    <string name="paywall_feature_expenses">הוצאות</string>
+    <string name="paywall_feature_invoices">חשבוניות</string>
+    <string name="paywall_feature_unlimited">ללא הגבלה</string>
+    <string name="paywall_plan_monthly_title">KablanPro חודשי</string>
+    <string name="paywall_plan_monthly_period">/ חודש</string>
+    <string name="paywall_plan_yearly_title">KablanPro שנתי</string>
+    <string name="paywall_plan_yearly_period">/ שנה</string>
+    <string name="paywall_savings_badge_fallback">חסוך 58%%</string>
+    <string name="paywall_savings_badge_format">חסוך %d%%</string>
+    <string name="paywall_period_days">%d ימים</string>
+    <string name="paywall_period_weeks">%d שבועות</string>
+    <string name="paywall_period_months">%d חודשים</string>
+    <string name="paywall_period_years">%d שנים</string>
+    <string name="paywall_trial_label">ניסיון חינם של %s</string>
+    <string name="paywall_subscribe_now">הירשם עכשיו</string>
+    <string name="paywall_restore_purchases">שחזר רכישות</string>
+    <string name="paywall_terms_of_use">תנאי שימוש</string>
+    <string name="paywall_privacy_policy">מדיניות פרטיות</string>
+    <string name="paywall_error_title">שגיאה</string>
+    <string name="paywall_error_ok">אישור</string>
+    <string name="paywall_close">סגור</string>
     <string name="paywall_title">שדרוג ל-KablanPro Pro</string>
     <string name="paywall_description">פתח תכונות פרימיום עם מנוי אמיתי דרך Google Play.</string>
     <string name="paywall_price_label">מחיר המנוי: %1$s</string>

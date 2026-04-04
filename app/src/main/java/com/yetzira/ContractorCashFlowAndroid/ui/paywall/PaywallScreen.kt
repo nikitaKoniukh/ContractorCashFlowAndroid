@@ -57,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,6 +67,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.billingclient.api.ProductDetails
+import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.billing.BillingProduct
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 
@@ -115,23 +117,32 @@ fun PaywallScreen(
     val yearlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_YEARLY }
     val monthlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_MONTHLY }
 
-    val plans = remember(monthlyProduct, yearlyProduct) {
-        val dynamicSavings = computeSavingsBadge(monthlyProduct, yearlyProduct)
+    // Localized strings for plan construction (must be read outside remember)
+    val monthlyTitle    = stringResource(R.string.paywall_plan_monthly_title)
+    val monthlyPeriod   = stringResource(R.string.paywall_plan_monthly_period)
+    val yearlyTitle     = stringResource(R.string.paywall_plan_yearly_title)
+    val yearlyPeriod    = stringResource(R.string.paywall_plan_yearly_period)
+    val savingsFallback = stringResource(R.string.paywall_savings_badge_fallback)
+    val savingsFormat   = stringResource(R.string.paywall_savings_badge_format)
+
+    val plans = remember(monthlyProduct, yearlyProduct, monthlyTitle, monthlyPeriod,
+                         yearlyTitle, yearlyPeriod, savingsFallback, savingsFormat) {
+        val dynamicSavings = computeSavingsBadge(monthlyProduct, yearlyProduct, savingsFormat)
         listOf(
             PaywallPlanOption(
                 id = BillingProduct.PRO_MONTHLY,
-                title = "KablanPro Monthly",
-                periodLabel = "/ month",
+                title = monthlyTitle,
+                periodLabel = monthlyPeriod,
                 basePlanId = BillingProduct.MONTHLY_BASE_PLAN,
                 savingsBadge = null,
                 productDetails = monthlyProduct
             ),
             PaywallPlanOption(
                 id = BillingProduct.PRO_YEARLY,
-                title = "KablanPro Yearly",
-                periodLabel = "/ year",
+                title = yearlyTitle,
+                periodLabel = yearlyPeriod,
                 basePlanId = BillingProduct.YEARLY_BASE_PLAN,
-                savingsBadge = dynamicSavings ?: "SAVE 58%",
+                savingsBadge = dynamicSavings ?: savingsFallback,
                 productDetails = yearlyProduct
             )
         )
@@ -156,11 +167,11 @@ fun PaywallScreen(
     if (showErrorDialog && errorMessage != null) {
         AlertDialog(
             onDismissRequest = { showErrorDialog = false; viewModel.clearError() },
-            title = { Text("Error") },
+            title = { Text(stringResource(R.string.paywall_error_title)) },
             text = { Text(errorMessage.orEmpty()) },
             confirmButton = {
                 TextButton(onClick = { showErrorDialog = false; viewModel.clearError() }) {
-                    Text("OK")
+                    Text(stringResource(R.string.paywall_error_ok))
                 }
             }
         )
@@ -190,7 +201,7 @@ fun PaywallScreen(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(R.string.paywall_close),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -214,7 +225,7 @@ fun PaywallScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Upgrade to Pro",
+                text = stringResource(R.string.paywall_screen_title),
                 style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BalanceTextStyle,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -225,8 +236,7 @@ fun PaywallScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = limitReachedMessage
-                    ?: "Run more projects and manage your full crew — no limits holding you back.",
+                text = limitReachedMessage ?: stringResource(R.string.paywall_screen_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -240,8 +250,7 @@ fun PaywallScreen(
             Surface(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)) {
                     // Column headers
@@ -252,20 +261,20 @@ fun PaywallScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Features",
+                            text = stringResource(R.string.paywall_features_header),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = "Free",
+                            text = stringResource(R.string.paywall_features_col_free),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.width(52.dp),
                             textAlign = TextAlign.Center
                         )
                         Text(
-                            text = "Pro",
+                            text = stringResource(R.string.paywall_features_col_pro),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
@@ -276,30 +285,30 @@ fun PaywallScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     PaywallFeatureRow(
                         icon = Icons.Default.Folder,
-                        title = "Unlimited Projects",
-                        freeValue = "1",
-                        proValue = "Unlimited"
+                        title = stringResource(R.string.paywall_feature_projects),
+                        freeValue = stringResource(R.string.paywall_feature_projects_free),
+                        proValue = stringResource(R.string.paywall_feature_unlimited)
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     PaywallFeatureRow(
                         icon = Icons.Default.Group,
-                        title = "Unlimited Workers",
-                        freeValue = "2",
-                        proValue = "Unlimited"
+                        title = stringResource(R.string.paywall_feature_workers),
+                        freeValue = stringResource(R.string.paywall_feature_workers_free),
+                        proValue = stringResource(R.string.paywall_feature_unlimited)
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     PaywallFeatureRow(
                         icon = Icons.Default.AttachMoney,
-                        title = "Expenses",
-                        subtitle = "(always free)",
+                        title = stringResource(R.string.paywall_feature_expenses),
+                        subtitle = stringResource(R.string.paywall_feature_always_free),
                         freeValue = "check",
                         proValue = "check"
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     PaywallFeatureRow(
                         icon = Icons.Default.Description,
-                        title = "Invoices",
-                        subtitle = "(always free)",
+                        title = stringResource(R.string.paywall_feature_invoices),
+                        subtitle = stringResource(R.string.paywall_feature_always_free),
                         freeValue = "check",
                         proValue = "check"
                     )
@@ -314,8 +323,7 @@ fun PaywallScreen(
             } else {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     plans.forEach { plan ->
                         PaywallProductCard(
@@ -352,7 +360,7 @@ fun PaywallScreen(
                     )
                 } else {
                     Text(
-                        text = "Subscribe Now",
+                        text = stringResource(R.string.paywall_subscribe_now),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         letterSpacing = 0.3.sp
@@ -364,7 +372,7 @@ fun PaywallScreen(
 
             TextButton(onClick = { viewModel.restorePurchases() }) {
                 Text(
-                    text = "Restore Purchases",
+                    text = stringResource(R.string.paywall_restore_purchases),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -378,7 +386,7 @@ fun PaywallScreen(
             ) {
                 TextButton(onClick = { legalUrl = PAYWALL_TERMS_OF_USE_URL }) {
                     Text(
-                        text = "Terms of Use",
+                        text = stringResource(R.string.paywall_terms_of_use),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
@@ -390,7 +398,7 @@ fun PaywallScreen(
                 )
                 TextButton(onClick = { legalUrl = PAYWALL_PRIVACY_POLICY_URL }) {
                     Text(
-                        text = "Privacy Policy",
+                        text = stringResource(R.string.paywall_privacy_policy),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                     )
@@ -432,11 +440,14 @@ private fun LegalWebDialog(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close"
+                            contentDescription = stringResource(R.string.paywall_close)
                         )
                     }
                     Text(
-                        text = if (url.contains("privacy")) "Privacy Policy" else "Terms of Use",
+                        text = if (url.contains("privacy"))
+                            stringResource(R.string.paywall_privacy_policy)
+                        else
+                            stringResource(R.string.paywall_terms_of_use),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -571,6 +582,13 @@ private fun PaywallProductCard(
     val displayPrice = recurringPricingPhase(plan.productDetails, plan.basePlanId)
         ?.formattedPrice ?: "—"
 
+    // Preload period format strings (must be done here, outside the lambda)
+    val daysFormat   = stringResource(R.string.paywall_period_days)
+    val weeksFormat  = stringResource(R.string.paywall_period_weeks)
+    val monthsFormat = stringResource(R.string.paywall_period_months)
+    val yearsFormat  = stringResource(R.string.paywall_period_years)
+    val trialFormat  = stringResource(R.string.paywall_trial_label)
+
     // Detect a free-trial intro offer (priceAmountMicros == 0)
     val trialLabel = plan.productDetails
         ?.subscriptionOfferDetails
@@ -579,8 +597,8 @@ private fun PaywallProductCard(
         ?.pricingPhaseList
         ?.firstOrNull { it.priceAmountMicros == 0L }
         ?.billingPeriod
-        ?.let { parsePeriodLabel(it) }
-        ?.let { "$it free trial" }
+        ?.let { parsePeriodLabel(it, daysFormat, weeksFormat, monthsFormat, yearsFormat) }
+        ?.let { trialFormat.format(it) }
 
     OutlinedCard(
         onClick = onClick,
@@ -693,11 +711,12 @@ private fun recurringPricingPhase(
 
 /**
  * Calculates "SAVE X%" from real Play Store micros prices.
- * Returns null when either product isn't loaded yet (UI will use the hardcoded fallback).
+ * Returns null when either product isn't loaded yet (UI will use the localized fallback).
  */
 private fun computeSavingsBadge(
     monthlyProduct: ProductDetails?,
-    yearlyProduct: ProductDetails?
+    yearlyProduct: ProductDetails?,
+    formatString: String
 ): String? {
     val monthlyMicros = recurringPricingPhase(monthlyProduct, BillingProduct.MONTHLY_BASE_PLAN)
         ?.priceAmountMicros ?: return null
@@ -706,19 +725,25 @@ private fun computeSavingsBadge(
     val monthlyAnnual = monthlyMicros * 12
     if (monthlyAnnual <= 0) return null
     val savingsPct = ((monthlyAnnual - yearlyMicros) * 100L / monthlyAnnual).toInt()
-    return if (savingsPct > 0) "SAVE $savingsPct%" else null
+    return if (savingsPct > 0) formatString.format(savingsPct) else null
 }
 
 /**
  * Parses an ISO 8601 duration like "P7D", "P1W", "P1M", "P1Y"
- * into a human-readable label such as "7-day", "1-week", "1-month".
+ * into a localized human-readable label using the provided format strings.
  */
-private fun parsePeriodLabel(isoPeriod: String): String? {
+private fun parsePeriodLabel(
+    isoPeriod: String,
+    daysFormat: String,
+    weeksFormat: String,
+    monthsFormat: String,
+    yearsFormat: String
+): String? {
     if (isoPeriod.isBlank()) return null
-    Regex("P(\\d+)D").find(isoPeriod)?.let { return "${it.groupValues[1]}-day" }
-    Regex("P(\\d+)W").find(isoPeriod)?.let { return "${it.groupValues[1]}-week" }
-    Regex("P(\\d+)M").find(isoPeriod)?.let { return "${it.groupValues[1]}-month" }
-    Regex("P(\\d+)Y").find(isoPeriod)?.let { return "${it.groupValues[1]}-year" }
+    Regex("P(\\d+)D").find(isoPeriod)?.let { return daysFormat.format(it.groupValues[1].toInt()) }
+    Regex("P(\\d+)W").find(isoPeriod)?.let { return weeksFormat.format(it.groupValues[1].toInt()) }
+    Regex("P(\\d+)M").find(isoPeriod)?.let { return monthsFormat.format(it.groupValues[1].toInt()) }
+    Regex("P(\\d+)Y").find(isoPeriod)?.let { return yearsFormat.format(it.groupValues[1].toInt()) }
     return null
 }
 
