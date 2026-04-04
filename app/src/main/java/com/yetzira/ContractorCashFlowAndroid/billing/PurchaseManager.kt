@@ -8,6 +8,7 @@ import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
+import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
@@ -94,37 +95,42 @@ class PurchaseManager(
     }
 
     fun connectAndLoad() {
-        if (billingClient.isReady) {
-            scope.launch {
+        scope.launch {
+            ensureConnected()
+            if (isConnected) {
                 checkCurrentEntitlements()
                 loadProducts()
             }
+        }
+    }
+
+    /** Suspends until the BillingClient is ready (or returns immediately if already connected). */
+    private suspend fun ensureConnected() {
+        if (billingClient.isReady) {
+            isConnected = true
             return
         }
-
-        billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(billingResult: com.android.billingclient.api.BillingResult) {
-                isConnected = billingResult.responseCode == BillingClient.BillingResponseCode.OK
-                if (isConnected) {
-                    scope.launch {
-                        checkCurrentEntitlements()
-                        loadProducts()
+        suspendCancellableCoroutine<Unit> { continuation ->
+            billingClient.startConnection(object : BillingClientStateListener {
+                override fun onBillingSetupFinished(result: BillingResult) {
+                    isConnected = result.responseCode == BillingClient.BillingResponseCode.OK
+                    if (!isConnected) {
+                        _errorMessage.value = "Billing unavailable: ${result.debugMessage}"
                     }
-                } else {
-                    _errorMessage.value = "Billing unavailable: ${billingResult.debugMessage}"
+                    if (continuation.isActive) continuation.resume(Unit)
                 }
-            }
-
-            override fun onBillingServiceDisconnected() {
-                isConnected = false
-            }
-        })
+                override fun onBillingServiceDisconnected() {
+                    isConnected = false
+                }
+            })
+        }
     }
 
     suspend fun loadProducts() {
         _isLoading.value = true
         try {
-            reconnectIfNeeded()
+            ensureConnected()
+            if (!isConnected) return
             val products = BillingProduct.ALL_IDS.map { productId ->
                 QueryProductDetailsParams.Product.newBuilder()
                     .setProductId(productId)
@@ -132,7 +138,7 @@ class PurchaseManager(
                     .build()
             }
 
-            val result = suspendCancellableCoroutine<Pair<com.android.billingclient.api.BillingResult, List<ProductDetails>>> { continuation ->
+            val result = suspendCancellableCoroutine<Pair<BillingResult, List<ProductDetails>>> { continuation ->
                 billingClient.queryProductDetailsAsync(
                     QueryProductDetailsParams.newBuilder()
                         .setProductList(products)
@@ -192,7 +198,7 @@ class PurchaseManager(
         }
 
         if (!purchase.isAcknowledged) {
-            val result = suspendCancellableCoroutine<com.android.billingclient.api.BillingResult> { continuation ->
+            val result = suspendCancellableCoroutine<BillingResult> { continuation ->
                 billingClient.acknowledgePurchase(
                     AcknowledgePurchaseParams.newBuilder()
                         .setPurchaseToken(purchase.purchaseToken)
@@ -213,9 +219,10 @@ class PurchaseManager(
     }
 
     suspend fun checkCurrentEntitlements() {
-        reconnectIfNeeded()
+        ensureConnected()
+        if (!isConnected) return
 
-        val result = suspendCancellableCoroutine<Pair<com.android.billingclient.api.BillingResult, List<Purchase>>> { continuation ->
+        val result = suspendCancellableCoroutine<Pair<BillingResult, List<Purchase>>> { continuation ->
             billingClient.queryPurchasesAsync(
                 QueryPurchasesParams.newBuilder()
                     .setProductType(BillingClient.ProductType.SUBS)

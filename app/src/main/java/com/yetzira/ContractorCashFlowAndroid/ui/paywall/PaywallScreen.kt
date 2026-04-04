@@ -116,12 +116,12 @@ fun PaywallScreen(
     val monthlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_MONTHLY }
 
     val plans = remember(monthlyProduct, yearlyProduct) {
+        val dynamicSavings = computeSavingsBadge(monthlyProduct, yearlyProduct)
         listOf(
             PaywallPlanOption(
                 id = BillingProduct.PRO_MONTHLY,
                 title = "KablanPro Monthly",
                 periodLabel = "/ month",
-                hardcodedPrice = "₪69.90",
                 basePlanId = BillingProduct.MONTHLY_BASE_PLAN,
                 savingsBadge = null,
                 productDetails = monthlyProduct
@@ -130,9 +130,8 @@ fun PaywallScreen(
                 id = BillingProduct.PRO_YEARLY,
                 title = "KablanPro Yearly",
                 periodLabel = "/ year",
-                hardcodedPrice = "₪349.90",
                 basePlanId = BillingProduct.YEARLY_BASE_PLAN,
-                savingsBadge = "SAVE 17%",
+                savingsBadge = dynamicSavings ?: "SAVE 58%",
                 productDetails = yearlyProduct
             )
         )
@@ -568,13 +567,20 @@ private fun PaywallProductCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val pricingPhase = plan.productDetails
+    // Get the recurring (non-trial) price — last phase in the list
+    val displayPrice = recurringPricingPhase(plan.productDetails, plan.basePlanId)
+        ?.formattedPrice ?: "—"
+
+    // Detect a free-trial intro offer (priceAmountMicros == 0)
+    val trialLabel = plan.productDetails
         ?.subscriptionOfferDetails
-        ?.firstOrNull { it.basePlanId == plan.basePlanId }
+        ?.firstOrNull { it.basePlanId == plan.basePlanId && it.offerId != null }
         ?.pricingPhases
         ?.pricingPhaseList
-        ?.firstOrNull()
-    val displayPrice = pricingPhase?.formattedPrice ?: plan.hardcodedPrice
+        ?.firstOrNull { it.priceAmountMicros == 0L }
+        ?.billingPeriod
+        ?.let { parsePeriodLabel(it) }
+        ?.let { "$it free trial" }
 
     OutlinedCard(
         onClick = onClick,
@@ -629,6 +635,14 @@ private fun PaywallProductCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (trialLabel != null) {
+                    Text(
+                        text = trialLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF34C759)
+                    )
+                }
             }
 
             if (isSelected) {
@@ -659,13 +673,61 @@ private fun PaywallProductCard(
     }
 }
 
+// ── Billing helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Returns the recurring (non-trial) pricing phase for [basePlanId].
+ * Prefers the base-plan-only offer (offerId == null); falls back to any offer.
+ * Uses the LAST phase in the list because Google returns phases in order:
+ * [free-trial?, intro?, recurring], so last == the ongoing charge.
+ */
+private fun recurringPricingPhase(
+    productDetails: ProductDetails?,
+    basePlanId: String
+): ProductDetails.PricingPhase? {
+    val offers = productDetails?.subscriptionOfferDetails ?: return null
+    val offer = offers.firstOrNull { it.basePlanId == basePlanId && it.offerId == null }
+        ?: offers.firstOrNull { it.basePlanId == basePlanId }
+    return offer?.pricingPhases?.pricingPhaseList?.lastOrNull()
+}
+
+/**
+ * Calculates "SAVE X%" from real Play Store micros prices.
+ * Returns null when either product isn't loaded yet (UI will use the hardcoded fallback).
+ */
+private fun computeSavingsBadge(
+    monthlyProduct: ProductDetails?,
+    yearlyProduct: ProductDetails?
+): String? {
+    val monthlyMicros = recurringPricingPhase(monthlyProduct, BillingProduct.MONTHLY_BASE_PLAN)
+        ?.priceAmountMicros ?: return null
+    val yearlyMicros = recurringPricingPhase(yearlyProduct, BillingProduct.YEARLY_BASE_PLAN)
+        ?.priceAmountMicros ?: return null
+    val monthlyAnnual = monthlyMicros * 12
+    if (monthlyAnnual <= 0) return null
+    val savingsPct = ((monthlyAnnual - yearlyMicros) * 100L / monthlyAnnual).toInt()
+    return if (savingsPct > 0) "SAVE $savingsPct%" else null
+}
+
+/**
+ * Parses an ISO 8601 duration like "P7D", "P1W", "P1M", "P1Y"
+ * into a human-readable label such as "7-day", "1-week", "1-month".
+ */
+private fun parsePeriodLabel(isoPeriod: String): String? {
+    if (isoPeriod.isBlank()) return null
+    Regex("P(\\d+)D").find(isoPeriod)?.let { return "${it.groupValues[1]}-day" }
+    Regex("P(\\d+)W").find(isoPeriod)?.let { return "${it.groupValues[1]}-week" }
+    Regex("P(\\d+)M").find(isoPeriod)?.let { return "${it.groupValues[1]}-month" }
+    Regex("P(\\d+)Y").find(isoPeriod)?.let { return "${it.groupValues[1]}-year" }
+    return null
+}
+
 // ── Data class ─────────────────────────────────────────────────────────────────
 
 private data class PaywallPlanOption(
     val id: String,
     val title: String,
     val periodLabel: String,
-    val hardcodedPrice: String,
     val basePlanId: String,
     val savingsBadge: String?,
     val productDetails: ProductDetails?
