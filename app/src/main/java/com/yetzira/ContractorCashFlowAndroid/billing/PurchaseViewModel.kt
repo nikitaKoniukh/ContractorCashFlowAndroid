@@ -34,6 +34,16 @@ class PurchaseViewModel(
         }
     }
 
+    fun reloadProducts() {
+        viewModelScope.launch {
+            purchaseManager.loadProducts()
+        }
+    }
+
+    fun reconnect() {
+        purchaseManager.connectAndLoad()
+    }
+
     fun clearError() {
         purchaseManager.clearError()
     }
@@ -42,4 +52,3 @@ class PurchaseViewModel(
         purchaseManager.openManageSubscriptions(context)
     }
 }
-

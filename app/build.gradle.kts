@@ -14,7 +14,7 @@ android {
         applicationId = "com.yetzira.ContractorCashFlowAndroid"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
+        versionCode = 3
         versionName = "1.0"
 
 
@@ -24,6 +24,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            isDebuggable = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -138,9 +139,23 @@ val duplicateBuildArtifactRiskPathMarkers = listOf(
     "intermediates/runtime_app_classes_jar",
     "intermediates/compile_app_classes_jar",
     "intermediates/compile_and_runtime_not_namespaced_r_class_jar",
-    "intermediates/dex"
+    "intermediates/dex",
+    // Resource merge/package outputs can also get Finder-style duplicates like "ic_launcher 2.xml".
+    "intermediates/merged_res",
+    "intermediates/packaged_res"
 )
-val duplicateBuildArtifactRiskExtensions = setOf("jar", "class", "dex", "apk", "aar")
+val duplicateBuildArtifactRiskExtensions = setOf(
+    "jar",
+    "class",
+    "dex",
+    "apk",
+    "aar",
+    "xml",
+    "png",
+    "webp",
+    "jpg",
+    "jpeg"
+)
 
 val verifyNoDuplicateBuildArtifacts by tasks.registering {
     group = "verification"
@@ -196,4 +211,3 @@ val verifyNoDuplicateBuildArtifacts by tasks.registering {
 tasks.named("preBuild") {
     dependsOn(verifyNoDuplicateBuildArtifacts)
 }
-

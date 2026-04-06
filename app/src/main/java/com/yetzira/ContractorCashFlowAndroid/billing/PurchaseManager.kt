@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -55,14 +56,19 @@ class PurchaseManager(
     val activePurchase: StateFlow<Purchase?> = _activePurchase.asStateFlow()
 
     private val purchasesUpdatedListener = PurchasesUpdatedListener { billingResult, purchases ->
+        Log.d(TAG, "purchasesUpdated: code=${billingResult.responseCode} msg='${billingResult.debugMessage}' purchases=${purchases?.size ?: 0}")
         when (billingResult.responseCode) {
             BillingClient.BillingResponseCode.OK -> {
                 purchases.orEmpty().forEach { purchase ->
+                    Log.d(TAG, "  purchase: products=${purchase.products} state=${purchase.purchaseState} acknowledged=${purchase.isAcknowledged} token=${purchase.purchaseToken.take(20)}…")
                     scope.launch { handlePurchase(purchase) }
                 }
             }
-            BillingClient.BillingResponseCode.USER_CANCELED -> Unit
-            else -> _errorMessage.value = "Purchase failed: ${billingResult.debugMessage}"
+            BillingClient.BillingResponseCode.USER_CANCELED -> Log.d(TAG, "  user cancelled purchase")
+            else -> {
+                Log.w(TAG, "  purchase FAILED: code=${billingResult.responseCode} msg='${billingResult.debugMessage}'")
+                _errorMessage.value = "Purchase failed: ${billingResult.debugMessage}"
+            }
         }
         _isPurchasing.value = false
     }
@@ -95,11 +101,14 @@ class PurchaseManager(
     }
 
     fun connectAndLoad() {
+        Log.d(TAG, "connectAndLoad: starting (isReady=${billingClient.isReady})")
         scope.launch {
             ensureConnected()
             if (isConnected) {
                 checkCurrentEntitlements()
                 loadProducts()
+            } else {
+                Log.w(TAG, "connectAndLoad: billing not connected, skipping load")
             }
         }
     }
@@ -108,18 +117,22 @@ class PurchaseManager(
     private suspend fun ensureConnected() {
         if (billingClient.isReady) {
             isConnected = true
+            Log.d(TAG, "ensureConnected: already ready")
             return
         }
+        Log.d(TAG, "ensureConnected: starting connection…")
         suspendCancellableCoroutine<Unit> { continuation ->
             billingClient.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(result: BillingResult) {
                     isConnected = result.responseCode == BillingClient.BillingResponseCode.OK
+                    Log.d(TAG, "onBillingSetupFinished: code=${result.responseCode} connected=$isConnected msg='${result.debugMessage}'")
                     if (!isConnected) {
                         _errorMessage.value = "Billing unavailable: ${result.debugMessage}"
                     }
                     if (continuation.isActive) continuation.resume(Unit)
                 }
                 override fun onBillingServiceDisconnected() {
+                    Log.w(TAG, "onBillingServiceDisconnected")
                     isConnected = false
                 }
             })
@@ -127,10 +140,14 @@ class PurchaseManager(
     }
 
     suspend fun loadProducts() {
+        Log.d(TAG, "loadProducts: querying ${BillingProduct.ALL_IDS}")
         _isLoading.value = true
         try {
             ensureConnected()
-            if (!isConnected) return
+            if (!isConnected) {
+                Log.w(TAG, "loadProducts: not connected, aborting")
+                return
+            }
             val products = BillingProduct.ALL_IDS.map { productId ->
                 QueryProductDetailsParams.Product.newBuilder()
                     .setProductId(productId)
@@ -150,11 +167,22 @@ class PurchaseManager(
                 }
             }
 
+            Log.d(TAG, "loadProducts: response code=${result.first.responseCode} msg='${result.first.debugMessage}' count=${result.second.size}")
             if (result.first.responseCode == BillingClient.BillingResponseCode.OK) {
+                result.second.forEach { details ->
+                    Log.d(TAG, "  product: id=${details.productId} name='${details.name}'")
+                    details.subscriptionOfferDetails?.forEach { offer ->
+                        Log.d(TAG, "    offer: basePlanId=${offer.basePlanId} offerId=${offer.offerId} token=${offer.offerToken.take(20)}…")
+                        offer.pricingPhases.pricingPhaseList.forEach { phase ->
+                            Log.d(TAG, "      phase: price=${phase.formattedPrice} micros=${phase.priceAmountMicros} period=${phase.billingPeriod} cycles=${phase.billingCycleCount} mode=${phase.recurrenceMode}")
+                        }
+                    }
+                }
                 _products.value = result.second.sortedBy { details ->
                     if (details.productId == BillingProduct.PRO_MONTHLY) 0 else 1
                 }
             } else {
+                Log.w(TAG, "loadProducts: FAILED code=${result.first.responseCode} msg='${result.first.debugMessage}'")
                 _errorMessage.value = "Failed to load products: ${result.first.debugMessage}"
             }
         } finally {
@@ -167,15 +195,20 @@ class PurchaseManager(
         productDetails: ProductDetails,
         basePlanId: String
     ) {
+        Log.d(TAG, "launchPurchaseFlow: productId=${productDetails.productId} basePlanId=$basePlanId")
+        Log.d(TAG, "  available offers: ${productDetails.subscriptionOfferDetails?.map { "${it.basePlanId}/${it.offerId}" }}")
+
         val offerToken = productDetails.subscriptionOfferDetails
             ?.firstOrNull { it.basePlanId == basePlanId }
             ?.offerToken
 
         if (offerToken == null) {
+            Log.e(TAG, "launchPurchaseFlow: no offer token found for basePlanId=$basePlanId")
             _errorMessage.value = "No active offer found for ${productDetails.productId}"
             return
         }
 
+        Log.d(TAG, "launchPurchaseFlow: using offerToken=${offerToken.take(20)}…")
         _isPurchasing.value = true
 
         val billingFlowParams = BillingFlowParams.newBuilder()
@@ -189,15 +222,23 @@ class PurchaseManager(
             )
             .build()
 
-        billingClient.launchBillingFlow(activity, billingFlowParams)
+        val result = billingClient.launchBillingFlow(activity, billingFlowParams)
+        Log.d(TAG, "launchBillingFlow result: code=${result.responseCode} msg='${result.debugMessage}'")
+        if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+            Log.w(TAG, "launchBillingFlow: non-OK response, resetting isPurchasing")
+            _isPurchasing.value = false
+        }
     }
 
     private suspend fun handlePurchase(purchase: Purchase) {
+        Log.d(TAG, "handlePurchase: products=${purchase.products} state=${purchase.purchaseState} acknowledged=${purchase.isAcknowledged}")
         if (purchase.purchaseState != Purchase.PurchaseState.PURCHASED) {
+            Log.d(TAG, "handlePurchase: skipping — state is ${purchase.purchaseState}")
             return
         }
 
         if (!purchase.isAcknowledged) {
+            Log.d(TAG, "handlePurchase: acknowledging purchase token=${purchase.purchaseToken.take(20)}…")
             val result = suspendCancellableCoroutine<BillingResult> { continuation ->
                 billingClient.acknowledgePurchase(
                     AcknowledgePurchaseParams.newBuilder()
@@ -209,18 +250,26 @@ class PurchaseManager(
                     }
                 }
             }
+            Log.d(TAG, "handlePurchase: ack result code=${result.responseCode} msg='${result.debugMessage}'")
             if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+                Log.e(TAG, "handlePurchase: acknowledgment FAILED")
                 _errorMessage.value = "Acknowledgment failed: ${result.debugMessage}"
                 return
             }
+        } else {
+            Log.d(TAG, "handlePurchase: already acknowledged")
         }
 
         checkCurrentEntitlements()
     }
 
     suspend fun checkCurrentEntitlements() {
+        Log.d(TAG, "checkCurrentEntitlements: querying active subscriptions")
         ensureConnected()
-        if (!isConnected) return
+        if (!isConnected) {
+            Log.w(TAG, "checkCurrentEntitlements: not connected, aborting")
+            return
+        }
 
         val result = suspendCancellableCoroutine<Pair<BillingResult, List<Purchase>>> { continuation ->
             billingClient.queryPurchasesAsync(
@@ -234,9 +283,15 @@ class PurchaseManager(
             }
         }
 
+        Log.d(TAG, "checkCurrentEntitlements: response code=${result.first.responseCode} total purchases=${result.second.size}")
         if (result.first.responseCode != BillingClient.BillingResponseCode.OK) {
+            Log.w(TAG, "checkCurrentEntitlements: FAILED msg='${result.first.debugMessage}'")
             _errorMessage.value = "Failed to refresh purchases: ${result.first.debugMessage}"
             return
+        }
+
+        result.second.forEach { p ->
+            Log.d(TAG, "  purchase: products=${p.products} state=${p.purchaseState} acknowledged=${p.isAcknowledged} token=${p.purchaseToken.take(20)}…")
         }
 
         val activeProPurchase = result.second.firstOrNull { purchase ->
@@ -244,6 +299,7 @@ class PurchaseManager(
                 purchase.products.any { it in BillingProduct.ALL_IDS }
         }
 
+        Log.d(TAG, "checkCurrentEntitlements: activeProPurchase=${activeProPurchase?.products} → isProUser=${activeProPurchase != null}")
         _activePurchase.value = activeProPurchase
         _isProUser.value = activeProPurchase != null
 
@@ -261,11 +317,13 @@ class PurchaseManager(
         result.second
             .filter { !it.isAcknowledged && it.purchaseState == Purchase.PurchaseState.PURCHASED }
             .forEach { purchase ->
+                Log.d(TAG, "checkCurrentEntitlements: found unacknowledged purchase, handling…")
                 handlePurchase(purchase)
             }
     }
 
     suspend fun restorePurchases() {
+        Log.d(TAG, "restorePurchases: delegating to checkCurrentEntitlements")
         checkCurrentEntitlements()
     }
 
@@ -290,8 +348,13 @@ class PurchaseManager(
     }
 
     fun destroy() {
+        Log.d(TAG, "destroy: ending billing connection")
         billingClient.endConnection()
         scope.cancel()
+    }
+
+    companion object {
+        private const val TAG = "BillingDebug"
     }
 }
 

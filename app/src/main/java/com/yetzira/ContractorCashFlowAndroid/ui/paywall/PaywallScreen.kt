@@ -40,18 +40,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.layout.PaddingValues
+import com.android.billingclient.api.Purchase
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.yetzira.ContractorCashFlowAndroid.BuildConfig
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -113,6 +117,7 @@ fun PaywallScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val isPurchasing by viewModel.isPurchasing.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val activePurchase by viewModel.activePurchase.collectAsStateWithLifecycle()
 
     val yearlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_YEARLY }
     val monthlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_MONTHLY }
@@ -406,6 +411,24 @@ fun PaywallScreen(
             }
 
             Spacer(modifier = Modifier.height(10.dp))
+
+            // ── Debug panel (any build where isDebuggable=true) ───────────
+            val appFlags = LocalContext.current.applicationInfo.flags
+            if (appFlags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+                BillingDebugPanel(
+                    isProUser = isProUser,
+                    isLoading = isLoading,
+                    isPurchasing = isPurchasing,
+                    products = products,
+                    plans = plans,
+                    selectedPlanId = selectedPlanId,
+                    activePurchase = activePurchase,
+                    onRefreshEntitlements = { viewModel.refreshEntitlements() },
+                    onReloadProducts = { viewModel.reloadProducts() },
+                    onReconnect = { viewModel.reconnect() }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 
@@ -745,6 +768,126 @@ private fun parsePeriodLabel(
     Regex("P(\\d+)M").find(isoPeriod)?.let { return monthsFormat.format(it.groupValues[1].toInt()) }
     Regex("P(\\d+)Y").find(isoPeriod)?.let { return yearsFormat.format(it.groupValues[1].toInt()) }
     return null
+}
+
+// ── Debug panel ────────────────────────────────────────────────────────────────
+
+@Composable
+private fun BillingDebugPanel(
+    isProUser: Boolean,
+    isLoading: Boolean,
+    isPurchasing: Boolean,
+    products: List<ProductDetails>,
+    plans: List<PaywallPlanOption>,
+    selectedPlanId: String,
+    activePurchase: Purchase?,
+    onRefreshEntitlements: () -> Unit,
+    onReloadProducts: () -> Unit,
+    onReconnect: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val mono = MaterialTheme.typography.labelSmall.copy(
+        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+        color = Color(0xFFEBEBF5)
+    )
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFF1C1C1E),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
+
+            // Header row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🐛 Billing Debug",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF30D158)
+                )
+                TextButton(onClick = { expanded = !expanded }) {
+                    Text(if (expanded) "hide" else "show", color = Color(0xFF636366))
+                }
+            }
+
+            if (expanded) {
+                // ── State summary ──────────────────────────────────────────
+                Text("isProUser=$isProUser  loading=$isLoading  purchasing=$isPurchasing", style = mono)
+
+                // ── Active purchase ────────────────────────────────────────
+                Spacer(modifier = Modifier.height(4.dp))
+                if (activePurchase != null) {
+                    Text("activePurchase:", style = mono, color = Color(0xFF30D158))
+                    Text("  products=${activePurchase.products}", style = mono)
+                    Text("  state=${activePurchase.purchaseState}  ack=${activePurchase.isAcknowledged}", style = mono)
+                    Text("  token=${activePurchase.purchaseToken.take(32)}…", style = mono, color = Color(0xFF64D2FF))
+                } else {
+                    Text("activePurchase: none", style = mono, color = Color(0xFFFF453A))
+                }
+
+                // ── Products ───────────────────────────────────────────────
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("products loaded: ${products.size}", style = mono)
+                products.forEach { p ->
+                    Text("  • ${p.productId}", style = mono, color = Color(0xFFFFD60A))
+                    p.subscriptionOfferDetails?.forEach { offer ->
+                        Text("    offer basePlan=${offer.basePlanId} offerId=${offer.offerId ?: "–"}", style = mono)
+                        offer.pricingPhases.pricingPhaseList.forEach { phase ->
+                            Text(
+                                "      ${phase.formattedPrice} / ${phase.billingPeriod}" +
+                                    "  micros=${phase.priceAmountMicros}  cycles=${phase.billingCycleCount}",
+                                style = mono,
+                                color = Color(0xFF64D2FF)
+                            )
+                        }
+                    }
+                }
+
+                // ── Plans ──────────────────────────────────────────────────
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("plans:", style = mono)
+                plans.forEach { plan ->
+                    val sel = if (plan.id == selectedPlanId) "✓" else " "
+                    Text(
+                        "  $sel ${plan.basePlanId}  details=${plan.productDetails != null}",
+                        style = mono,
+                        color = if (plan.id == selectedPlanId) Color(0xFF30D158) else Color(0xFFEBEBF5)
+                    )
+                }
+
+                // ── Action buttons ─────────────────────────────────────────
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    OutlinedButton(
+                        onClick = onRefreshEntitlements,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
+                    ) {
+                        Text("Entitlements", style = MaterialTheme.typography.labelSmall)
+                    }
+                    OutlinedButton(
+                        onClick = onReloadProducts,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
+                    ) {
+                        Text("Products", style = MaterialTheme.typography.labelSmall)
+                    }
+                    OutlinedButton(
+                        onClick = onReconnect,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
+                    ) {
+                        Text("Reconnect", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+        }
+    }
 }
 
 // ── Data class ─────────────────────────────────────────────────────────────────
