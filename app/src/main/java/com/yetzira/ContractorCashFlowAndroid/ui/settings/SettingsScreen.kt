@@ -276,7 +276,7 @@ fun SettingsScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
-        containerColor = SettingsPageBackground,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
@@ -299,14 +299,14 @@ fun SettingsScreen(
                     SettingsActionRow(
                         title = stringResource(R.string.settings_sign_out),
                         leadingIcon = Icons.Default.Description,
-                        titleColor = SettingsActionBlue,
+                        titleColor = MaterialTheme.colorScheme.primary,
                         onClick = viewModel::signOut
                     )
                 } else {
                     SettingsActionRow(
                         title = stringResource(R.string.settings_sign_in_with_google),
                         leadingIcon = Icons.Default.Info,
-                        titleColor = SettingsActionBlue,
+                        titleColor = MaterialTheme.colorScheme.primary,
                         onClick = {
                             val serverClientId = webClientId
                             if (serverClientId.isNullOrBlank()) {
@@ -357,7 +357,7 @@ fun SettingsScreen(
                 Text(
                     text = stringResource(R.string.settings_sign_in_prompt),
                     style = MaterialTheme.typography.bodySmall,
-                    color = SettingsSecondaryText,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 6.dp)
                 )
                 googleSignInSetupError?.let { setupError ->
@@ -387,7 +387,7 @@ fun SettingsScreen(
                     SettingsActionRow(
                         title = stringResource(R.string.settings_manage_subscription),
                         leadingIcon = Icons.Default.EmojiEvents,
-                        titleColor = SettingsActionBlue,
+                        titleColor = MaterialTheme.colorScheme.primary,
                         onClick = { purchaseViewModel.openManageSubscriptions(context) }
                     )
                 } else {
@@ -482,7 +482,7 @@ fun SettingsScreen(
             Text(
                 text = stringResource(R.string.settings_notifications_footer),
                 style = MaterialTheme.typography.bodySmall,
-                color = SettingsSecondaryText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 6.dp)
             )
 
@@ -491,21 +491,21 @@ fun SettingsScreen(
                 SettingsActionRow(
                     title = stringResource(R.string.settings_sync_button_idle),
                     leadingIcon = Icons.Default.CloudSync,
-                    titleColor = SettingsActionBlue,
+                    titleColor = MaterialTheme.colorScheme.primary,
                     onClick = viewModel::runCloudSync
                 )
                 SettingsRowDivider()
                 SettingsActionRow(
                     title = stringResource(R.string.settings_export_button),
                     leadingIcon = Icons.Default.Sync,
-                    titleColor = SettingsActionBlue,
+                    titleColor = MaterialTheme.colorScheme.primary,
                     onClick = { exportLauncher.launch(viewModel.suggestedExportFileName()) }
                 )
             }
             Text(
                 text = stringResource(R.string.settings_export_description),
                 style = MaterialTheme.typography.bodySmall,
-                color = SettingsSecondaryText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 6.dp)
             )
 
@@ -528,7 +528,7 @@ fun SettingsScreen(
                 Text(
                     text = stringResource(R.string.settings_subscription_renews, formatDate(renewalDate)),
                     style = MaterialTheme.typography.labelLarge,
-                    color = SettingsSecondaryText,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 6.dp)
                 )
             }
@@ -548,7 +548,7 @@ private fun SettingsSectionHeader(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
-        color = SettingsSecondaryText,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(horizontal = 6.dp)
     )
@@ -557,7 +557,7 @@ private fun SettingsSectionHeader(title: String) {
 @Composable
 private fun SettingsGroupCard(content: @Composable ColumnScope.() -> Unit) {
     Surface(
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         shape = androidx.compose.foundation.shape.RoundedCornerShape(22.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -568,7 +568,7 @@ private fun SettingsGroupCard(content: @Composable ColumnScope.() -> Unit) {
 @Composable
 private fun SettingsRowDivider() {
     HorizontalDivider(
-        color = SettingsDivider,
+        color = MaterialTheme.colorScheme.outlineVariant,
         modifier = Modifier.padding(start = 52.dp)
     )
 }
@@ -578,7 +578,7 @@ private fun SettingsActionRow(
     title: String,
     leadingIcon: ImageVector,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
-    iconTint: Color = SettingsActionBlue,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit
 ) {
     Row(
@@ -619,7 +619,7 @@ private fun SettingsValueRow(
         Icon(
             imageVector = leadingIcon,
             contentDescription = null,
-            tint = SettingsActionBlue,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.width(30.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -631,7 +631,7 @@ private fun SettingsValueRow(
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            color = SettingsSecondaryText
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -661,7 +661,7 @@ private fun <T> SettingsPickerSection(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = SettingsActionBlue,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.width(30.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -673,12 +673,12 @@ private fun <T> SettingsPickerSection(
             Text(
                 text = selectedLabel,
                 style = MaterialTheme.typography.bodyMedium,
-                color = SettingsSecondaryText
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = SettingsSecondaryText,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 6.dp)
             )
         }
@@ -688,7 +688,7 @@ private fun <T> SettingsPickerSection(
         Text(
             text = it,
             style = MaterialTheme.typography.bodySmall,
-            color = SettingsSecondaryText,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 6.dp)
         )
     }
@@ -711,7 +711,7 @@ private fun <T> SettingsPickerSection(
                             Text(
                                 text = label,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (label == selectedLabel) SettingsActionBlue else MaterialTheme.colorScheme.onSurface,
+                                color = if (label == selectedLabel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                 fontWeight = if (label == selectedLabel) FontWeight.SemiBold else FontWeight.Normal
                             )
                         }
@@ -743,7 +743,7 @@ private fun SettingsSwitchRow(
         Icon(
             imageVector = leadingIcon,
             contentDescription = null,
-            tint = SettingsActionBlue,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.width(30.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -760,10 +760,6 @@ private fun SettingsSwitchRow(
     }
 }
 
-private val SettingsPageBackground = Color(0xFFF2F2F7)
-private val SettingsSecondaryText = Color(0xFF8E8E93)
-private val SettingsDivider = Color(0xFFE5E5EA)
-private val SettingsActionBlue = Color(0xFF2F80ED)
 private val SettingsProGold = Color(0xFFE6C229)
 
 private fun formatDate(timestamp: Long?): String {
