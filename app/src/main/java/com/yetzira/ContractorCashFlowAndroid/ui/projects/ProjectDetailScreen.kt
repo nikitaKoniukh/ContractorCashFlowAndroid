@@ -285,6 +285,7 @@ fun ProjectDetailScreen(
                     currency = currency,
                     isActive = project.isActive,
                     createdDate = project.createdDate,
+                    endDate = project.endDate,
                     onClientClick = { onOpenClient(project.clientName) }
                 )
             }
@@ -552,6 +553,7 @@ private fun ProjectInfoSection(
     currency: CurrencyOption,
     isActive: Boolean,
     createdDate: Long,
+    endDate: Long?,
     onClientClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -593,6 +595,13 @@ private fun ProjectInfoSection(
                     label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_created_date),
                     value = formatLongDate(createdDate)
                 )
+                if (endDate != null) {
+                    HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                    ProjectInfoRow(
+                        label = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_end_date),
+                        value = formatLongDate(endDate)
+                    )
+                }
             }
         }
     }

@@ -135,6 +135,31 @@ class ProjectViewModelTest {
     }
 
     @Test
+    fun `createProject saves end date when provided`() = runTest {
+        val repo = FakeProjectRepository()
+        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao())
+        val expectedEndDate = 1_750_118_400_000L
+
+        viewModel.createProject(
+            name = "Office Build",
+            budgetText = "5000",
+            useExistingClient = false,
+            selectedClientName = "",
+            newClientName = "Client X",
+            newClientEmail = "",
+            newClientPhone = "",
+            newClientAddress = "",
+            newClientNotes = "",
+            endDate = expectedEndDate,
+            onSuccess = {}
+        )
+        advanceUntilIdle()
+
+        assertEquals(1, repo.insertedProjects.size)
+        assertEquals(expectedEndDate, repo.insertedProjects.first().endDate)
+    }
+
+    @Test
     fun `delete and undo project restores item`() = runTest {
         val project = ProjectEntity(id = "p1", name = "A", clientName = "B", budget = 100.0)
         val repo = FakeProjectRepository(projects = listOf(project))

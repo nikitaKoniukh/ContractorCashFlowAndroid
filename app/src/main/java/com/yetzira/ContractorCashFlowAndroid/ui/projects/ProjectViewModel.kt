@@ -118,6 +118,7 @@ class ProjectViewModel(
         newClientPhone: String,
         newClientAddress: String,
         newClientNotes: String,
+        endDate: Long? = null,
         notes: String = "",
         isActive: Boolean = true,
         onSuccess: () -> Unit
@@ -151,6 +152,7 @@ class ProjectViewModel(
                     name = normalizedName,
                     clientName = clientName,
                     budget = budget,
+                    endDate = endDate,
                     isActive = isActive,
                     notes = normalizedNotes
                 )

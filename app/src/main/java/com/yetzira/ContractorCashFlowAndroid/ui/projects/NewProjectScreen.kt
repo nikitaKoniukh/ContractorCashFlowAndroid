@@ -1,5 +1,6 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.projects
 
+import android.app.DatePickerDialog
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -61,6 +62,9 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,6 +85,8 @@ fun NewProjectScreen(
     var clientName by rememberSaveable { mutableStateOf("") }
     var budget by rememberSaveable { mutableStateOf("") }
     var isActive by rememberSaveable { mutableStateOf(true) }
+    var hasExpectedCompletion by rememberSaveable { mutableStateOf(false) }
+    var expectedEndDate by rememberSaveable { mutableStateOf<Long?>(null) }
     var showClientDetails by rememberSaveable { mutableStateOf(false) }
     var newClientEmail by rememberSaveable { mutableStateOf("") }
     var newClientPhone by rememberSaveable { mutableStateOf("") }
@@ -94,7 +100,10 @@ fun NewProjectScreen(
         existingClients.any { it.name.equals(normalizedTypedClientName, ignoreCase = true) }
     val finalClientName = if (useExistingClient) selectedClientName.trim() else normalizedTypedClientName
     val budgetValue = parseAmountInput(budget) ?: 0.0
-    val canSave = normalizedProjectName.isNotEmpty() && finalClientName.isNotEmpty() && budgetValue > 0.0
+    val canSave = normalizedProjectName.isNotEmpty() &&
+        finalClientName.isNotEmpty() &&
+        budgetValue > 0.0 &&
+        (!hasExpectedCompletion || expectedEndDate != null)
     val bgColor = MaterialTheme.colorScheme.surfaceContainerHighest
     val showNewClientInfoSection = !useExistingClient && normalizedTypedClientName.isNotEmpty() && !duplicateTypedClient
 
@@ -139,6 +148,7 @@ fun NewProjectScreen(
                                 newClientPhone = newClientPhone,
                                 newClientAddress = newClientAddress,
                                 newClientNotes = newClientNotes,
+                                endDate = if (hasExpectedCompletion) expectedEndDate else null,
                                 notes = "",
                                 isActive = isActive,
                                 onSuccess = onBack
@@ -340,28 +350,126 @@ fun NewProjectScreen(
                     color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.projects_active),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.projects_active),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Switch(
+                                checked = isActive,
+                                onCheckedChange = { isActive = it }
+                            )
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                         )
-                        Switch(
-                            checked = isActive,
-                            onCheckedChange = { isActive = it }
-                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.projects_expected_completion),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Switch(
+                                checked = hasExpectedCompletion,
+                                onCheckedChange = { enabled ->
+                                    hasExpectedCompletion = enabled
+                                    expectedEndDate = if (enabled) {
+                                        expectedEndDate ?: startOfDayMillis(System.currentTimeMillis())
+                                    } else {
+                                        null
+                                    }
+                                }
+                            )
+                        }
+
+                        AnimatedVisibility(visible = hasExpectedCompletion) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(start = 16.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                )
+                                EndDatePickerRow(
+                                    endDate = expectedEndDate ?: startOfDayMillis(System.currentTimeMillis()),
+                                    onDateSelected = { expectedEndDate = it }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun EndDatePickerRow(
+    endDate: Long,
+    onDateSelected: (Long) -> Unit
+) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.projects_end_date),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        TextButton(onClick = {
+            val cal = Calendar.getInstance().apply { timeInMillis = endDate }
+            DatePickerDialog(
+                context,
+                { _, year, month, day ->
+                    val picked = Calendar.getInstance().apply {
+                        set(year, month, day, 0, 0, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+                    onDateSelected(picked)
+                },
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }) {
+            Text(
+                text = formatProjectDate(endDate),
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+private fun startOfDayMillis(timestamp: Long): Long = Calendar.getInstance().apply {
+    timeInMillis = timestamp
+    set(Calendar.HOUR_OF_DAY, 0)
+    set(Calendar.MINUTE, 0)
+    set(Calendar.SECOND, 0)
+    set(Calendar.MILLISECOND, 0)
+}.timeInMillis
+
+private fun formatProjectDate(timestamp: Long): String =
+    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(timestamp))
 
 @Composable
 private fun FormSection(

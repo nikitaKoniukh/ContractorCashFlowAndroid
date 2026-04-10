@@ -62,6 +62,8 @@
     <string name="projects_net_balance">יתרה נקייה</string>
     <string name="projects_profit_margin">מרווח רווח</string>
     <string name="projects_created_date">נוצר</string>
+    <string name="projects_expected_completion">סיום צפוי</string>
+    <string name="projects_end_date">תאריך סיום</string>
     <string name="projects_budget_usage">שימוש בתקציב</string>
     <string name="projects_category_breakdown">קטגוריות הוצאות</string>
     <string name="projects_expenses_section">הוצאות</string>

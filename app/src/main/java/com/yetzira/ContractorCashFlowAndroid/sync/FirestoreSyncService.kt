@@ -42,6 +42,7 @@ class FirestoreSyncService(
             "clientName" to project.clientName,
             "budget" to project.budget,
             "createdDate" to project.createdDate,
+            "endDate" to project.endDate,
             "isActive" to project.isActive,
             "notes" to project.notes,
             "lastModified" to project.lastModified
@@ -354,6 +355,7 @@ class FirestoreSyncService(
             clientName = clientName,
             budget = document.getDouble("budget") ?: 0.0,
             createdDate = document.getLong("createdDate") ?: System.currentTimeMillis(),
+            endDate = document.getLong("endDate"),
             isActive = document.getBoolean("isActive") ?: true,
             notes = document.getString("notes") ?: "",
             lastModified = document.getLong("lastModified") ?: 0L

@@ -62,6 +62,8 @@
     <string name="projects_net_balance">Чистый баланс</string>
     <string name="projects_profit_margin">Маржа прибыли</string>
     <string name="projects_created_date">Создано</string>
+    <string name="projects_expected_completion">Ожидаемое завершение</string>
+    <string name="projects_end_date">Дата завершения</string>
     <string name="projects_budget_usage">Использование бюджета</string>
     <string name="projects_category_breakdown">Категории расходов</string>
     <string name="projects_expenses_section">Расходы</string>
