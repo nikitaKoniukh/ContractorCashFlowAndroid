@@ -284,7 +284,8 @@ fun NewProjectScreen(
                                             value = newClientEmail,
                                             onValueChange = { newClientEmail = it },
                                             placeholder = stringResource(R.string.projects_client_email),
-                                            singleLine = true
+                                            singleLine = true,
+                                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                                         )
                                         HorizontalDivider(
                                             modifier = Modifier.padding(start = 16.dp),
