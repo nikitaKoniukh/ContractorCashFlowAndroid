@@ -20,13 +20,17 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.SubscriptionPrefer
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.resume
 
 class PurchaseManager(
@@ -85,6 +89,8 @@ class PurchaseManager(
 
     @Volatile
     private var isConnected = false
+    private val connectionMutex = Mutex()
+    private var reconnectJob: Job? = null
 
     init {
         connectAndLoad()
@@ -103,8 +109,7 @@ class PurchaseManager(
     fun connectAndLoad() {
         Log.d(TAG, "connectAndLoad: starting (isReady=${billingClient.isReady})")
         scope.launch {
-            ensureConnected()
-            if (isConnected) {
+            if (ensureConnected()) {
                 checkCurrentEntitlements()
                 loadProducts()
             } else {
@@ -114,28 +119,46 @@ class PurchaseManager(
     }
 
     /** Suspends until the BillingClient is ready (or returns immediately if already connected). */
-    private suspend fun ensureConnected() {
+    private suspend fun ensureConnected(): Boolean {
         if (billingClient.isReady) {
             isConnected = true
             Log.d(TAG, "ensureConnected: already ready")
-            return
+            return true
         }
-        Log.d(TAG, "ensureConnected: starting connection…")
-        suspendCancellableCoroutine<Unit> { continuation ->
-            billingClient.startConnection(object : BillingClientStateListener {
-                override fun onBillingSetupFinished(result: BillingResult) {
-                    isConnected = result.responseCode == BillingClient.BillingResponseCode.OK
-                    Log.d(TAG, "onBillingSetupFinished: code=${result.responseCode} connected=$isConnected msg='${result.debugMessage}'")
-                    if (!isConnected) {
-                        _errorMessage.value = "Billing unavailable: ${result.debugMessage}"
+
+        return connectionMutex.withLock {
+            if (billingClient.isReady) {
+                isConnected = true
+                return@withLock true
+            }
+
+            Log.d(TAG, "ensureConnected: starting connection…")
+            suspendCancellableCoroutine { continuation ->
+                billingClient.startConnection(object : BillingClientStateListener {
+                    override fun onBillingSetupFinished(result: BillingResult) {
+                        isConnected = result.responseCode == BillingClient.BillingResponseCode.OK
+                        Log.d(TAG, "onBillingSetupFinished: code=${result.responseCode} connected=$isConnected msg='${result.debugMessage}'")
+                        if (!isConnected && result.responseCode != BillingClient.BillingResponseCode.SERVICE_DISCONNECTED) {
+                            _errorMessage.value = "Billing unavailable: ${result.debugMessage}"
+                        }
+                        if (continuation.isActive) continuation.resume(isConnected)
                     }
-                    if (continuation.isActive) continuation.resume(Unit)
-                }
-                override fun onBillingServiceDisconnected() {
-                    Log.w(TAG, "onBillingServiceDisconnected")
-                    isConnected = false
-                }
-            })
+
+                    override fun onBillingServiceDisconnected() {
+                        Log.w(TAG, "onBillingServiceDisconnected")
+                        isConnected = false
+                        scheduleReconnect()
+                    }
+                })
+            }
+        }
+    }
+
+    private fun scheduleReconnect() {
+        if (reconnectJob?.isActive == true) return
+        reconnectJob = scope.launch {
+            delay(RECONNECT_DELAY_MS)
+            ensureConnected()
         }
     }
 
@@ -143,8 +166,7 @@ class PurchaseManager(
         Log.d(TAG, "loadProducts: querying ${BillingProduct.ALL_IDS}")
         _isLoading.value = true
         try {
-            ensureConnected()
-            if (!isConnected) {
+            if (!ensureConnected()) {
                 Log.w(TAG, "loadProducts: not connected, aborting")
                 return
             }
@@ -155,15 +177,25 @@ class PurchaseManager(
                     .build()
             }
 
-            val result = suspendCancellableCoroutine<Pair<BillingResult, List<ProductDetails>>> { continuation ->
-                billingClient.queryProductDetailsAsync(
-                    QueryProductDetailsParams.newBuilder()
-                        .setProductList(products)
-                        .build()
-                ) { billingResult, productDetailsList ->
-                    if (continuation.isActive) {
-                        continuation.resume(billingResult to productDetailsList)
+            suspend fun queryProducts(): Pair<BillingResult, List<ProductDetails>> =
+                suspendCancellableCoroutine { continuation ->
+                    billingClient.queryProductDetailsAsync(
+                        QueryProductDetailsParams.newBuilder()
+                            .setProductList(products)
+                            .build()
+                    ) { billingResult, productDetailsList ->
+                        if (continuation.isActive) {
+                            continuation.resume(billingResult to productDetailsList)
+                        }
                     }
+                }
+
+            var result = queryProducts()
+            if (result.first.responseCode == BillingClient.BillingResponseCode.SERVICE_DISCONNECTED) {
+                Log.w(TAG, "loadProducts: SERVICE_DISCONNECTED, reconnecting and retrying once")
+                isConnected = false
+                if (ensureConnected()) {
+                    result = queryProducts()
                 }
             }
 
@@ -226,6 +258,11 @@ class PurchaseManager(
         Log.d(TAG, "launchBillingFlow result: code=${result.responseCode} msg='${result.debugMessage}'")
         if (result.responseCode != BillingClient.BillingResponseCode.OK) {
             Log.w(TAG, "launchBillingFlow: non-OK response, resetting isPurchasing")
+            if (result.responseCode == BillingClient.BillingResponseCode.SERVICE_DISCONNECTED) {
+                isConnected = false
+                scheduleReconnect()
+                _errorMessage.value = "Billing temporarily disconnected. Please try again in a moment."
+            }
             _isPurchasing.value = false
         }
     }
@@ -239,17 +276,28 @@ class PurchaseManager(
 
         if (!purchase.isAcknowledged) {
             Log.d(TAG, "handlePurchase: acknowledging purchase token=${purchase.purchaseToken.take(20)}…")
-            val result = suspendCancellableCoroutine<BillingResult> { continuation ->
-                billingClient.acknowledgePurchase(
-                    AcknowledgePurchaseParams.newBuilder()
-                        .setPurchaseToken(purchase.purchaseToken)
-                        .build()
-                ) { ackResult ->
-                    if (continuation.isActive) {
-                        continuation.resume(ackResult)
+            suspend fun acknowledge(): BillingResult =
+                suspendCancellableCoroutine { continuation ->
+                    billingClient.acknowledgePurchase(
+                        AcknowledgePurchaseParams.newBuilder()
+                            .setPurchaseToken(purchase.purchaseToken)
+                            .build()
+                    ) { ackResult ->
+                        if (continuation.isActive) {
+                            continuation.resume(ackResult)
+                        }
                     }
                 }
+
+            var result = acknowledge()
+            if (result.responseCode == BillingClient.BillingResponseCode.SERVICE_DISCONNECTED) {
+                Log.w(TAG, "handlePurchase: SERVICE_DISCONNECTED during acknowledge, reconnecting and retrying once")
+                isConnected = false
+                if (ensureConnected()) {
+                    result = acknowledge()
+                }
             }
+
             Log.d(TAG, "handlePurchase: ack result code=${result.responseCode} msg='${result.debugMessage}'")
             if (result.responseCode != BillingClient.BillingResponseCode.OK) {
                 Log.e(TAG, "handlePurchase: acknowledgment FAILED")
@@ -265,21 +313,30 @@ class PurchaseManager(
 
     suspend fun checkCurrentEntitlements() {
         Log.d(TAG, "checkCurrentEntitlements: querying active subscriptions")
-        ensureConnected()
-        if (!isConnected) {
+        if (!ensureConnected()) {
             Log.w(TAG, "checkCurrentEntitlements: not connected, aborting")
             return
         }
 
-        val result = suspendCancellableCoroutine<Pair<BillingResult, List<Purchase>>> { continuation ->
-            billingClient.queryPurchasesAsync(
-                QueryPurchasesParams.newBuilder()
-                    .setProductType(BillingClient.ProductType.SUBS)
-                    .build()
-            ) { billingResult, purchases ->
-                if (continuation.isActive) {
-                    continuation.resume(billingResult to purchases)
+        suspend fun queryEntitlements(): Pair<BillingResult, List<Purchase>> =
+            suspendCancellableCoroutine { continuation ->
+                billingClient.queryPurchasesAsync(
+                    QueryPurchasesParams.newBuilder()
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build()
+                ) { billingResult, purchases ->
+                    if (continuation.isActive) {
+                        continuation.resume(billingResult to purchases)
+                    }
                 }
+            }
+
+        var result = queryEntitlements()
+        if (result.first.responseCode == BillingClient.BillingResponseCode.SERVICE_DISCONNECTED) {
+            Log.w(TAG, "checkCurrentEntitlements: SERVICE_DISCONNECTED, reconnecting and retrying once")
+            isConnected = false
+            if (ensureConnected()) {
+                result = queryEntitlements()
             }
         }
 
@@ -355,6 +412,7 @@ class PurchaseManager(
 
     companion object {
         private const val TAG = "BillingDebug"
+        private const val RECONNECT_DELAY_MS = 750L
     }
 }
 

@@ -1,9 +1,48 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.google.services)
+}
+
+val releaseSigningProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) {
+        file.inputStream().use(::load)
+    }
+}
+
+fun releaseSigningValue(key: String): String? {
+    val envKey = "RELEASE_${key.uppercase()}"
+    return providers.environmentVariable(envKey).orNull
+        ?: releaseSigningProperties.getProperty(key)
+}
+
+val releaseStoreFilePath = releaseSigningValue("storeFile")
+val releaseStorePassword = releaseSigningValue("storePassword")
+val releaseKeyAlias = releaseSigningValue("keyAlias")
+val releaseKeyPassword = releaseSigningValue("keyPassword")
+
+val isReleaseBuildRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("Release", ignoreCase = true) ||
+        taskName.contains("bundle", ignoreCase = true) ||
+        taskName.contains("publish", ignoreCase = true)
+}
+
+if (isReleaseBuildRequested) {
+    val missing = buildList {
+        if (releaseStoreFilePath.isNullOrBlank()) add("storeFile / RELEASE_STOREFILE")
+        if (releaseStorePassword.isNullOrBlank()) add("storePassword / RELEASE_STOREPASSWORD")
+        if (releaseKeyAlias.isNullOrBlank()) add("keyAlias / RELEASE_KEYALIAS")
+        if (releaseKeyPassword.isNullOrBlank()) add("keyPassword / RELEASE_KEYPASSWORD")
+    }
+    check(missing.isEmpty()) {
+        "Missing release signing config: ${missing.joinToString()}. " +
+            "Set env vars (RELEASE_*) or add keystore.properties in project root."
+    }
 }
 
 android {
@@ -14,17 +53,35 @@ android {
         applicationId = "com.yetzira.ContractorCashFlowAndroid"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
+        versionCode = 4
         versionName = "1.0"
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            if (!releaseStoreFilePath.isNullOrBlank()) {
+                storeFile = file(releaseStoreFilePath)
+            }
+            if (!releaseStorePassword.isNullOrBlank()) {
+                storePassword = releaseStorePassword
+            }
+            if (!releaseKeyAlias.isNullOrBlank()) {
+                keyAlias = releaseKeyAlias
+            }
+            if (!releaseKeyPassword.isNullOrBlank()) {
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             isDebuggable = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
