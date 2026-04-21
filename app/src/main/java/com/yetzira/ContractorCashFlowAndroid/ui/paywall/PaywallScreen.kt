@@ -1,6 +1,7 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.paywall
 
 import android.app.Activity
+import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -118,9 +119,27 @@ fun PaywallScreen(
     val isPurchasing by viewModel.isPurchasing.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val activePurchase by viewModel.activePurchase.collectAsStateWithLifecycle()
+    val isRestoring by viewModel.isRestoring.collectAsStateWithLifecycle()
+
+    // Debug logging
+    LaunchedEffect(products) {
+        Log.d("PaywallScreen", "products updated: count=${products.size}")
+        products.forEach { p ->
+            Log.d("PaywallScreen", "  - ${p.productId}: ${p.name}")
+            p.subscriptionOfferDetails?.forEach { offer ->
+                Log.d("PaywallScreen", "    offer: basePlan=${offer.basePlanId}")
+            }
+        }
+    }
 
     val yearlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_YEARLY }
     val monthlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_MONTHLY }
+
+    // Debug product matching
+    LaunchedEffect(yearlyProduct, monthlyProduct) {
+        Log.d("PaywallScreen", "yearlyProduct matched: ${yearlyProduct != null}")
+        Log.d("PaywallScreen", "monthlyProduct matched: ${monthlyProduct != null}")
+    }
 
     // Localized strings for plan construction (must be read outside remember)
     val monthlyTitle    = stringResource(R.string.paywall_plan_monthly_title)
@@ -375,7 +394,18 @@ fun PaywallScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            TextButton(onClick = { viewModel.restorePurchases() }) {
+            TextButton(
+                onClick = { viewModel.restorePurchases() },
+                enabled = !isRestoring
+            ) {
+                if (isRestoring) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
                 Text(
                     text = stringResource(R.string.paywall_restore_purchases),
                     style = MaterialTheme.typography.bodyMedium,

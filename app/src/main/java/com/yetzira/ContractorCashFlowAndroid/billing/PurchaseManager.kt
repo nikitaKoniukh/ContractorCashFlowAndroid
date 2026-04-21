@@ -59,6 +59,9 @@ class PurchaseManager(
     private val _activePurchase = MutableStateFlow<Purchase?>(null)
     val activePurchase: StateFlow<Purchase?> = _activePurchase.asStateFlow()
 
+    private val _isRestoring = MutableStateFlow(false)
+    val isRestoring: StateFlow<Boolean> = _isRestoring.asStateFlow()
+
     private val purchasesUpdatedListener = PurchasesUpdatedListener { billingResult, purchases ->
         Log.d(TAG, "purchasesUpdated: code=${billingResult.responseCode} msg='${billingResult.debugMessage}' purchases=${purchases?.size ?: 0}")
         when (billingResult.responseCode) {
@@ -243,27 +246,51 @@ class PurchaseManager(
         Log.d(TAG, "launchPurchaseFlow: using offerToken=${offerToken.take(20)}…")
         _isPurchasing.value = true
 
-        val billingFlowParams = BillingFlowParams.newBuilder()
-            .setProductDetailsParamsList(
-                listOf(
-                    BillingFlowParams.ProductDetailsParams.newBuilder()
-                        .setProductDetails(productDetails)
-                        .setOfferToken(offerToken)
-                        .build()
-                )
-            )
-            .build()
-
-        val result = billingClient.launchBillingFlow(activity, billingFlowParams)
-        Log.d(TAG, "launchBillingFlow result: code=${result.responseCode} msg='${result.debugMessage}'")
-        if (result.responseCode != BillingClient.BillingResponseCode.OK) {
-            Log.w(TAG, "launchBillingFlow: non-OK response, resetting isPurchasing")
-            if (result.responseCode == BillingClient.BillingResponseCode.SERVICE_DISCONNECTED) {
-                isConnected = false
-                scheduleReconnect()
-                _errorMessage.value = "Billing temporarily disconnected. Please try again in a moment."
+        scope.launch {
+            if (!ensureConnected()) {
+                Log.w(TAG, "launchPurchaseFlow: not connected, aborting")
+                _errorMessage.value = "Billing not available. Please try again."
+                _isPurchasing.value = false
+                return@launch
             }
-            _isPurchasing.value = false
+
+            val billingFlowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(
+                    listOf(
+                        BillingFlowParams.ProductDetailsParams.newBuilder()
+                            .setProductDetails(productDetails)
+                            .setOfferToken(offerToken)
+                            .build()
+                    )
+                )
+                .build()
+
+            val result = billingClient.launchBillingFlow(activity, billingFlowParams)
+            Log.d(TAG, "launchBillingFlow result: code=${result.responseCode} msg='${result.debugMessage}'")
+            if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+                Log.w(TAG, "launchBillingFlow: non-OK response, resetting isPurchasing")
+                when (result.responseCode) {
+                    BillingClient.BillingResponseCode.SERVICE_DISCONNECTED -> {
+                        isConnected = false
+                        scheduleReconnect()
+                        _errorMessage.value = "Billing temporarily disconnected. Please try again in a moment."
+                    }
+                    BillingClient.BillingResponseCode.DEVELOPER_ERROR -> {
+                        _errorMessage.value = "Purchase unavailable: app must be installed from Google Play (internal testing track)."
+                    }
+                    BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> {
+                        _errorMessage.value = "You already own this subscription."
+                        checkCurrentEntitlements()
+                    }
+                    BillingClient.BillingResponseCode.ITEM_UNAVAILABLE -> {
+                        _errorMessage.value = "This subscription is currently unavailable."
+                    }
+                    else -> {
+                        _errorMessage.value = "Purchase failed (code ${result.responseCode}): ${result.debugMessage}"
+                    }
+                }
+                _isPurchasing.value = false
+            }
         }
     }
 
@@ -381,7 +408,12 @@ class PurchaseManager(
 
     suspend fun restorePurchases() {
         Log.d(TAG, "restorePurchases: delegating to checkCurrentEntitlements")
-        checkCurrentEntitlements()
+        _isRestoring.value = true
+        try {
+            checkCurrentEntitlements()
+        } finally {
+            _isRestoring.value = false
+        }
     }
 
     fun canCreateProject(currentCount: Int): Boolean =
@@ -429,5 +461,4 @@ object PurchaseManagerProvider {
         }
     }
 }
-
 

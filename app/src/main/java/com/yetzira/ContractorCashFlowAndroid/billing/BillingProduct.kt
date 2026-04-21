@@ -7,8 +7,8 @@ object BillingProduct {
 
     val ALL_IDS = listOf(PRO_MONTHLY, PRO_YEARLY)
 
-    const val MONTHLY_BASE_PLAN = "monthly"
-    const val YEARLY_BASE_PLAN = "yearly"
+    const val MONTHLY_BASE_PLAN = "monthly-base"
+    const val YEARLY_BASE_PLAN = "yearly-base"
 }
 
 object FreeTierLimit {

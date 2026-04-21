@@ -17,6 +17,7 @@ class PurchaseViewModel(
     val isPurchasing = purchaseManager.isPurchasing
     val errorMessage = purchaseManager.errorMessage
     val activePurchase = purchaseManager.activePurchase
+    val isRestoring = purchaseManager.isRestoring
 
     fun launchPurchaseFlow(activity: Activity, productDetails: ProductDetails, basePlanId: String) {
         purchaseManager.launchPurchaseFlow(activity, productDetails, basePlanId)
