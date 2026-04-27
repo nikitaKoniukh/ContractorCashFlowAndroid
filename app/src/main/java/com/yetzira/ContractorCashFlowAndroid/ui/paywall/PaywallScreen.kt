@@ -1,6 +1,8 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.paywall
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -112,7 +114,6 @@ fun PaywallScreen(
     limitReachedMessage: String? = null
 ) {
     val context = LocalContext.current
-    val activity = context as? Activity
     val isProUser by viewModel.isProUser.collectAsStateWithLifecycle()
     val products by viewModel.products.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
@@ -367,7 +368,9 @@ fun PaywallScreen(
                     val product = selectedProduct
                     val basePlanId = selectedPlan?.basePlanId
                     if (product != null && basePlanId != null) {
-                        activity?.let { viewModel.launchPurchaseFlow(it, product, basePlanId) }
+                        context.findActivity()?.let {
+                            viewModel.launchPurchaseFlow(it, product, basePlanId)
+                        } ?: Log.e("PaywallScreen", "Cannot launch purchase flow: no Activity in LocalContext")
                     }
                 },
                 enabled = !isPurchasing,
@@ -935,4 +938,10 @@ private const val PAYWALL_TERMS_OF_USE_URL =
     "https://nikitakoniukh.github.io/KablanProAndroid/terms-of-use.html"
 private const val PAYWALL_PRIVACY_POLICY_URL =
     "https://nikitakoniukh.github.io/KablanProAndroid/privacy.html"
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
