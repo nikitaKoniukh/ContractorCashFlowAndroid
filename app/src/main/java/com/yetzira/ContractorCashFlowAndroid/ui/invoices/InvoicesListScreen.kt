@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -59,7 +59,9 @@ import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
+import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import java.text.SimpleDateFormat
@@ -100,6 +102,7 @@ fun InvoicesListScreen(
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
+        containerColor = IosGroupedBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateAttempt) {
@@ -154,10 +157,11 @@ fun InvoicesListScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                     contentPadding = PaddingValues(top = 14.dp, bottom = 92.dp)
                 ) {
-                    items(state.invoices, key = { it.invoice.id }) { item ->
+                    itemsIndexed(state.invoices, key = { _, item -> item.invoice.id }) { index, item ->
+                        val shape = groupedRowShape(index, state.invoices.lastIndex)
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
                                 if (value != SwipeToDismissBoxValue.Settled) {
@@ -174,7 +178,7 @@ fun InvoicesListScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .clip(shape)
                                         .background(MaterialTheme.colorScheme.errorContainer)
                                         .padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.CenterEnd
@@ -183,7 +187,13 @@ fun InvoicesListScreen(
                                 }
                             },
                             content = {
-                                InvoiceRow(item = item, currency = currency, onClick = { onEdit(item.invoice.id) })
+                                InvoiceRow(
+                                    item = item,
+                                    currency = currency,
+                                    index = index,
+                                    lastIndex = state.invoices.lastIndex,
+                                    onClick = { onEdit(item.invoice.id) }
+                                )
                             }
                         )
                     }
@@ -252,15 +262,21 @@ private fun EmptyInvoicesState(onCreate: () -> Unit) {
 }
 
 @Composable
-private fun InvoiceRow(item: InvoiceListItemUi, currency: CurrencyOption, onClick: () -> Unit) {
+private fun InvoiceRow(
+    item: InvoiceListItemUi,
+    currency: CurrencyOption,
+    index: Int,
+    lastIndex: Int,
+    onClick: () -> Unit
+) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = groupedRowShape(index, lastIndex),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -278,7 +294,7 @@ private fun InvoiceRow(item: InvoiceListItemUi, currency: CurrencyOption, onClic
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
             )
 
             Row(

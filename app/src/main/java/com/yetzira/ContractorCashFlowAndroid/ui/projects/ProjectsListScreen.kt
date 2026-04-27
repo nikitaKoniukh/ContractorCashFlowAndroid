@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -65,7 +65,9 @@ import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierLimit
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
+import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
+import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import kotlinx.coroutines.launch
@@ -109,6 +111,7 @@ fun ProjectsListScreen(
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
+        containerColor = IosGroupedBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreateProjectAttempt) {
@@ -139,10 +142,11 @@ fun ProjectsListScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                     contentPadding = PaddingValues(top = 14.dp, bottom = 92.dp)
                 ) {
-                    items(uiState.projects, key = { it.project.id }) { item ->
+                    itemsIndexed(uiState.projects, key = { _, item -> item.project.id }) { index, item ->
+                        val shape = groupedRowShape(index, uiState.projects.lastIndex)
                         val dismissState = rememberSwipeToDismissBoxState(
                             confirmValueChange = { value ->
                                 if (value != SwipeToDismissBoxValue.Settled) {
@@ -159,7 +163,7 @@ fun ProjectsListScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .clip(shape)
                                         .background(MaterialTheme.colorScheme.errorContainer)
                                         .padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.CenterEnd
@@ -171,6 +175,8 @@ fun ProjectsListScreen(
                                 ProjectCard(
                                     item = item,
                                     currency = currency,
+                                    index = index,
+                                    lastIndex = uiState.projects.lastIndex,
                                     onClick = { onOpenProject(item.project.id) }
                                 )
                             }
@@ -256,6 +262,8 @@ private fun EmptyProjectsState(
 private fun ProjectCard(
     item: ProjectListItemUi,
     currency: CurrencyOption,
+    index: Int,
+    lastIndex: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -266,7 +274,7 @@ private fun ProjectCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
+        shape = groupedRowShape(index, lastIndex),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -411,7 +419,7 @@ private fun ProjectCard(
                 // ── Divider ────────────────────────────────────────────────
                 HorizontalDivider(
                     modifier = Modifier.padding(top = 10.dp, bottom = 6.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f),
                     thickness = 0.5.dp
                 )
 

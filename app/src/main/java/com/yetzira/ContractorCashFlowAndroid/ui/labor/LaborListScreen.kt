@@ -30,7 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
@@ -65,14 +66,21 @@ import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierLimit
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
+import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.StatPill
 import com.yetzira.ContractorCashFlowAndroid.ui.components.WorkerAvatar
+import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.BodyMediumSemibold
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.SectionHeaderStyle
+
+private val Space8 = 8.dp
+private val Space12 = 12.dp
+private val Space16 = 16.dp
+private val Space20 = 20.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,6 +121,7 @@ fun LaborListScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
+        containerColor = IosGroupedBackground,
         topBar = {
             TopAppBar(
                 title = { Text(text = stringResource(R.string.tab_labor)) },
@@ -166,7 +175,7 @@ fun LaborListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Space20)
         ) {
 
 
@@ -182,7 +191,7 @@ fun LaborListScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp, bottom = 6.dp),
+                            .padding(top = Space20, bottom = Space8),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -194,12 +203,13 @@ fun LaborListScreen(
                         Text(
                             text = "${state.workers.size}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                         )
                     }
                 }
 
-                items(state.workers, key = { it.worker.id }) { worker ->
+                itemsIndexed(state.workers, key = { _, worker -> worker.worker.id }) { index, worker ->
+                    val shape = groupedRowShape(index, state.workers.lastIndex)
                     val dismissState = rememberSwipeToDismissBoxState(
                         confirmValueChange = { value ->
                             if (value != SwipeToDismissBoxValue.Settled) {
@@ -210,7 +220,7 @@ fun LaborListScreen(
                     )
 
                     SwipeToDismissBox(
-                        modifier = Modifier.padding(vertical = 5.dp),
+                        modifier = Modifier,
                         state = dismissState,
                         backgroundContent = {
                             val isSwiping =
@@ -219,7 +229,7 @@ fun LaborListScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .clip(RoundedCornerShape(16.dp))
+                                    .clip(shape)
                                     .background(if (isSwiping) MaterialTheme.colorScheme.errorContainer else Color.Transparent)
                                     .padding(horizontal = 16.dp),
                                 contentAlignment = Alignment.CenterEnd
@@ -233,6 +243,8 @@ fun LaborListScreen(
                             WorkerCard(
                                 worker = worker,
                                 currency = currency,
+                                index = index,
+                                lastIndex = state.workers.lastIndex,
                                 onClick = { onEdit(worker.worker.id) },
                                 modifier = Modifier
                             )
@@ -304,20 +316,20 @@ private fun SummaryCard(summary: LaborSummaryUi, currency: CurrencyOption) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(top = Space16, bottom = Space8),
+        verticalArrangement = Arrangement.spacedBy(Space12)
     ) {
         Text(
             text = summary.periodLabel.uppercase(),
             style = SectionHeaderStyle,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 2.dp)
+            modifier = Modifier.padding(start = Space8)
         )
 
         // Row 1: Worker Cost + Total Workers
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(Space12)
         ) {
             AllTimeMetricCard(
                 label = stringResource(R.string.labor_summary_total_cost),
@@ -338,7 +350,7 @@ private fun SummaryCard(summary: LaborSummaryUi, currency: CurrencyOption) {
         // Row 2: keep the bottom row visible so ALL TIME is always a 2x2 grid.
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(Space12)
         ) {
             AllTimeMetricCard(
                 label = stringResource(R.string.labor_summary_total_days),
@@ -375,12 +387,12 @@ private fun AllTimeMetricCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(Space16),
+            verticalArrangement = Arrangement.spacedBy(Space8)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(Space8)
             ) {
                 Icon(
                     imageVector = icon,
@@ -395,8 +407,8 @@ private fun AllTimeMetricCard(
             }
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -408,36 +420,39 @@ private fun AllTimeMetricCard(
 private fun WorkerCard(
     worker: WorkerMetricsUi,
     currency: CurrencyOption,
+    index: Int,
+    lastIndex: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = groupedRowShape(index, lastIndex),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(Space16),
+            verticalArrangement = Arrangement.spacedBy(Space8)
         ) {
             // ── Header: avatar + name/rate + type badge ───────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(Space12)
             ) {
                 WorkerAvatar(name = worker.worker.workerName)
 
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(Space8)
                 ) {
                     Text(
                         text = worker.worker.workerName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium,
                         maxLines = 1
                     )
                     val rateLabel = worker.rateLabel
@@ -445,7 +460,7 @@ private fun WorkerCard(
                         Text(
                             text = rateLabel,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f)
                         )
                     }
                 }
@@ -460,10 +475,16 @@ private fun WorkerCard(
                     color = KablanProColors.WorkerPurple,
                     modifier = Modifier
                         .background(
-                            KablanProColors.WorkerPurple.copy(alpha = 0.12f),
+                            KablanProColors.WorkerPurple.copy(alpha = 0.1f),
                             CircleShape
                         )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(horizontal = Space8, vertical = Space8)
+                )
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
                 )
             }
 
@@ -472,8 +493,8 @@ private fun WorkerCard(
             val showDays = worker.dailyUnitsWorked > 0
             if (showHours || showDays) {
                 Row(
-                    modifier = Modifier.padding(top = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.padding(top = Space8),
+                    horizontalArrangement = Arrangement.spacedBy(Space8)
                 ) {
                     if (showHours) {
                         StatPill(
@@ -497,7 +518,7 @@ private fun WorkerCard(
             // ── Projects breakdown ────────────────────────────────────────
             if (worker.projectBreakdown.isNotEmpty()) {
                 Column(
-                    modifier = Modifier.padding(top = 10.dp),
+                    modifier = Modifier.padding(top = Space8),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     worker.projectBreakdown.forEach { project ->
@@ -508,7 +529,7 @@ private fun WorkerCard(
                             Icon(
                                 imageVector = Icons.Default.Folder,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
@@ -521,7 +542,8 @@ private fun WorkerCard(
                             )
                             Text(
                                 text = formatCurrencyAmount(project.amount, currency),
-                                style = BodyMediumSemibold
+                                style = BodyMediumSemibold,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
@@ -530,13 +552,13 @@ private fun WorkerCard(
 
             // ── Total Amount footer ───────────────────────────────────────
             HorizontalDivider(
-                modifier = Modifier.padding(top = 10.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                modifier = Modifier.padding(top = Space8),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
             )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp),
+                    .padding(top = Space8),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -548,7 +570,7 @@ private fun WorkerCard(
                 Text(
                     text = formatCurrencyAmount(worker.totalAmountEarned, currency),
                     style = BodyMediumSemibold,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Medium
                 )
             }
         }

@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -30,7 +30,9 @@ import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
+import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import java.text.SimpleDateFormat
@@ -71,6 +73,7 @@ fun ExpensesListScreen(
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
+        containerColor = IosGroupedBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             Column(
@@ -132,7 +135,7 @@ fun ExpensesListScreen(
                 val sections = remember(state.expenses) { groupExpensesByDate(state.expenses) }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                     contentPadding = PaddingValues(top = 14.dp, bottom = 92.dp)
                 ) {
                     sections.forEach { section ->
@@ -145,7 +148,8 @@ fun ExpensesListScreen(
                             )
                         }
 
-                        items(section.items, key = { it.expense.id }) { item ->
+                        itemsIndexed(section.items, key = { _, item -> item.expense.id }) { index, item ->
+                            val shape = groupedRowShape(index, section.items.lastIndex)
                             val dismissState = rememberSwipeToDismissBoxState(
                                 confirmValueChange = { value ->
                                     if (value != SwipeToDismissBoxValue.Settled) {
@@ -162,7 +166,7 @@ fun ExpensesListScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .clip(RoundedCornerShape(16.dp))
+                                            .clip(shape)
                                             .background(MaterialTheme.colorScheme.errorContainer)
                                             .padding(horizontal = 16.dp),
                                         contentAlignment = Alignment.CenterEnd
@@ -171,7 +175,12 @@ fun ExpensesListScreen(
                                     }
                                 },
                                 content = {
-                                    ExpenseRow(item = item, onClick = { onEditExpense(item.expense.id) })
+                                    ExpenseRow(
+                                        item = item,
+                                        index = index,
+                                        lastIndex = section.items.lastIndex,
+                                        onClick = { onEditExpense(item.expense.id) }
+                                    )
                                 }
                             )
                         }
@@ -284,18 +293,18 @@ private fun EmptyExpensesState(onCreateExpense: () -> Unit, modifier: Modifier =
 }
 
 @Composable
-private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
+private fun ExpenseRow(item: ExpenseListItemUi, index: Int, lastIndex: Int, onClick: () -> Unit) {
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = groupedRowShape(index, lastIndex),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -312,7 +321,7 @@ private fun ExpenseRow(item: ExpenseListItemUi, onClick: () -> Unit) {
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
             )
 
             Row(
