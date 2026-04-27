@@ -3,13 +3,13 @@ package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.annotation.StringRes
@@ -23,7 +23,6 @@ import com.yetzira.ContractorCashFlowAndroid.ui.invoices.InvoiceRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsRoutes
-import kotlinx.coroutines.launch
 
 @Composable
 fun KablanProNavigationShell(
@@ -31,42 +30,47 @@ fun KablanProNavigationShell(
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val coroutineScope = rememberCoroutineScope()
+    var showMoreSheet by remember { mutableStateOf(false) }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            KablanProNavigationDrawer(
+    fun navigate(tab: TabDestination) {
+        if (tab == selectedTab.value) {
+            navController.popBackStack(getTabRootRoute(tab), inclusive = false)
+        } else {
+            selectedTab.value = tab
+            navController.navigate(getGraphRoute(tab)) {
+                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
+
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        bottomBar = {
+            KablanProNavigationBar(
                 selectedTab = selectedTab.value,
-                onTabSelected = { newTab: TabDestination ->
-                    coroutineScope.launch {
-                        drawerState.close()
-                    }
-                    if (newTab == selectedTab.value) {
-                        navController.popBackStack(getTabRootRoute(newTab), inclusive = false)
+                onTabSelected = { tab ->
+                    if (tab == TabDestination.MORE) {
+                        showMoreSheet = true
                     } else {
-                        selectedTab.value = newTab
-                        navController.navigate(getGraphRoute(newTab)) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navigate(tab)
                     }
                 }
             )
         }
-    ) {
+    ) { innerPadding ->
         KablanProNavigationContent(
             navController = navController,
-            onMenuClick = {
-                coroutineScope.launch {
-                    drawerState.open()
-                }
-            },
-            modifier = modifier
+            modifier = modifier.padding(innerPadding)
+        )
+    }
+
+    if (showMoreSheet) {
+        MoreBottomSheet(
+            selectedTab = selectedTab.value,
+            onTabSelected = { tab -> navigate(tab) },
+            onDismiss = { showMoreSheet = false }
         )
     }
 }
@@ -74,7 +78,6 @@ fun KablanProNavigationShell(
 @Composable
 private fun KablanProNavigationContent(
     navController: NavController,
-    onMenuClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val backStackEntry by (navController as androidx.navigation.NavHostController).currentBackStackEntryAsState()
@@ -82,14 +85,11 @@ private fun KablanProNavigationContent(
     val screenTitle = stringResource(id = titleResForRoute(currentRoute))
     val hideShellTopBar = currentRoute in routesWithOwnTopBar
 
-    androidx.compose.material3.Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             if (!hideShellTopBar) {
-                KablanProTopBar(
-                    title = screenTitle,
-                    onMenuClick = onMenuClick
-                )
+                KablanProTopBar(title = screenTitle)
             }
         }
     ) { paddingValues ->
@@ -106,7 +106,7 @@ private fun KablanProNavigationContent(
                 projectsGraph(navController)
                 expensesGraph(navController)
                 invoicesGraph(navController)
-                laborGraph(navController, onMenuClick)
+                laborGraph(navController)
                 clientsGraph(navController)
                 analyticsGraph(navController)
                 settingsGraph(navController)
@@ -182,6 +182,7 @@ private fun getGraphRoute(tab: TabDestination): String = when (tab) {
     TabDestination.CLIENTS -> ClientRoutes.GRAPH
     TabDestination.ANALYTICS -> "analytics_graph"
     TabDestination.SETTINGS -> SettingsRoutes.GRAPH
+    TabDestination.MORE -> ProjectRoutes.GRAPH // never reached
 }
 
 private fun getTabRootRoute(tab: TabDestination): String = when (tab) {

@@ -18,6 +18,8 @@
     <string name="tab_clients_description">Clients tab</string>
     <string name="tab_analytics_description">Analytics tab</string>
     <string name="tab_settings_description">Settings tab</string>
+    <string name="tab_more">More</string>
+    <string name="tab_more_description">More options</string>
 
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>

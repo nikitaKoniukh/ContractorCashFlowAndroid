@@ -298,8 +298,7 @@ fun NavGraphBuilder.invoicesGraph(navController: NavController) {
 }
 
 fun NavGraphBuilder.laborGraph(
-    navController: NavController,
-    onMenuClick: () -> Unit
+    navController: NavController
 ) {
     navigation(
         startDestination = LaborRoutes.LIST,
@@ -312,7 +311,7 @@ fun NavGraphBuilder.laborGraph(
 
             LaborListScreen(
                 viewModel = viewModel,
-                onMenuClick = onMenuClick,
+                onMenuClick = {},
                 onAdd = { navController.navigate(LaborRoutes.ADD) },
                 onEdit = { workerId -> navController.navigate(LaborRoutes.edit(workerId)) }
             )
