@@ -144,7 +144,7 @@ fun ScannedExpenseReviewScreen(
                 // Receipt image thumbnail
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -181,7 +181,7 @@ fun ScannedExpenseReviewScreen(
                 // Category
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -205,7 +205,7 @@ fun ScannedExpenseReviewScreen(
                 // Amount, Description, Date
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -242,7 +242,7 @@ fun ScannedExpenseReviewScreen(
                 // Notes
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -265,7 +265,7 @@ fun ScannedExpenseReviewScreen(
                 // Project picker
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
@@ -371,4 +371,3 @@ private fun DatePickerFieldReview(date: Long, onDateSelected: (Long) -> Unit) {
         }
     }
 }
-

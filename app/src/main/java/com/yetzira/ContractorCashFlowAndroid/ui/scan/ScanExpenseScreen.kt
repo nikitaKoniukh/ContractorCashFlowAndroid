@@ -259,7 +259,7 @@ private fun ScanOptionButton(
     Card(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -340,6 +340,8 @@ private fun copyUriToInternalStorage(context: Context, sourceUri: Uri): Uri? {
         null
     }
 }
+
+
 
 
 
