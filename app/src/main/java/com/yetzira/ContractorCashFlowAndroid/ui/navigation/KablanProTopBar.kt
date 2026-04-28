@@ -2,42 +2,70 @@ package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KablanProTopBar(
-    title: String
+    title: String,
+    navigationIcon: @Composable (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+    height: Dp = 82.dp
 ) {
-    TopAppBar(
-        title = {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 0.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            // Navigation icon — bottom-aligned with same padding
+            Box(modifier = Modifier.padding(bottom = 4.dp)) {
+                Spacer(modifier = Modifier.width(32.dp))
+            }
+
+            // Title — bottom-aligned
             Text(
                 text = title,
-                fontSize = 17.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = (-0.4).sp
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(bottom = 12.dp)
             )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            scrolledContainerColor = MaterialTheme.colorScheme.surface
-        ),
-        // No window insets bottom padding — flat flush look
-        windowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
-    )
-    // iOS-style hairline separator under nav bar
+
+            // Actions — wrapped in a Row with matching bottom padding
+            // so icon centers land at the same visual level as the title
+            Row(
+                modifier = Modifier.padding(bottom = 4.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                actions()
+            }
+        }
+    }
+    // iOS-style hairline separator
     Box(
         modifier = Modifier
             .fillMaxWidth()

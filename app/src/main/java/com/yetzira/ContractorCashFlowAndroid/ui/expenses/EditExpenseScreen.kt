@@ -14,8 +14,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -90,20 +90,16 @@ fun EditExpenseScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.expenses_screen_edit_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = { IconButton(onClick = onBack) {
+            KablanProTopBar(
+                title = stringResource(R.string.expenses_screen_edit_title),
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.common_back)
                         )
-                    } },
+                    }
+                },
                 actions = {
                     TextButton(onClick = { viewModel.saveExpense(formState) }, enabled = formState.canSave) {
                         Text(stringResource(R.string.common_save))

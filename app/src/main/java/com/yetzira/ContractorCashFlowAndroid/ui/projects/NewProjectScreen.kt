@@ -39,8 +39,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -119,14 +119,8 @@ fun NewProjectScreen(
         modifier = modifier.fillMaxSize(),
         containerColor = bgColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.projects_new_project),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+            KablanProTopBar(
+                title = stringResource(R.string.projects_new_project),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

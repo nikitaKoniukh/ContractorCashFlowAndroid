@@ -70,7 +70,7 @@ fun ClientsListScreen(
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
-        containerColor = IosGroupedBackground,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreate) {

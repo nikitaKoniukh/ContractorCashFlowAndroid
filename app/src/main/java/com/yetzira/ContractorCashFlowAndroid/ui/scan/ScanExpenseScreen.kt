@@ -37,6 +37,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -102,8 +103,8 @@ fun ScanExpenseScreen(
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.scan_title)) },
+            KablanProTopBar(
+                title = stringResource(R.string.scan_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))

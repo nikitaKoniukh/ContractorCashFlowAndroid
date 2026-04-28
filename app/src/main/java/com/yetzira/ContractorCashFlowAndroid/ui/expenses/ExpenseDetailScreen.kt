@@ -36,8 +36,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -110,14 +110,8 @@ fun ExpenseDetailScreen(
         modifier = modifier.fillMaxSize(),
         containerColor = bgColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = expense?.descriptionText ?: "",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+            KablanProTopBar(
+                title = expense?.descriptionText ?: "",
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

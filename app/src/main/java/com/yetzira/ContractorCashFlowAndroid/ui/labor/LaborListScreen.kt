@@ -58,7 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.TopAppBar
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
@@ -121,10 +121,10 @@ fun LaborListScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
-        containerColor = IosGroupedBackground,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
         topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.tab_labor)) },
+            KablanProTopBar(
+                title = stringResource(R.string.tab_labor),
                 navigationIcon = {
                     IconButton(onClick = onMenuClick) {
                         Icon(
