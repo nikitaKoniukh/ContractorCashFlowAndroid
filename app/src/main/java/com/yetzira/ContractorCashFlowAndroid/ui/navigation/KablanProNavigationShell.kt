@@ -1,23 +1,31 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.navigation.NavController
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -34,6 +42,9 @@ fun KablanProNavigationShell(
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+    val showBottomBar = currentRoute !in routesWithOwnTopBar
     var showMoreSheet by remember { mutableStateOf(false) }
 
     fun navigate(tab: TabDestination) {
@@ -50,18 +61,20 @@ fun KablanProNavigationShell(
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = KablanProLayoutDefaults.ScaffoldContentInsets,
         bottomBar = {
-            KablanProNavigationBar(
-                selectedTab = selectedTab.value,
-                onTabSelected = { tab ->
-                    if (tab == TabDestination.MORE) {
-                        showMoreSheet = true
-                    } else {
-                        navigate(tab)
+            if (showBottomBar) {
+                KablanProNavigationBar(
+                    selectedTab = selectedTab.value,
+                    onTabSelected = { tab ->
+                        if (tab == TabDestination.MORE) {
+                            showMoreSheet = true
+                        } else {
+                            navigate(tab)
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     ) { innerPadding ->
         KablanProNavigationContent(
@@ -81,35 +94,106 @@ fun KablanProNavigationShell(
 
 @Composable
 private fun KablanProNavigationContent(
-    navController: NavController,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val backStackEntry by (navController as androidx.navigation.NavHostController).currentBackStackEntryAsState()
+    val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val screenTitle = stringResource(id = titleResForRoute(currentRoute))
     val hideShellTopBar = currentRoute in routesWithOwnTopBar
+    val isModal = hideShellTopBar
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = KablanProLayoutDefaults.ScaffoldContentInsets,
         topBar = {
-            if (!hideShellTopBar) {
+            // Fade the shell top bar out over the same duration as the modal slides up,
+            // so there's no abrupt disappear flash during modal presentation.
+            AnimatedVisibility(
+                visible = !hideShellTopBar,
+                enter = fadeIn(tween(120)),
+                exit = fadeOut(tween(340))
+            ) {
                 KablanProTopBar(title = screenTitle)
             }
         }
     ) { paddingValues ->
-        androidx.compose.foundation.layout.Column(
-            modifier = modifier
+        // Swipe-down-to-dismiss state (accumulated drag)
+        val dragAccum = remember { mutableFloatStateOf(0f) }
+
+        val contentModifier = if (isModal) {
+            Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-        ) {
+                .pointerInput(currentRoute) {
+                    detectVerticalDragGestures(
+                        onDragStart = { dragAccum.floatValue = 0f },
+                        onDragEnd = {
+                            if (dragAccum.floatValue > 120.dp.toPx()) {
+                                navController.popBackStack()
+                            }
+                            dragAccum.floatValue = 0f
+                        },
+                        onVerticalDrag = { change, amount ->
+                            if (amount > 0) {
+                                change.consume()
+                                dragAccum.floatValue += amount
+                            }
+                        }
+                    )
+                }
+        } else {
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        }
+
+        Box(modifier = modifier.then(contentModifier)) {
             NavHost(
-                navController = navController as androidx.navigation.NavHostController,
+                navController = navController,
                 startDestination = ProjectRoutes.GRAPH,
                 modifier = Modifier.fillMaxSize(),
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) },
-                popEnterTransition = { fadeIn(tween(220)) },
-                popExitTransition = { fadeOut(tween(220)) }
+                enterTransition = {
+                    val from = initialState.destination.route
+                    val to = targetState.destination.route
+                    when {
+                        isPresentingModal(from, to) -> slideInVertically(
+                            animationSpec = tween(340),
+                            initialOffsetY = { it }
+                        )
+                        isTopBarOwnerChanging(from, to) -> EnterTransition.None
+                        else -> fadeIn(tween(300))
+                    }
+                },
+                exitTransition = {
+                    val from = initialState.destination.route
+                    val to = targetState.destination.route
+                    when {
+                        isPresentingModal(from, to) -> fadeOut(tween(200))
+                        isTopBarOwnerChanging(from, to) -> ExitTransition.None
+                        else -> fadeOut(tween(300))
+                    }
+                },
+                popEnterTransition = {
+                    val from = initialState.destination.route
+                    val to = targetState.destination.route
+                    when {
+                        isDismissingModal(from, to) -> fadeIn(tween(220))
+                        isTopBarOwnerChanging(from, to) -> EnterTransition.None
+                        else -> fadeIn(tween(220))
+                    }
+                },
+                popExitTransition = {
+                    val from = initialState.destination.route
+                    val to = targetState.destination.route
+                    when {
+                        isDismissingModal(from, to) -> slideOutVertically(
+                            animationSpec = tween(300),
+                            targetOffsetY = { it }
+                        )
+                        isTopBarOwnerChanging(from, to) -> ExitTransition.None
+                        else -> fadeOut(tween(220))
+                    }
+                }
             ) {
                 projectsGraph(navController)
                 expensesGraph(navController)
@@ -174,13 +258,24 @@ private val routesWithOwnTopBar = setOf(
     InvoiceRoutes.NEW,
     InvoiceRoutes.DETAIL,
     InvoiceRoutes.EDIT,
-    LaborRoutes.LIST,
     LaborRoutes.ADD,
     LaborRoutes.EDIT,
     ClientRoutes.NEW,
     ClientRoutes.DETAIL,
     ClientRoutes.EDIT,
 )
+
+private fun isTopBarOwnerChanging(fromRoute: String?, toRoute: String?): Boolean {
+    val fromOwnTopBar = fromRoute in routesWithOwnTopBar
+    val toOwnTopBar = toRoute in routesWithOwnTopBar
+    return fromOwnTopBar != toOwnTopBar
+}
+
+private fun isPresentingModal(fromRoute: String?, toRoute: String?): Boolean =
+    fromRoute !in routesWithOwnTopBar && toRoute in routesWithOwnTopBar
+
+private fun isDismissingModal(fromRoute: String?, toRoute: String?): Boolean =
+    fromRoute in routesWithOwnTopBar && toRoute !in routesWithOwnTopBar
 
 private fun getGraphRoute(tab: TabDestination): String = when (tab) {
     TabDestination.PROJECTS -> ProjectRoutes.GRAPH
@@ -190,7 +285,7 @@ private fun getGraphRoute(tab: TabDestination): String = when (tab) {
     TabDestination.CLIENTS -> ClientRoutes.GRAPH
     TabDestination.ANALYTICS -> "analytics_graph"
     TabDestination.SETTINGS -> SettingsRoutes.GRAPH
-    TabDestination.MORE -> ProjectRoutes.GRAPH // never reached
+    TabDestination.MORE -> ProjectRoutes.GRAPH
 }
 
 private fun getTabRootRoute(tab: TabDestination): String = when (tab) {

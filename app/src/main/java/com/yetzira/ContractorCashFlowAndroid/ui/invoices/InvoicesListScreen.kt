@@ -63,6 +63,7 @@ import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -122,7 +123,7 @@ fun InvoicesListScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp),
+                    .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 ModernSearchBar(

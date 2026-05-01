@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
 import com.yetzira.ContractorCashFlowAndroid.ui.components.PeriodFilterBar
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors
 import kotlin.math.max
 import java.util.Locale
@@ -52,7 +53,8 @@ fun AnalyticsScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+            .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         PeriodFilterBar(

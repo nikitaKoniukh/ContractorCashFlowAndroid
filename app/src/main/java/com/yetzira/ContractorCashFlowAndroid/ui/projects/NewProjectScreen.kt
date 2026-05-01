@@ -60,6 +60,7 @@ import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import java.text.SimpleDateFormat
@@ -171,7 +172,8 @@ fun NewProjectScreen(
                 modifier = Modifier
                     .then(if (isTablet) Modifier.widthIn(max = 600.dp) else Modifier.fillMaxWidth())
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                    .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 FormSection(title = stringResource(R.string.projects_info_section)) {

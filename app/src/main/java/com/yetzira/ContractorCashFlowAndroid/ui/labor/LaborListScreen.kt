@@ -51,14 +51,12 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
@@ -66,11 +64,11 @@ import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierLimit
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
-import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.StatPill
 import com.yetzira.ContractorCashFlowAndroid.ui.components.WorkerAvatar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.BodyMediumSemibold
@@ -86,7 +84,6 @@ private val Space20 = 20.dp
 @Composable
 fun LaborListScreen(
     viewModel: LaborViewModel,
-    onMenuClick: () -> Unit,
     onAdd: () -> Unit,
     onEdit: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -122,49 +119,6 @@ fun LaborListScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        topBar = {
-            KablanProTopBar(
-                title = stringResource(R.string.tab_labor),
-                navigationIcon = {
-                    IconButton(onClick = onMenuClick) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = stringResource(id = R.string.menu_open)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showFilters = true }) {
-                        Icon(
-                            imageVector = Icons.Default.FilterList,
-                            contentDescription = "Filter"
-                        )
-                    }
-                    Box {
-                        IconButton(onClick = { showSortMenu = true }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Sort,
-                                contentDescription = "Sort"
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = showSortMenu,
-                            onDismissRequest = { showSortMenu = false }
-                        ) {
-                            LaborSortOption.entries.forEach { option ->
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(option.labelResId)) },
-                                    onClick = {
-                                        viewModel.setSort(option)
-                                        showSortMenu = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddAttempt) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Worker")
@@ -200,11 +154,41 @@ fun LaborListScreen(
                             style = SectionHeaderStyle,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Text(
-                            text = "${state.workers.size}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${state.workers.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+                            IconButton(onClick = { showFilters = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.FilterList,
+                                    contentDescription = "Filter"
+                                )
+                            }
+                            Box {
+                                IconButton(onClick = { showSortMenu = true }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.Sort,
+                                        contentDescription = "Sort"
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = showSortMenu,
+                                    onDismissRequest = { showSortMenu = false }
+                                ) {
+                                    LaborSortOption.entries.forEach { option ->
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(option.labelResId)) },
+                                            onClick = {
+                                                viewModel.setSort(option)
+                                                showSortMenu = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -316,7 +300,7 @@ private fun SummaryCard(summary: LaborSummaryUi, currency: CurrencyOption) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = Space16, bottom = Space8),
+            .padding(top = KablanProLayoutDefaults.TopSectionSpacing, bottom = Space8),
         verticalArrangement = Arrangement.spacedBy(Space12)
     ) {
         Text(

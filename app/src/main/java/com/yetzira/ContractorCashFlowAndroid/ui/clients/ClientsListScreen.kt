@@ -53,6 +53,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +93,7 @@ fun ClientsListScreen(
                 onValueChange = viewModel::setSearchQuery,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp),
+                    .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
                 placeholder = stringResource(R.string.clients_list_search)
             )
 

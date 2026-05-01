@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,7 +104,8 @@ fun EditInvoiceScreen(
             onStateChange = { formState = viewModel.updateForm(it) },
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .padding(top = KablanProLayoutDefaults.TopSectionSpacing)
         )
     }
 }

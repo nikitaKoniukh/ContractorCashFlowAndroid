@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,7 +129,8 @@ fun ClientDetailScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 

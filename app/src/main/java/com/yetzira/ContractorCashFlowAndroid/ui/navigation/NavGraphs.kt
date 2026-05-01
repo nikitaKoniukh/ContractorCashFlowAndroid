@@ -311,7 +311,6 @@ fun NavGraphBuilder.laborGraph(
 
             LaborListScreen(
                 viewModel = viewModel,
-                onMenuClick = {},
                 onAdd = { navController.navigate(LaborRoutes.ADD) },
                 onEdit = { workerId -> navController.navigate(LaborRoutes.edit(workerId)) }
             )

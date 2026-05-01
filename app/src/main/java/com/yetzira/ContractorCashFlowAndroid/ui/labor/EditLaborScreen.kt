@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +93,10 @@ fun EditLaborScreen(
         }
 
         Column(
-            modifier = Modifier.padding(innerPadding).padding(16.dp),
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             LaborFormContent(

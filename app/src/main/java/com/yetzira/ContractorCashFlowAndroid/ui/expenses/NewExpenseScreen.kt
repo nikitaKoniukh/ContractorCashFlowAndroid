@@ -31,6 +31,7 @@ import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.notification.BudgetWarningNotifier
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,7 +125,10 @@ fun NewExpenseScreen(
                 val updatedDates = formState.selectedDates.filter { it != dateMillis }
                 formState = viewModel.updateForm(formState.copy(selectedDates = updatedDates))
             },
-            modifier = Modifier.padding(innerPadding).padding(16.dp)
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .padding(top = KablanProLayoutDefaults.TopSectionSpacing)
         )
     }
 }
