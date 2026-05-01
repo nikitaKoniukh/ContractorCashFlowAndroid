@@ -1,5 +1,6 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,8 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val IosBlue = Color(0xFF007AFF)
-private val IosGroupedBg = Color(0xFFF2F2F7)     // iOS grouped background
-private val IosSecondaryLabel = Color(0xFF8E8E93)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +43,17 @@ fun MoreBottomSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // Theme-aware colors
+    val isLightMode = !isSystemInDarkTheme()
+    val groupedBgColor = if (isLightMode)
+        Color(0xFFF2F2F7)
+    else
+        MaterialTheme.colorScheme.surfaceContainerLow
+    val secondaryLabelColor = if (isLightMode)
+        Color(0xFF8E8E93)
+    else
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -72,7 +82,7 @@ fun MoreBottomSheet(
             Text(
                 text = stringResource(id = com.yetzira.ContractorCashFlowAndroid.R.string.tab_more).uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = IosSecondaryLabel,
+                color = secondaryLabelColor,
                 letterSpacing = 0.8.sp,
                 modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
             )
@@ -82,12 +92,7 @@ fun MoreBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (MaterialTheme.colorScheme.surface == Color.White || true)
-                            IosGroupedBg
-                        else
-                            MaterialTheme.colorScheme.surfaceContainerLow
-                    )
+                    .background(groupedBgColor)
             ) {
                 TabDestination.moreTabs.forEachIndexed { index, tab ->
                     val isSelected = selectedTab == tab
@@ -111,13 +116,13 @@ fun MoreBottomSheet(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(if (isSelected) IosBlue else IosSecondaryLabel.copy(alpha = 0.2f)),
+                                .background(if (isSelected) IosBlue else secondaryLabelColor.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = tab.icon,
                                 contentDescription = null,
-                                tint = if (isSelected) Color.White else IosSecondaryLabel,
+                                tint = if (isSelected) Color.White else secondaryLabelColor,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -134,7 +139,7 @@ fun MoreBottomSheet(
                         Text(
                             text = "›",
                             fontSize = 20.sp,
-                            color = IosSecondaryLabel,
+                            color = secondaryLabelColor,
                             fontWeight = FontWeight.Light
                         )
                     }
