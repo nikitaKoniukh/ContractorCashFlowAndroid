@@ -81,9 +81,8 @@ import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
+import java.text.DateFormat
 import java.util.Date
-import java.util.Locale
 
 /**
  * Identifies which notification toggle the user is trying to enable,
@@ -374,12 +373,12 @@ fun SettingsScreen(
             SettingsSectionHeader(stringResource(R.string.settings_section_subscription))
             SettingsGroupCard {
                 val planLabel = when {
-                    activePurchase?.products?.contains(BillingProduct.PRO_YEARLY) == true -> "Pro Yearly"
-                    activePurchase?.products?.contains(BillingProduct.PRO_MONTHLY) == true -> "Pro Monthly"
+                    activePurchase?.products?.contains(BillingProduct.PRO_YEARLY) == true -> stringResource(R.string.settings_plan_pro_yearly)
+                    activePurchase?.products?.contains(BillingProduct.PRO_MONTHLY) == true -> stringResource(R.string.settings_plan_pro_monthly)
                     else -> stringResource(R.string.settings_subscription_free)
                 }
                 SettingsValueRow(
-                    title = "Current Plan",
+                    title = stringResource(R.string.settings_current_plan),
                     value = planLabel,
                     leadingIcon = Icons.Default.Description
                 )
@@ -409,7 +408,7 @@ fun SettingsScreen(
                 options = AppLanguageOption.entries.toList(),
                 optionLabel = { it.displayName },
                 leadingIcon = Icons.Default.Language,
-                description = "Choose the app language. Layout direction updates automatically for RTL languages.",
+                description = stringResource(R.string.settings_language_description),
                 onOptionSelected = { language ->
                     LocaleHelper.saveLanguage(context, language.code)
                     viewModel.setLanguage(language)
@@ -424,7 +423,7 @@ fun SettingsScreen(
                 options = CurrencyOption.entries.toList(),
                 optionLabel = { "${it.code} (${it.symbol})" },
                 leadingIcon = Icons.Default.AttachMoney,
-                description = "Currency used for displaying amounts throughout the app.",
+                description = stringResource(R.string.settings_currency_description),
                 onOptionSelected = viewModel::setCurrency
             )
 
@@ -487,7 +486,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(horizontal = 6.dp)
             )
 
-            SettingsSectionHeader("Data")
+            SettingsSectionHeader(stringResource(R.string.settings_section_data))
             SettingsGroupCard {
                 SettingsActionRow(
                     title = stringResource(R.string.settings_sync_button_idle),
@@ -510,16 +509,16 @@ fun SettingsScreen(
                 modifier = Modifier.padding(horizontal = 6.dp)
             )
 
-            SettingsSectionHeader("About")
+            SettingsSectionHeader(stringResource(R.string.settings_section_about))
             SettingsGroupCard {
                 SettingsValueRow(
-                    title = "About",
-                    value = "KablanPro",
+                    title = stringResource(R.string.settings_about),
+                    value = stringResource(R.string.app_name),
                     leadingIcon = Icons.Default.Info
                 )
                 SettingsRowDivider()
                 SettingsValueRow(
-                    title = "App Version",
+                    title = stringResource(R.string.settings_app_version),
                     value = appVersionValue,
                     leadingIcon = Icons.Default.Description
                 )
@@ -764,8 +763,8 @@ private fun SettingsSwitchRow(
 private val SettingsProGold = Color(0xFFE6C229)
 
 private fun formatDate(timestamp: Long?): String {
-    if (timestamp == null) return "—"
-    return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(timestamp))
+    if (timestamp == null) return ""
+    return DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(timestamp))
 }
 
 private fun googleSignInErrorMessage(

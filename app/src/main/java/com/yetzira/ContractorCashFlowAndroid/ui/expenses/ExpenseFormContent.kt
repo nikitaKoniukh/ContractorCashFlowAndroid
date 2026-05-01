@@ -85,12 +85,17 @@ fun ExpenseFormContent(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    val categoryOptions = ExpenseCategory.entries.map { category ->
+                        category to expenseCategoryLabel(category)
+                    }
                     ModernDropdown(
                         label = stringResource(R.string.expenses_form_category_label),
-                        options = ExpenseCategory.entries.map { it.name },
-                        selected = state.category.name,
-                        onSelected = { selectedName ->
-                            val selected = ExpenseCategory.entries.find { it.name == selectedName }
+                        options = categoryOptions.map { it.second },
+                        selected = categoryOptions.first { it.first == state.category }.second,
+                        onSelected = { selectedLabel ->
+                            val selected = categoryOptions
+                                .firstOrNull { it.second == selectedLabel }
+                                ?.first
                             if (selected != null) {
                                 onStateChange(state.copy(
                                     category = selected,
@@ -541,6 +546,14 @@ private fun startOfMonth(millis: Long): Long {
 private fun dayOfMonth(millis: Long): Int {
     val cal = Calendar.getInstance().apply { timeInMillis = millis }
     return cal.get(Calendar.DAY_OF_MONTH)
+}
+
+@Composable
+private fun expenseCategoryLabel(category: ExpenseCategory): String = when (category) {
+    ExpenseCategory.MATERIALS -> stringResource(R.string.expenses_category_materials)
+    ExpenseCategory.LABOR -> stringResource(R.string.expenses_category_labor)
+    ExpenseCategory.EQUIPMENT -> stringResource(R.string.expenses_category_equipment)
+    ExpenseCategory.MISC -> stringResource(R.string.expenses_category_misc)
 }
 
 @Composable
