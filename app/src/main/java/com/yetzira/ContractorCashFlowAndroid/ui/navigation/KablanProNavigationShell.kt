@@ -17,7 +17,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
@@ -99,109 +98,170 @@ private fun KablanProNavigationContent(
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    val screenTitle = stringResource(id = titleResForRoute(currentRoute))
-    val hideShellTopBar = currentRoute in routesWithOwnTopBar
-    val isModal = hideShellTopBar
 
-    Scaffold(
-        contentWindowInsets = KablanProLayoutDefaults.ScaffoldContentInsets,
-        topBar = {
-            // Fade the shell top bar out over the same duration as the modal slides up,
-            // so there's no abrupt disappear flash during modal presentation.
-            AnimatedVisibility(
-                visible = !hideShellTopBar,
-                enter = fadeIn(tween(120)),
-                exit = fadeOut(tween(340))
-            ) {
-                KablanProTopBar(title = screenTitle)
-            }
-        }
-    ) { paddingValues ->
-        // Swipe-down-to-dismiss state (accumulated drag)
-        val dragAccum = remember { mutableFloatStateOf(0f) }
+    // Track previous route to freeze title during modal presentation
+    var previousRoute by remember { mutableStateOf<String?>(null) }
 
-        val contentModifier = if (isModal) {
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .pointerInput(currentRoute) {
-                    detectVerticalDragGestures(
-                        onDragStart = { dragAccum.floatValue = 0f },
-                        onDragEnd = {
-                            if (dragAccum.floatValue > 120.dp.toPx()) {
-                                navController.popBackStack()
+    // Update previousRoute when we're not transitioning to a modal
+    val isTransitioningToModal = previousRoute != null &&
+        previousRoute !in routesWithOwnTopBar &&
+        currentRoute in routesWithOwnTopBar
+
+    if (!isTransitioningToModal) {
+        previousRoute = currentRoute
+    }
+
+    // Use previousRoute for title display to keep it frozen during modal presentation
+    val displayRoute = if (isTransitioningToModal) previousRoute else currentRoute
+    val screenTitle = stringResource(id = titleResForRoute(displayRoute))
+    val isModal = currentRoute in routesWithOwnTopBar
+    val dragAccum = remember { mutableFloatStateOf(0f) }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        if (isModal) {
+            // Full-screen modal without Scaffold constraints
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(currentRoute) {
+                        detectVerticalDragGestures(
+                            onDragStart = { dragAccum.floatValue = 0f },
+                            onDragEnd = {
+                                if (dragAccum.floatValue > 120.dp.toPx()) {
+                                    navController.popBackStack()
+                                }
+                                dragAccum.floatValue = 0f
+                            },
+                            onVerticalDrag = { change, amount ->
+                                if (amount > 0) {
+                                    change.consume()
+                                    dragAccum.floatValue += amount
+                                }
                             }
-                            dragAccum.floatValue = 0f
+                        )
+                    }
+            ) {
+                NavHost(
+                    navController = navController,
+                    startDestination = ProjectRoutes.GRAPH,
+                    modifier = Modifier.fillMaxSize(),
+                    enterTransition = {
+                        val from = initialState.destination.route
+                        val to = targetState.destination.route
+                        when {
+                            isPresentingModal(from, to) -> slideInVertically(
+                                animationSpec = tween(340),
+                                initialOffsetY = { it }
+                            )
+                            isTopBarOwnerChanging(from, to) -> EnterTransition.None
+                            else -> fadeIn(tween(300))
+                        }
+                    },
+                    exitTransition = {
+                        val from = initialState.destination.route
+                        val to = targetState.destination.route
+                        when {
+                            isPresentingModal(from, to) -> fadeOut(tween(200))
+                            isTopBarOwnerChanging(from, to) -> ExitTransition.None
+                            else -> fadeOut(tween(300))
+                        }
+                    },
+                    popEnterTransition = {
+                        val from = initialState.destination.route
+                        val to = targetState.destination.route
+                        when {
+                            isDismissingModal(from, to) -> fadeIn(tween(220))
+                            isTopBarOwnerChanging(from, to) -> EnterTransition.None
+                            else -> fadeIn(tween(220))
+                        }
+                    },
+                    popExitTransition = {
+                        val from = initialState.destination.route
+                        val to = targetState.destination.route
+                        when {
+                            isDismissingModal(from, to) -> slideOutVertically(
+                                animationSpec = tween(300),
+                                targetOffsetY = { it }
+                            )
+                            isTopBarOwnerChanging(from, to) -> ExitTransition.None
+                            else -> fadeOut(tween(220))
+                        }
+                    }
+                ) {
+                    projectsGraph(navController)
+                    expensesGraph(navController)
+                    invoicesGraph(navController)
+                    laborGraph(navController)
+                    clientsGraph(navController)
+                    analyticsGraph(navController)
+                    settingsGraph(navController)
+                }
+            }
+        } else {
+            // Normal view with Scaffold for non-modal routes
+            Scaffold(
+                contentWindowInsets = KablanProLayoutDefaults.ScaffoldContentInsets,
+                topBar = {
+                    KablanProTopBar(title = screenTitle)
+                }
+            ) { paddingValues ->
+                Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = ProjectRoutes.GRAPH,
+                        modifier = Modifier.fillMaxSize(),
+                        enterTransition = {
+                            val from = initialState.destination.route
+                            val to = targetState.destination.route
+                            when {
+                                isPresentingModal(from, to) -> slideInVertically(
+                                    animationSpec = tween(340),
+                                    initialOffsetY = { it }
+                                )
+                                isTopBarOwnerChanging(from, to) -> EnterTransition.None
+                                else -> fadeIn(tween(300))
+                            }
                         },
-                        onVerticalDrag = { change, amount ->
-                            if (amount > 0) {
-                                change.consume()
-                                dragAccum.floatValue += amount
+                        exitTransition = {
+                            val from = initialState.destination.route
+                            val to = targetState.destination.route
+                            when {
+                                isPresentingModal(from, to) -> fadeOut(tween(200))
+                                isTopBarOwnerChanging(from, to) -> ExitTransition.None
+                                else -> fadeOut(tween(300))
+                            }
+                        },
+                        popEnterTransition = {
+                            val from = initialState.destination.route
+                            val to = targetState.destination.route
+                            when {
+                                isDismissingModal(from, to) -> fadeIn(tween(220))
+                                isTopBarOwnerChanging(from, to) -> EnterTransition.None
+                                else -> fadeIn(tween(220))
+                            }
+                        },
+                        popExitTransition = {
+                            val from = initialState.destination.route
+                            val to = targetState.destination.route
+                            when {
+                                isDismissingModal(from, to) -> slideOutVertically(
+                                    animationSpec = tween(300),
+                                    targetOffsetY = { it }
+                                )
+                                isTopBarOwnerChanging(from, to) -> ExitTransition.None
+                                else -> fadeOut(tween(220))
                             }
                         }
-                    )
-                }
-        } else {
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        }
-
-        Box(modifier = modifier.then(contentModifier)) {
-            NavHost(
-                navController = navController,
-                startDestination = ProjectRoutes.GRAPH,
-                modifier = Modifier.fillMaxSize(),
-                enterTransition = {
-                    val from = initialState.destination.route
-                    val to = targetState.destination.route
-                    when {
-                        isPresentingModal(from, to) -> slideInVertically(
-                            animationSpec = tween(340),
-                            initialOffsetY = { it }
-                        )
-                        isTopBarOwnerChanging(from, to) -> EnterTransition.None
-                        else -> fadeIn(tween(300))
-                    }
-                },
-                exitTransition = {
-                    val from = initialState.destination.route
-                    val to = targetState.destination.route
-                    when {
-                        isPresentingModal(from, to) -> fadeOut(tween(200))
-                        isTopBarOwnerChanging(from, to) -> ExitTransition.None
-                        else -> fadeOut(tween(300))
-                    }
-                },
-                popEnterTransition = {
-                    val from = initialState.destination.route
-                    val to = targetState.destination.route
-                    when {
-                        isDismissingModal(from, to) -> fadeIn(tween(220))
-                        isTopBarOwnerChanging(from, to) -> EnterTransition.None
-                        else -> fadeIn(tween(220))
-                    }
-                },
-                popExitTransition = {
-                    val from = initialState.destination.route
-                    val to = targetState.destination.route
-                    when {
-                        isDismissingModal(from, to) -> slideOutVertically(
-                            animationSpec = tween(300),
-                            targetOffsetY = { it }
-                        )
-                        isTopBarOwnerChanging(from, to) -> ExitTransition.None
-                        else -> fadeOut(tween(220))
+                    ) {
+                        projectsGraph(navController)
+                        expensesGraph(navController)
+                        invoicesGraph(navController)
+                        laborGraph(navController)
+                        clientsGraph(navController)
+                        analyticsGraph(navController)
+                        settingsGraph(navController)
                     }
                 }
-            ) {
-                projectsGraph(navController)
-                expensesGraph(navController)
-                invoicesGraph(navController)
-                laborGraph(navController)
-                clientsGraph(navController)
-                analyticsGraph(navController)
-                settingsGraph(navController)
             }
         }
     }
