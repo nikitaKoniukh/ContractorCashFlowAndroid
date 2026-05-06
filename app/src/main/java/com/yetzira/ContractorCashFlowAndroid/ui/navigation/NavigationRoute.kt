@@ -100,7 +100,7 @@ enum class TabDestination(
             entries.find { it.route == route }
 
         /** The 5 items shown in the bottom tab bar. */
-        val bottomBarTabs = listOf(PROJECTS, LABOR, INVOICES, EXPENSES, MORE)
+        val bottomBarTabs = listOf(PROJECTS, EXPENSES, INVOICES, LABOR, MORE)
 
         /** Destinations accessible from the "More" bottom sheet. */
         val moreTabs = listOf(CLIENTS, ANALYTICS, SETTINGS)
