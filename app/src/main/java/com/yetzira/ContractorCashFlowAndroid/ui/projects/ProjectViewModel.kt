@@ -9,6 +9,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
+import com.yetzira.ContractorCashFlowAndroid.data.repository.ClientRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,7 +28,8 @@ class ProjectViewModel(
     private val repository: ProjectRepositoryContract,
     private val expenseDao: ExpenseDao,
     private val invoiceDao: InvoiceDao,
-    private val clientDao: ClientDao
+    private val clientDao: ClientDao,
+    private val clientRepository: ClientRepositoryContract
 ) : ViewModel() {
 
     private val searchQuery = MutableStateFlow("")
@@ -135,7 +137,7 @@ class ProjectViewModel(
             if (!useExistingClient && normalizedNewClientName.isNotBlank()) {
                 val existingClient = clientDao.findByNameIgnoreCase(normalizedNewClientName)
                 if (existingClient == null) {
-                    clientDao.insert(
+                    clientRepository.insertClient(
                         ClientEntity(
                             name = normalizedNewClientName,
                             email = newClientEmail.trim().ifBlank { null },

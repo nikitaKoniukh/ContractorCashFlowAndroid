@@ -7,6 +7,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
+import com.yetzira.ContractorCashFlowAndroid.data.repository.ClientRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.testutil.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +42,7 @@ class ProjectViewModelTest {
         )
         val clientDao = FakeClientDao()
 
-        val viewModel = ProjectViewModel(repo, expenseDao, invoiceDao, clientDao)
+        val viewModel = ProjectViewModel(repo, expenseDao, invoiceDao, clientDao, FakeClientRepository(clientDao))
         val collectJob = launch { viewModel.projectsUiState.collect { } }
         advanceUntilIdle()
 
@@ -59,7 +60,7 @@ class ProjectViewModelTest {
         val expenseDao = FakeExpenseDao()
         val invoiceDao = FakeInvoiceDao()
         val clientDao = FakeClientDao()
-        val viewModel = ProjectViewModel(repo, expenseDao, invoiceDao, clientDao)
+        val viewModel = ProjectViewModel(repo, expenseDao, invoiceDao, clientDao, FakeClientRepository(clientDao))
 
         var successCalled = false
         viewModel.createProject(
@@ -86,7 +87,7 @@ class ProjectViewModelTest {
     @Test
     fun `createProject rejects invalid input`() = runTest {
         val repo = FakeProjectRepository()
-        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao())
+        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao(), FakeClientRepository())
 
         viewModel.createProject(
             name = "",
@@ -111,7 +112,7 @@ class ProjectViewModelTest {
         val clientDao = FakeClientDao(
             initial = listOf(ClientEntity(id = "c1", name = "Gindi", email = "gindi@g.com"))
         )
-        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), clientDao)
+        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), clientDao, FakeClientRepository(clientDao))
 
         var successCalled = false
         viewModel.createProject(
@@ -137,7 +138,7 @@ class ProjectViewModelTest {
     @Test
     fun `createProject saves end date when provided`() = runTest {
         val repo = FakeProjectRepository()
-        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao())
+        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao(), FakeClientRepository())
         val expectedEndDate = 1_750_118_400_000L
 
         viewModel.createProject(
@@ -163,7 +164,7 @@ class ProjectViewModelTest {
     fun `delete and undo project restores item`() = runTest {
         val project = ProjectEntity(id = "p1", name = "A", clientName = "B", budget = 100.0)
         val repo = FakeProjectRepository(projects = listOf(project))
-        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao())
+        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao(), FakeClientRepository())
 
         val collectJob = launch { viewModel.projectsUiState.collect { } }
 
@@ -329,6 +330,17 @@ class ProjectViewModelTest {
         override suspend fun delete(client: ClientEntity) {
             clients.value = clients.value.filterNot { it.id == client.id }
         }
+    }
+
+    private class FakeClientRepository(
+        private val clientDao: FakeClientDao = FakeClientDao()
+    ) : ClientRepositoryContract {
+        override fun getAllClients() = clientDao.getAll()
+        override fun searchClients(query: String) = clientDao.search(query)
+        override suspend fun getClientById(id: String) = clientDao.getById(id)
+        override suspend fun insertClient(client: ClientEntity) = clientDao.insert(client)
+        override suspend fun updateClient(client: ClientEntity) = clientDao.update(client)
+        override suspend fun deleteClient(client: ClientEntity) = clientDao.delete(client)
     }
 }
 
