@@ -279,14 +279,15 @@ private fun ProjectCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Main content
-            Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Main content
+                Column(modifier = Modifier.weight(1f)) {
 
                 // ── Row 1: project name (bold) + status badge ──────────────
                 Row(
@@ -445,16 +446,25 @@ private fun ProjectCard(
                         fontSize = 15.sp
                     )
                 }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    modifier = Modifier.size(20.dp)
+                )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                modifier = Modifier.size(20.dp)
-            )
+            if (index < lastIndex) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(start = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f),
+                    thickness = 0.5.dp
+                )
+            }
         }
     }
 }
