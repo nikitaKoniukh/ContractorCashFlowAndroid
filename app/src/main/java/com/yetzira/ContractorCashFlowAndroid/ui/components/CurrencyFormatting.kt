@@ -40,12 +40,9 @@ fun formatAmountWithGrouping(amount: Double): String {
 }
 
 fun formatCurrencyAmount(amount: Double, currency: CurrencyOption): String {
-    // LTR embedding marks ensure sign + digits + symbol render in the correct
-    // visual order even inside an RTL (Hebrew) layout.
     val sign = if (amount < 0) "-" else ""
     val absFormatted = formatAmountWithGrouping(abs(amount))
-    // \u202A = LEFT-TO-RIGHT EMBEDDING, \u202C = POP DIRECTIONAL FORMATTING
-    return "\u202A${sign}${currency.symbol}${absFormatted}\u202C"
+    return "${sign}${absFormatted} ${currency.symbol}"
 }
 
 fun Double.toFormattedCurrency(currency: CurrencyOption): String {
