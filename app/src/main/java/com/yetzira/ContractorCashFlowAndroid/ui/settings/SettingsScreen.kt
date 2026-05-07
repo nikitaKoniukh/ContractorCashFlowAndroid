@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -56,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -80,6 +82,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
@@ -120,6 +123,7 @@ fun SettingsScreen(
         factory = remember { PurchaseViewModelFactory(context) }
     )
     val isProUser by purchaseViewModel.isProUser.collectAsState()
+    val devProOverride by purchaseViewModel.devProOverride.collectAsState()
     val activePurchase by purchaseViewModel.activePurchase.collectAsState()
     val credentialManager = remember(context) { CredentialManager.create(context) }
     var showPaywall by remember { mutableStateOf(false) }
@@ -517,10 +521,10 @@ fun SettingsScreen(
                     leadingIcon = Icons.Default.Info
                 )
                 SettingsRowDivider()
-                SettingsValueRow(
-                    title = stringResource(R.string.settings_app_version),
-                    value = appVersionValue,
-                    leadingIcon = Icons.Default.Description
+                val versionLabel = if (devProOverride) "$appVersionValue ⭐" else appVersionValue
+                SettingsVersionRow(
+                    value = versionLabel,
+                    onLongPress = { purchaseViewModel.toggleDevProOverride() }
                 )
             }
 
@@ -761,6 +765,53 @@ private fun SettingsSwitchRow(
 }
 
 private val SettingsProGold = Color(0xFFE6C229)
+
+@Composable
+private fun SettingsVersionRow(
+    value: String,
+    onLongPress: () -> Unit
+) {
+    val coroutineScope = rememberCoroutineScope()
+    var pressJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerInput(onLongPress) {
+                detectTapGestures(
+                    onPress = {
+                        pressJob = coroutineScope.launch {
+                            delay(10_000L)
+                            onLongPress()
+                        }
+                        tryAwaitRelease()
+                        pressJob?.cancel()
+                        pressJob = null
+                    }
+                )
+            }
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Description,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.width(30.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = stringResource(R.string.settings_app_version),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
 
 private fun formatDate(timestamp: Long?): String {
     if (timestamp == null) return ""

@@ -42,7 +42,23 @@ class PurchaseManager(
     private val appContext = context.applicationContext
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private val _isProUser = MutableStateFlow(false)
+    private val devPrefs = appContext.getSharedPreferences("dev_prefs", Context.MODE_PRIVATE)
+    private val _devProOverride = MutableStateFlow(devPrefs.getBoolean("dev_pro_override", false))
+    val devProOverride: StateFlow<Boolean> = _devProOverride.asStateFlow()
+
+    fun toggleDevProOverride() {
+        val newValue = !_devProOverride.value
+        _devProOverride.value = newValue
+        devPrefs.edit().putBoolean("dev_pro_override", newValue).apply()
+        if (newValue) {
+            _isProUser.value = true
+        } else {
+            // Re-evaluate from real billing state
+            scope.launch { checkCurrentEntitlements() }
+        }
+    }
+
+    private val _isProUser = MutableStateFlow(_devProOverride.value)
     val isProUser: StateFlow<Boolean> = _isProUser.asStateFlow()
 
     private val _products = MutableStateFlow<List<ProductDetails>>(emptyList())
@@ -432,7 +448,7 @@ class PurchaseManager(
 
         Log.d(TAG, "checkCurrentEntitlements: isProUser=${activeProPurchase != null}")
         _activePurchase.value = activeProPurchase
-        _isProUser.value = activeProPurchase != null
+        _isProUser.value = activeProPurchase != null || _devProOverride.value
 
         // Persist subscription state
         val planName = when {
@@ -488,7 +504,7 @@ class PurchaseManager(
         }
 
         _activePurchase.value = activeProPurchase
-        _isProUser.value = activeProPurchase != null
+        _isProUser.value = activeProPurchase != null || _devProOverride.value
 
         val planName = when {
             activeProPurchase?.products?.contains(BillingProduct.PRO_YEARLY) == true -> "Pro Yearly"

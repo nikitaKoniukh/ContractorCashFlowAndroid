@@ -12,6 +12,7 @@ class PurchaseViewModel(
 ) : ViewModel() {
 
     val isProUser = purchaseManager.isProUser
+    val devProOverride = purchaseManager.devProOverride
     val products = purchaseManager.products
     val isLoading = purchaseManager.isLoading
     val isPurchasing = purchaseManager.isPurchasing
@@ -47,6 +48,10 @@ class PurchaseViewModel(
 
     fun clearError() {
         purchaseManager.clearError()
+    }
+
+    fun toggleDevProOverride() {
+        purchaseManager.toggleDevProOverride()
     }
 
     fun openManageSubscriptions(context: Context) {
