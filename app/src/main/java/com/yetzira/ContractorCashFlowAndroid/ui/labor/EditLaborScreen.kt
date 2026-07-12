@@ -88,7 +88,7 @@ fun EditLaborScreen(
         }
     ) { innerPadding ->
         if (worker == null) {
-            Text(text = "Worker not found", modifier = Modifier.padding(innerPadding).padding(24.dp))
+            Text(text = stringResource(R.string.labor_worker_not_found), modifier = Modifier.padding(innerPadding).padding(24.dp))
             return@Scaffold
         }
 
@@ -106,12 +106,12 @@ fun EditLaborScreen(
 
             if (metrics != null && metrics.linkedExpenseCount > 0) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Worker Statistics")
-                    Text("Total earned: ${String.format(java.util.Locale.US, "%.2f", metrics.totalAmountEarned)}")
-                    Text("Hours/Units: ${String.format(java.util.Locale.US, "%.2f", metrics.totalUnitsWorked)}")
-                    Text("Days worked: ${metrics.totalDaysWorked}")
+                    Text(stringResource(R.string.labor_worker_statistics), fontWeight = FontWeight.SemiBold)
+                    Text("${stringResource(R.string.labor_total_earned)} ${String.format(java.util.Locale.US, "%.2f", metrics.totalAmountEarned)}")
+                    Text("${stringResource(R.string.labor_hours_units)} ${String.format(java.util.Locale.US, "%.2f", metrics.totalUnitsWorked)}")
+                    Text("${stringResource(R.string.labor_days_worked)} ${metrics.totalDaysWorked}")
                     if (metrics.associatedProjects.isNotEmpty()) {
-                        Text("Projects: ${metrics.associatedProjects.joinToString()}")
+                        Text("${stringResource(R.string.labor_projects)} ${metrics.associatedProjects.joinToString()}")
                     }
                 }
             }
@@ -122,13 +122,17 @@ fun EditLaborScreen(
         val linkedCount = metrics?.linkedExpenseCount ?: 0
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete worker?") },
+            title = { Text(stringResource(R.string.labor_delete_worker_title)) },
             text = {
                 Text(
                     if (linkedCount > 0) {
-                        "$linkedCount linked expense(s) will remain but unlinked."
+                        stringResource(
+                            R.string.labor_delete_worker_message_with_linked,
+                            worker.workerName,
+                            linkedCount
+                        )
                     } else {
-                        "This worker will be deleted."
+                        stringResource(R.string.labor_delete_worker_message, worker.workerName)
                     }
                 )
             },
@@ -136,10 +140,10 @@ fun EditLaborScreen(
                 TextButton(onClick = {
                     viewModel.deleteWorker(worker) { onBack() }
                     showDeleteDialog = false
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.common_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showDeleteDialog = false }) { Text(stringResource(R.string.common_cancel)) }
             }
         )
     }

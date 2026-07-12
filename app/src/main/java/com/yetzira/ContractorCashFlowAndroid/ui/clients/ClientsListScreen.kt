@@ -65,7 +65,7 @@ fun ClientsListScreen(
 ) {
     val state by viewModel.listUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val deletedMessage = "Client deleted"
+    val deletedMessage = stringResource(R.string.clients_deleted)
     val undoLabel = stringResource(R.string.common_undo)
 
     Scaffold(
@@ -77,7 +77,7 @@ fun ClientsListScreen(
             FloatingActionButton(onClick = onCreate) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "New Client"
+                    contentDescription = stringResource(R.string.clients_new)
                 )
             }
         }
@@ -248,12 +248,12 @@ private fun EmptyClientsState() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No clients yet",
+            text = stringResource(R.string.clients_empty_title),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Add your first client to manage contacts.",
+            text = stringResource(R.string.clients_empty_body),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp)

@@ -450,7 +450,7 @@
     <string name="scan_photos">Choose from Photos</string>
     <string name="scan_photos_subtitle">Select an image from your gallery</string>
     <string name="scan_files">Choose from Files</string>
-    <string name="scan_files_subtitle">Open an image or PDF from your files</string>
+    <string name="scan_files_subtitle">Open an image from your files</string>
     <string name="scan_capture">Capture</string>
     <string name="scan_processing">Analyzing receipt…</string>
     <string name="scan_review_title">Review Expense</string>
@@ -458,4 +458,59 @@
     <string name="scan_receipt_attached">Receipt attached</string>
     <string name="scan_receipt_hint">Extracted data — review and edit before saving</string>
     <string name="scan_notes_label">Notes</string>
+    <string name="scan_failed_load_image">Failed to load image</string>
+    <string name="scan_failed_load_file">Failed to load file</string>
+    <string name="scan_capture_failed">Capture failed: %1$s</string>
+    <string name="scan_camera_failed">Could not start the camera. Please try again.</string>
+    <string name="scan_ocr_failed">Could not read this receipt. Enter the details manually.</string>
+
+    <!-- Analytics polish -->
+    <string name="analytics_income_vs_expenses">Income vs Expenses</string>
+    <string name="analytics_income">Income</string>
+    <string name="analytics_expenses">Expenses</string>
+    <string name="analytics_expenses_by_category">Expenses by Category</string>
+    <string name="analytics_budget_utilization">Budget Utilization</string>
+    <string name="analytics_average_utilization">Average utilization: %1$s</string>
+    <string name="analytics_spent">Spent %1$s</string>
+    <string name="analytics_remaining">Remaining %1$s</string>
+    <string name="analytics_empty_income_expenses">No income or expense activity for the selected period.</string>
+    <string name="analytics_empty_monthly_trend">No monthly trend is available for this period yet.</string>
+    <string name="analytics_empty_invoices">No invoices match the selected period.</string>
+    <string name="analytics_empty_categories">No expense categories are available for this period.</string>
+    <string name="analytics_empty_budgets">No projects with a budget are available yet.</string>
+    <string name="analytics_empty_top_projects">No project income has been recorded for this period.</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_invoice_reminders">Invoice Reminders</string>
+    <string name="notification_channel_invoice_reminders_desc">Reminders for upcoming invoice due dates</string>
+    <string name="notification_channel_overdue">Overdue Alerts</string>
+    <string name="notification_channel_overdue_desc">Alerts for overdue invoices</string>
+    <string name="notification_channel_budget">Budget Warnings</string>
+    <string name="notification_channel_budget_desc">Warnings when project budget reaches 80%% or 100%%</string>
+    <string name="notification_invoice_reminder_title">Invoice Reminder</string>
+    <string name="notification_invoice_update_title">Invoice update</string>
+
+    <!-- Labor -->
+    <string name="labor_worker_not_found">Worker not found</string>
+    <string name="labor_worker_statistics">Worker Statistics</string>
+    <string name="labor_total_earned">Total earned:</string>
+    <string name="labor_hours_units">Hours/Units:</string>
+    <string name="labor_days_worked">Days worked:</string>
+    <string name="labor_projects">Projects:</string>
+    <string name="labor_delete_title">Delete worker?</string>
+    <string name="labor_delete_body">This worker will be deleted.</string>
+
+    <!-- Billing errors -->
+    <string name="billing_purchase_failed">Purchase failed: %1$s</string>
+    <string name="billing_unavailable">Billing unavailable: %1$s</string>
+    <string name="billing_failed_load_products">Failed to load products: %1$s</string>
+    <string name="billing_no_active_offer">No active offer found for %1$s</string>
+    <string name="billing_not_available">Billing not available. Please try again.</string>
+    <string name="billing_temporarily_disconnected">Billing temporarily disconnected. Please try again.</string>
+    <string name="billing_must_install_from_play">Purchase unavailable: app must be installed from Google Play.</string>
+    <string name="billing_already_owned">You already own this subscription.</string>
+    <string name="billing_unavailable_product">This subscription is currently unavailable.</string>
+    <string name="billing_purchase_failed_code">Purchase failed (code %1$d).</string>
+    <string name="billing_ack_failed">Acknowledgment failed: %1$s</string>
+    <string name="billing_refresh_failed">Failed to refresh purchases: %1$s</string>
 </resources>

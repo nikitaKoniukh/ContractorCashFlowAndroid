@@ -10,6 +10,8 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ClientRepositoryContract
+import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepositoryContract
+import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,7 +31,9 @@ class ProjectViewModel(
     private val expenseDao: ExpenseDao,
     private val invoiceDao: InvoiceDao,
     private val clientDao: ClientDao,
-    private val clientRepository: ClientRepositoryContract
+    private val clientRepository: ClientRepositoryContract,
+    private val expenseRepository: ExpenseRepositoryContract,
+    private val invoiceRepository: InvoiceRepositoryContract
 ) : ViewModel() {
 
     private val searchQuery = MutableStateFlow("")
@@ -187,14 +191,14 @@ class ProjectViewModel(
     fun deleteExpense(expense: ExpenseEntity) {
         viewModelScope.launch {
             recentlyDeletedExpense = expense
-            expenseDao.delete(expense)
+            expenseRepository.deleteExpense(expense)
         }
     }
 
     fun undoDeleteExpense() {
         val toRestore = recentlyDeletedExpense ?: return
         viewModelScope.launch {
-            expenseDao.insert(toRestore)
+            expenseRepository.insertExpense(toRestore)
             recentlyDeletedExpense = null
         }
     }
@@ -202,14 +206,14 @@ class ProjectViewModel(
     fun deleteInvoice(invoice: InvoiceEntity) {
         viewModelScope.launch {
             recentlyDeletedInvoice = invoice
-            invoiceDao.delete(invoice)
+            invoiceRepository.deleteInvoice(invoice)
         }
     }
 
     fun undoDeleteInvoice() {
         val toRestore = recentlyDeletedInvoice ?: return
         viewModelScope.launch {
-            invoiceDao.insert(toRestore)
+            invoiceRepository.insertInvoice(toRestore)
             recentlyDeletedInvoice = null
         }
     }

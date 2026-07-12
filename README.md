@@ -186,7 +186,7 @@ Subscriptions are managed via Google Play Billing. The paywall opens as a modal 
   - Google Sign-In enabled in Firebase Auth
   - `google-services.json` placed at `app/google-services.json`
 - A Google Play Console project with:
-  - In-app products configured: `kablanpro_monthly`, `kablanpro_yearly`
+  - In-app products configured: `com.yetzira.contractorcashflow.monthly`, `com.yetzira.contractorcashflow.yearly`
 
 ### Clone
 
@@ -343,8 +343,8 @@ The following subscription products must be created in the Google Play Console b
 
 | Product ID | Type | Price |
 |---|---|---|
-| `kablanpro_monthly` | Subscription | ₪69.90 / month |
-| `kablanpro_yearly` | Subscription | ₪349.90 / year |
+| `com.yetzira.contractorcashflow.monthly` | Subscription | ₪69.90 / month |
+| `com.yetzira.contractorcashflow.yearly` | Subscription | ₪349.90 / year |
 
 Each product needs:
 - A **base plan** with billing period configured

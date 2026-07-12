@@ -33,7 +33,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
 import com.yetzira.ContractorCashFlowAndroid.ui.components.PeriodFilterBar
@@ -87,13 +89,13 @@ private fun KpiRow(state: AnalyticsUiState) {
     ) {
         AnalyticsMetricCard(
             modifier = Modifier.weight(1f),
-            title = "Net Balance",
+            title = stringResource(R.string.analytics_net_balance),
             value = formatCurrency(state.netBalance, state.currency),
             accentColor = if (state.netBalance >= 0.0) KablanProColors.IncomeGreen else KablanProColors.ExpenseRed
         )
         AnalyticsMetricCard(
             modifier = Modifier.weight(1f),
-            title = "Overdue",
+            title = stringResource(R.string.analytics_overdue),
             value = formatCurrency(state.overdueAmount, state.currency),
             accentColor = if (state.overdueAmount > 0.0) KablanProColors.ExpenseRed else MaterialTheme.colorScheme.onSurface
         )
@@ -126,9 +128,9 @@ private fun AnalyticsMetricCard(
 @Composable
 private fun IncomeExpenseDonutCard(state: AnalyticsUiState) {
     AnalyticsCard {
-        SectionTitle(title = "Income vs Expenses")
+        SectionTitle(title = stringResource(R.string.analytics_income_vs_expenses))
         if (!state.hasDonutData) {
-            EmptySection(message = "No income or expense activity for the selected period.")
+            EmptySection(message = stringResource(R.string.analytics_empty_income_expenses))
         } else {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -148,7 +150,7 @@ private fun IncomeExpenseDonutCard(state: AnalyticsUiState) {
                     )
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Net Balance",
+                            text = stringResource(R.string.analytics_net_balance),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -167,12 +169,12 @@ private fun IncomeExpenseDonutCard(state: AnalyticsUiState) {
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     LegendRow(
-                        label = "Income",
+                        label = stringResource(R.string.analytics_income),
                         value = formatCurrency(state.totalIncome, state.currency),
                         color = KablanProColors.IncomeGreen
                     )
                     LegendRow(
-                        label = "Expenses",
+                        label = stringResource(R.string.analytics_expenses),
                         value = formatCurrency(state.totalExpenses, state.currency),
                         color = KablanProColors.ExpenseRed
                     )
@@ -231,9 +233,9 @@ private fun DonutChart(
 @Composable
 private fun MonthlyTrendCard(state: AnalyticsUiState) {
     AnalyticsCard {
-        SectionTitle(title = "Monthly Trend")
+        SectionTitle(title = stringResource(R.string.analytics_monthly_trend))
         if (state.monthlyTrend.isEmpty()) {
-            EmptySection(message = "No monthly trend is available for this period yet.")
+            EmptySection(message = stringResource(R.string.analytics_empty_monthly_trend))
         } else {
             Column(
                 modifier = Modifier
@@ -273,13 +275,13 @@ private fun MonthlyTrendCard(state: AnalyticsUiState) {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 LegendRow(
-                    label = "Income",
+                    label = stringResource(R.string.analytics_income),
                     value = formatCurrency(state.totalIncome, state.currency),
                     color = KablanProColors.IncomeGreen,
                     modifier = Modifier.weight(1f)
                 )
                 LegendRow(
-                    label = "Expenses",
+                    label = stringResource(R.string.analytics_expenses),
                     value = formatCurrency(state.totalExpenses, state.currency),
                     color = KablanProColors.ExpenseRed,
                     modifier = Modifier.weight(1f)
@@ -292,10 +294,10 @@ private fun MonthlyTrendCard(state: AnalyticsUiState) {
 @Composable
 private fun InvoiceStatusCard(state: AnalyticsUiState) {
     AnalyticsCard {
-        SectionTitle(title = "Invoice Status")
+        SectionTitle(title = stringResource(R.string.analytics_invoice_status))
 
         if (state.invoiceStatusTotal <= 0.0) {
-            EmptySection(message = "No invoices match the selected period.")
+            EmptySection(message = stringResource(R.string.analytics_empty_invoices))
         } else {
             Row(
                 modifier = Modifier
@@ -342,9 +344,9 @@ private fun InvoiceStatusCard(state: AnalyticsUiState) {
 @Composable
 private fun ExpensesByCategoryCard(state: AnalyticsUiState) {
     AnalyticsCard {
-        SectionTitle(title = "Expenses by Category")
+        SectionTitle(title = stringResource(R.string.analytics_expenses_by_category))
         if (state.expensesByCategory.isEmpty()) {
-            EmptySection(message = "No expense categories are available for this period.")
+            EmptySection(message = stringResource(R.string.analytics_empty_categories))
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 val maxAmount = state.expensesByCategory.maxOfOrNull { it.amount } ?: 1.0
@@ -420,16 +422,16 @@ private fun BudgetUtilizationCard(state: AnalyticsUiState) {
     }
 
     AnalyticsCard {
-        SectionTitle(title = "Budget Utilization")
+        SectionTitle(title = stringResource(R.string.analytics_budget_utilization))
         Text(
-            text = "Average utilization: ${String.format(Locale.getDefault(), "%.0f%%", state.averageBudgetUtilization)}",
+            text = stringResource(R.string.analytics_average_utilization, String.format(Locale.getDefault(), "%.0f%%", state.averageBudgetUtilization)),
             style = MaterialTheme.typography.titleSmall,
             color = averageColor,
             fontWeight = FontWeight.SemiBold
         )
 
         if (state.budgetUtilization.isEmpty()) {
-            EmptySection(message = "No projects with a budget are available yet.")
+            EmptySection(message = stringResource(R.string.analytics_empty_budgets))
         } else {
             Column(
                 modifier = Modifier.padding(top = 12.dp),
@@ -475,12 +477,12 @@ private fun BudgetProjectRow(item: ProjectBudgetUi, currency: CurrencyOption) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Spent ${formatCurrency(item.spent, currency)}",
+                text = stringResource(R.string.analytics_spent, formatCurrency(item.spent, currency)),
                 style = MaterialTheme.typography.labelMedium,
                 color = KablanProColors.PendingOrange
             )
             Text(
-                text = "Remaining ${formatCurrency(item.remaining, currency)}",
+                text = stringResource(R.string.analytics_remaining, formatCurrency(item.remaining, currency)),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color(0xFF8FD3FF)
             )
@@ -527,9 +529,9 @@ private fun BudgetBar(
 @Composable
 private fun TopProjectsCard(state: AnalyticsUiState) {
     AnalyticsCard {
-        SectionTitle(title = "Top Projects")
+        SectionTitle(title = stringResource(R.string.analytics_top_projects))
         if (state.topProjects.isEmpty()) {
-            EmptySection(message = "No project income has been recorded for this period.")
+            EmptySection(message = stringResource(R.string.analytics_empty_top_projects))
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 state.topProjects.forEach { item ->

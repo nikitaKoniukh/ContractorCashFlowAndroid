@@ -65,15 +65,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
-import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
-import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
-import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.export.ProjectExportService
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -94,10 +90,6 @@ fun ProjectDetailScreen(
 ) {
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
-    val purchaseManager = remember(context) { PurchaseManagerProvider.getInstance(context.applicationContext) }
-    val purchaseViewModel: PurchaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = remember { PurchaseViewModelFactory(context) }
-    )
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val state by viewModel.detailUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -105,30 +97,11 @@ fun ProjectDetailScreen(
     var showExportSheet by remember { mutableStateOf(false) }
     var includeExpensesInExport by remember { mutableStateOf(true) }
     var includeInvoicesInExport by remember { mutableStateOf(true) }
-    var showPaywall by remember { mutableStateOf(false) }
-    var paywallMessage by remember { mutableStateOf<String?>(null) }
     val projectExportService = remember { ProjectExportService() }
     val expenseDeletedMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_expense_deleted)
     val invoiceDeletedMessage = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_invoice_deleted)
     val undoLabel = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_undo)
 
-    val onAddExpenseAttempt = {
-        if (purchaseManager.canCreateExpense(state.expenses.size)) {
-            onAddExpense()
-        } else {
-            paywallMessage = context.getString(com.yetzira.ContractorCashFlowAndroid.R.string.paywall_limit_expenses)
-            showPaywall = true
-        }
-    }
-
-    val onAddInvoiceAttempt = {
-        if (purchaseManager.canCreateInvoice(state.invoices.size)) {
-            onAddInvoice()
-        } else {
-            paywallMessage = context.getString(com.yetzira.ContractorCashFlowAndroid.R.string.paywall_limit_invoices)
-            showPaywall = true
-        }
-    }
 
     LaunchedEffect(projectId) {
         viewModel.selectProject(projectId)
@@ -175,14 +148,14 @@ fun ProjectDetailScreen(
                             text = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_expense)) },
                             onClick = {
                                 showMenu = false
-                                onAddExpenseAttempt()
+                                onAddExpense()
                             }
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_invoice)) },
                             onClick = {
                                 showMenu = false
-                                onAddInvoiceAttempt()
+                                onAddInvoice()
                             }
                         )
                     }
@@ -314,7 +287,7 @@ fun ProjectDetailScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TextButton(onClick = onAddExpenseAttempt) {
+                    TextButton(onClick = onAddExpense) {
                         Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_expense))
                     }
                 }
@@ -374,7 +347,7 @@ fun ProjectDetailScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TextButton(onClick = onAddInvoiceAttempt) {
+                    TextButton(onClick = onAddInvoice) {
                         Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_invoice))
                     }
                 }
@@ -422,13 +395,6 @@ fun ProjectDetailScreen(
             }
         }
 
-        if (showPaywall) {
-            PaywallSheet(
-                viewModel = purchaseViewModel,
-                onDismiss = { showPaywall = false },
-                limitReachedMessage = paywallMessage
-            )
-        }
     }
 }
 

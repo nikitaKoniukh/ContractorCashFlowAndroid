@@ -7,11 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ClientDao
+import com.yetzira.ContractorCashFlowAndroid.data.local.dao.DeletedRecordDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ExpenseDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.InvoiceDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.LaborDetailsDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ProjectDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.DeletedRecordEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
@@ -23,10 +25,11 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
         ExpenseEntity::class,
         InvoiceEntity::class,
         ClientEntity::class,
-        LaborDetailsEntity::class
+        LaborDetailsEntity::class,
+        DeletedRecordEntity::class
     ],
-    version = 6,
-    exportSchema = false
+    version = 7,
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
@@ -34,6 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun invoiceDao(): InvoiceDao
     abstract fun clientDao(): ClientDao
     abstract fun laborDetailsDao(): LaborDetailsDao
+    abstract fun deletedRecordDao(): DeletedRecordDao
 
     companion object {
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -71,6 +75,21 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS deleted_records (
+                        collection TEXT NOT NULL,
+                        recordId TEXT NOT NULL,
+                        deletedAt INTEGER NOT NULL,
+                        PRIMARY KEY(collection, recordId)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -81,7 +100,14 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "kablan_pro_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(
+                        MIGRATION_1_2,
+                        MIGRATION_2_3,
+                        MIGRATION_3_4,
+                        MIGRATION_4_5,
+                        MIGRATION_5_6,
+                        MIGRATION_6_7
+                    )
                     .build()
                 INSTANCE = instance
                 instance

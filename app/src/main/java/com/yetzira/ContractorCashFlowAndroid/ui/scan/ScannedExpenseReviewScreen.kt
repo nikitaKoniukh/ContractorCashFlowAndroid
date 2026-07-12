@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.scan
 
 import android.app.DatePickerDialog
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.WindowInsets
@@ -60,10 +61,12 @@ fun ScannedExpenseReviewScreen(
     var projectId by remember { mutableStateOf<String?>(null) }
     var notes by remember { mutableStateOf("") }
     var isProcessing by remember { mutableStateOf(true) }
+    var ocrFailed by remember { mutableStateOf(false) }
 
     // Run OCR on launch
     LaunchedEffect(imageUri) {
         isProcessing = true
+        ocrFailed = false
         try {
             val result = OcrService.parseFromUri(context, imageUri)
             result.amount?.let { amount = formatAmountInput(it.toLong().toString()) }
@@ -74,7 +77,14 @@ fun ScannedExpenseReviewScreen(
             // Auto-suggest category
             val suggestedCategory = OcrService.suggestCategory(result.description)
             category = ExpenseCategory.fromString(suggestedCategory) ?: ExpenseCategory.MISC
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+            ocrFailed = true
+            Toast.makeText(
+                context,
+                context.getString(R.string.scan_ocr_failed),
+                Toast.LENGTH_LONG
+            ).show()
+        }
         isProcessing = false
     }
 
@@ -142,6 +152,13 @@ fun ScannedExpenseReviewScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                if (ocrFailed) {
+                    Text(
+                        text = stringResource(R.string.scan_ocr_failed),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
                 // Receipt image thumbnail
                 Card(
                     shape = RoundedCornerShape(16.dp),
