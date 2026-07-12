@@ -10,11 +10,14 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.yetzira.ContractorCashFlowAndroid.R
 
 class InvoiceReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val title = intent.getStringExtra(EXTRA_TITLE) ?: "Invoice Reminder"
-        val message = intent.getStringExtra(EXTRA_MESSAGE) ?: "Invoice update"
+        val title = intent.getStringExtra(EXTRA_TITLE)
+            ?: context.getString(R.string.notification_invoice_reminder_title)
+        val message = intent.getStringExtra(EXTRA_MESSAGE)
+            ?: context.getString(R.string.notification_invoice_update_title)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val granted = ContextCompat.checkSelfPermission(
@@ -30,14 +33,14 @@ class InvoiceReminderReceiver : BroadcastReceiver() {
             manager.createNotificationChannel(
                 NotificationChannel(
                     CHANNEL_ID,
-                    "Invoice Notifications",
+                    context.getString(R.string.notification_channel_invoice_reminders),
                     NotificationManager.IMPORTANCE_HIGH
                 )
             )
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

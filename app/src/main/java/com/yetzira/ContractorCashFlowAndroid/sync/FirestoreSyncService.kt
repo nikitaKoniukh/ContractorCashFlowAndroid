@@ -63,7 +63,7 @@ class FirestoreSyncService(
             "unitsWorked" to expense.unitsWorked,
             "laborTypeSnapshot" to expense.laborTypeSnapshot,
             "notes" to expense.notes,
-            "receiptImageUri" to expense.receiptImageUri,
+            "receiptImageUri" to ReceiptUriSanitizer.forCloudSync(expense.receiptImageUri),
             "lastModified" to expense.lastModified
         )
     )
@@ -417,7 +417,7 @@ class FirestoreSyncService(
             unitsWorked = document.getDouble("unitsWorked"),
             laborTypeSnapshot = document.getString("laborTypeSnapshot"),
             notes = document.getString("notes"),
-            receiptImageUri = document.getString("receiptImageUri"),
+            receiptImageUri = ReceiptUriSanitizer.forLocalMerge(document.getString("receiptImageUri")),
             lastModified = document.getLong("lastModified") ?: 0L
         )
     }

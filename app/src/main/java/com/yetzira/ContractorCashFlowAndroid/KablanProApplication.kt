@@ -11,6 +11,7 @@ import android.os.LocaleList
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import kotlinx.coroutines.launch
 
 class KablanProApplication : Application() {
 
@@ -48,10 +49,13 @@ class KablanProApplication : Application() {
             .putString("lang_code", "he")
             .commit()
 
-        // 2. Seed the DataStore preferences file with Hebrew + ILS.
+        // 2. Seed the DataStore preferences file with Hebrew + ILS (async — SharedPreferences
+        //    already holds Hebrew for the first frame via attachBaseContext).
         val dsFile = java.io.File(filesDir, "datastore/kablan_pro_preferences.preferences_pb")
         if (!dsFile.exists()) {
-            kotlinx.coroutines.runBlocking {
+            kotlinx.coroutines.CoroutineScope(
+                kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO
+            ).launch {
                 val repo = com.yetzira.ContractorCashFlowAndroid.data.preferences
                     .UserPreferencesRepository(this@KablanProApplication)
                 repo.setAppLanguage(
@@ -86,26 +90,26 @@ class KablanProApplication : Application() {
 
         val invoiceReminders = NotificationChannel(
             CHANNEL_INVOICE_REMINDERS,
-            "Invoice Reminders",
+            getString(R.string.notification_channel_invoice_reminders),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Reminders for upcoming invoice due dates"
+            description = getString(R.string.notification_channel_invoice_reminders_desc)
         }
 
         val invoiceOverdue = NotificationChannel(
             CHANNEL_INVOICE_OVERDUE,
-            "Overdue Alerts",
+            getString(R.string.notification_channel_overdue),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Alerts for overdue invoices"
+            description = getString(R.string.notification_channel_overdue_desc)
         }
 
         val budgetWarnings = NotificationChannel(
             CHANNEL_BUDGET_WARNINGS,
-            "Budget Warnings",
+            getString(R.string.notification_channel_budget),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Warnings when project budget reaches 80% or 100%"
+            description = getString(R.string.notification_channel_budget_desc)
         }
 
         manager.createNotificationChannels(

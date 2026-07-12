@@ -29,7 +29,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
         DeletedRecordEntity::class
     ],
     version = 7,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao

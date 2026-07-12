@@ -47,7 +47,7 @@ class BudgetWarningNotifier(private val context: Context) {
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -75,7 +75,7 @@ class BudgetWarningNotifier(private val context: Context) {
 
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Budget Warnings",
+            context.getString(R.string.notification_channel_budget),
             NotificationManager.IMPORTANCE_HIGH
         )
         manager.createNotificationChannel(channel)

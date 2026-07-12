@@ -60,6 +60,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Room schema export for migration review
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+
     signingConfigs {
         create("release") {
             if (!releaseStoreFilePath.isNullOrBlank()) {
