@@ -28,7 +28,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
         LaborDetailsEntity::class,
         DeletedRecordEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -77,16 +77,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         private val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL(
-                    """
-                    CREATE TABLE IF NOT EXISTS deleted_records (
-                        collection TEXT NOT NULL,
-                        recordId TEXT NOT NULL,
-                        deletedAt INTEGER NOT NULL,
-                        PRIMARY KEY(collection, recordId)
-                    )
-                    """.trimIndent()
-                )
+                ensureDeletedRecordsTable(db)
             }
         }
 
@@ -96,17 +87,31 @@ abstract class AppDatabase : RoomDatabase() {
          */
         private val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL(
-                    """
-                    CREATE TABLE IF NOT EXISTS deleted_records (
-                        collection TEXT NOT NULL,
-                        recordId TEXT NOT NULL,
-                        deletedAt INTEGER NOT NULL,
-                        PRIMARY KEY(collection, recordId)
-                    )
-                    """.trimIndent()
-                )
+                ensureDeletedRecordsTable(db)
             }
+        }
+
+        /**
+         * Re-aligns Room identity hash for installs that reached v8 with a mismatched
+         * schema hash (same tables, different identity). No structural change.
+         */
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                ensureDeletedRecordsTable(db)
+            }
+        }
+
+        private fun ensureDeletedRecordsTable(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS deleted_records (
+                    collection TEXT NOT NULL,
+                    recordId TEXT NOT NULL,
+                    deletedAt INTEGER NOT NULL,
+                    PRIMARY KEY(collection, recordId)
+                )
+                """.trimIndent()
+            )
         }
 
         @Volatile
@@ -126,7 +131,8 @@ abstract class AppDatabase : RoomDatabase() {
                         MIGRATION_4_5,
                         MIGRATION_5_6,
                         MIGRATION_6_7,
-                        MIGRATION_7_8
+                        MIGRATION_7_8,
+                        MIGRATION_8_9
                     )
                     .fallbackToDestructiveMigrationOnDowngrade()
                     .fallbackToDestructiveMigration()
