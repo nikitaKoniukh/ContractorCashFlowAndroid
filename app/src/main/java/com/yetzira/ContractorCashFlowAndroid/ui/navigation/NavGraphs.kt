@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepository
+import com.yetzira.ContractorCashFlowAndroid.review.InAppReviewHelper
 import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
 import com.yetzira.ContractorCashFlowAndroid.ui.scan.ScanExpenseScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.scan.ScannedExpenseReviewScreen
@@ -246,6 +247,7 @@ fun NavGraphBuilder.expensesGraph(navController: NavController) {
                         }.onFailure { throwable ->
                             Log.w("KablanProScan", "Failed to save scanned expense: ${throwable.message}")
                         }.onSuccess {
+                            InAppReviewHelper.onExpenseCreated(context)
                             navController.popBackStack(ExpenseRoutes.LIST, inclusive = false)
                         }
                     }

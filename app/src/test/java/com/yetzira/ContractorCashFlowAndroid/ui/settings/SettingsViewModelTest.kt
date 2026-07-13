@@ -4,7 +4,6 @@ import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.SettingsPreferencesRepositoryContract
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.export.DataExportServiceContract
 import com.yetzira.ContractorCashFlowAndroid.network.NetworkConnectivityCheckerContract
 import com.yetzira.ContractorCashFlowAndroid.notification.NotificationSettingsCoordinatorContract
@@ -123,7 +122,6 @@ class SettingsViewModelTest {
 
     private class FakeSettingsPreferencesRepository : SettingsPreferencesRepositoryContract {
         val appLanguageFlow = MutableStateFlow(AppLanguageOption.HEBREW)
-        val themeModeFlow = MutableStateFlow(ThemeModeOption.SYSTEM)
         val selectedCurrencyFlow = MutableStateFlow(CurrencyOption.ILS)
         val invoiceRemindersEnabledFlow = MutableStateFlow(false)
         val overdueAlertsEnabledFlow = MutableStateFlow(false)
@@ -133,7 +131,6 @@ class SettingsViewModelTest {
         val subscriptionRenewalDateFlow = MutableStateFlow<Long?>(null)
 
         override val appLanguage: Flow<AppLanguageOption> = appLanguageFlow
-        override val themeMode: Flow<ThemeModeOption> = themeModeFlow
         override val selectedCurrencyCode: Flow<CurrencyOption> = selectedCurrencyFlow
         override val invoiceRemindersEnabled: Flow<Boolean> = invoiceRemindersEnabledFlow
         override val overdueAlertsEnabled: Flow<Boolean> = overdueAlertsEnabledFlow
@@ -144,10 +141,6 @@ class SettingsViewModelTest {
 
         override suspend fun setAppLanguage(language: AppLanguageOption) {
             appLanguageFlow.value = language
-        }
-
-        override suspend fun setThemeMode(themeMode: ThemeModeOption) {
-            themeModeFlow.value = themeMode
         }
 
         override suspend fun setSelectedCurrency(currency: CurrencyOption) {

@@ -76,7 +76,7 @@ fun ScanExpenseScreen(
         }
     }
 
-    // File picker launcher (images only — PDF is not supported by ML Kit OCR)
+    // File picker launcher (images + PDF; PDF is rendered then OCR'd)
     val filePickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -247,7 +247,7 @@ fun ScanExpenseScreen(
                         label = stringResource(R.string.scan_files),
                         subtitle = stringResource(R.string.scan_files_subtitle),
                         onClick = {
-                            filePickerLauncher.launch(arrayOf("image/*"))
+                            filePickerLauncher.launch(arrayOf("image/*", "application/pdf"))
                         }
                     )
                 }

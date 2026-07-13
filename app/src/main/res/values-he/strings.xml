@@ -238,10 +238,6 @@
     <string name="settings_sign_in_with_google">היכנס עם Google</string>
     <string name="settings_section_language">שפה</string>
     <string name="settings_section_currency">מטבע</string>
-    <string name="settings_section_theme">ערכת נושא</string>
-    <string name="settings_theme_system">ברירת מחדל של המערכת</string>
-    <string name="settings_theme_light">בהיר</string>
-    <string name="settings_theme_dark">כהה</string>
     <string name="settings_section_notifications">הודעות</string>
     <string name="settings_section_subscription">מנוי</string>
     <string name="settings_subscription_pro_badge">👑</string>
@@ -414,13 +410,13 @@
 
     <!-- Scan / Receipt Strings -->
     <string name="scan_title">סריקת קבלה</string>
-    <string name="scan_description">סרוק קבלה או בחר תמונה כדי לחלץ פרטי הוצאה באופן אוטומטי.</string>
+    <string name="scan_description">סרוק קבלה או בחר תמונה או PDF כדי לחלץ פרטי הוצאה באופן אוטומטי.</string>
     <string name="scan_document">סרוק מסמך</string>
     <string name="scan_document_subtitle">השתמש במצלמה כדי לצלם קבלה</string>
     <string name="scan_photos">בחר מהתמונות</string>
     <string name="scan_photos_subtitle">בחר תמונה מהגלריה</string>
     <string name="scan_files">בחר מקבצים</string>
-    <string name="scan_files_subtitle">פתחו תמונה מהקבצים שלכם</string>
+    <string name="scan_files_subtitle">פתחו תמונה או PDF מהקבצים שלכם</string>
     <string name="scan_capture">צלם</string>
     <string name="scan_processing">מנתח קבלה…</string>
     <string name="scan_review_title">סקירת הוצאה</string>

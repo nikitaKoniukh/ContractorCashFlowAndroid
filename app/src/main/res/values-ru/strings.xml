@@ -238,10 +238,6 @@
     <string name="settings_sign_in_with_google">Войти с Google</string>
     <string name="settings_section_language">Язык</string>
     <string name="settings_section_currency">Валюта</string>
-    <string name="settings_section_theme">Тема</string>
-    <string name="settings_theme_system">Как в системе</string>
-    <string name="settings_theme_light">Светлая</string>
-    <string name="settings_theme_dark">Тёмная</string>
     <string name="settings_section_notifications">Уведомления</string>
     <string name="settings_section_subscription">Подписка</string>
     <string name="settings_subscription_pro_badge">👑</string>
@@ -414,13 +410,13 @@
 
     <!-- Scan / Receipt Strings -->
     <string name="scan_title">Сканировать чек</string>
-    <string name="scan_description">Сканируйте чек или выберите изображение для автоматического извлечения данных расхода.</string>
+    <string name="scan_description">Сканируйте чек или выберите изображение или PDF для автоматического извлечения данных расхода.</string>
     <string name="scan_document">Сканировать документ</string>
     <string name="scan_document_subtitle">Используйте камеру для съёмки чека</string>
     <string name="scan_photos">Выбрать из фотографий</string>
     <string name="scan_photos_subtitle">Выберите изображение из галереи</string>
     <string name="scan_files">Выбрать из файлов</string>
-    <string name="scan_files_subtitle">Откройте изображение из файлов</string>
+    <string name="scan_files_subtitle">Откройте изображение или PDF из файлов</string>
     <string name="scan_capture">Снять</string>
     <string name="scan_processing">Анализ чека…</string>
     <string name="scan_review_title">Проверка расхода</string>

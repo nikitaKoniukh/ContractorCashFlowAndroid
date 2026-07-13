@@ -9,7 +9,6 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.SettingsPreferencesRepositoryContract
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.testutil.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -122,7 +121,6 @@ class AnalyticsViewModelTest {
         currency: CurrencyOption = CurrencyOption.ILS
     ) : SettingsPreferencesRepositoryContract {
         override val appLanguage: Flow<AppLanguageOption> = MutableStateFlow(AppLanguageOption.HEBREW)
-        override val themeMode: Flow<ThemeModeOption> = MutableStateFlow(ThemeModeOption.SYSTEM)
         override val selectedCurrencyCode: Flow<CurrencyOption> = MutableStateFlow(currency)
         override val invoiceRemindersEnabled: Flow<Boolean> = MutableStateFlow(true)
         override val overdueAlertsEnabled: Flow<Boolean> = MutableStateFlow(true)
@@ -132,7 +130,6 @@ class AnalyticsViewModelTest {
         override val subscriptionRenewalDate: Flow<Long?> = MutableStateFlow(null)
 
         override suspend fun setAppLanguage(language: AppLanguageOption) = Unit
-        override suspend fun setThemeMode(themeMode: ThemeModeOption) = Unit
         override suspend fun setSelectedCurrency(currency: CurrencyOption) = Unit
         override suspend fun setInvoiceRemindersEnabled(enabled: Boolean) = Unit
         override suspend fun setOverdueAlertsEnabled(enabled: Boolean) = Unit
