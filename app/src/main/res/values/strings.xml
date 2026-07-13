@@ -203,6 +203,9 @@
     <string name="clients_search_placeholder">Search by name, email, or phone</string>
     <string name="clients_empty_title">No clients yet</string>
     <string name="clients_empty_body">Add your first client to manage contacts.</string>
+    <string name="clients_empty_filtered_title">No matching clients</string>
+    <string name="clients_empty_filtered_body">Try a different search.</string>
+    <string name="clients_no_contact_details">No contact details</string>
     <string name="clients_detail_title">Client Details</string>
     <string name="clients_not_found">Client not found</string>
     <string name="clients_info_section">Client Information</string>

@@ -1,12 +1,9 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.clients
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
@@ -23,11 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.font.FontWeight
 import com.yetzira.ContractorCashFlowAndroid.R
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +39,7 @@ fun NewClientScreen(
     }
 
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         topBar = {
             KablanProTopBar(
@@ -79,57 +73,3 @@ fun NewClientScreen(
         )
     }
 }
-
-@Composable
-internal fun ClientForm(
-    state: ClientFormUiState,
-    onChange: (ClientFormUiState) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    androidx.compose.foundation.layout.Column(
-        modifier = modifier,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(10.dp)
-    ) {
-        ModernTextField(
-            value = state.name,
-            onValueChange = { onChange(state.copy(name = it)) },
-            label = stringResource(R.string.clients_name),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-        ModernTextField(
-            value = state.email,
-            onValueChange = { onChange(state.copy(email = it)) },
-            label = stringResource(R.string.clients_email),
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true
-        )
-        ModernTextField(
-            value = state.phone,
-            onValueChange = { onChange(state.copy(phone = it)) },
-            label = stringResource(R.string.clients_phone),
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            singleLine = true
-        )
-        ModernTextField(
-            value = state.address,
-            onValueChange = { onChange(state.copy(address = it)) },
-            label = stringResource(R.string.clients_address),
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
-            maxLines = 5
-        )
-        ModernTextField(
-            value = state.notes,
-            onValueChange = { onChange(state.copy(notes = it)) },
-            label = stringResource(R.string.clients_notes),
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 4,
-            maxLines = 8
-        )
-    }
-}
-
-

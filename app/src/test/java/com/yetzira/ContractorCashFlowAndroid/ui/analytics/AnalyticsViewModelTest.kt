@@ -158,6 +158,8 @@ class AnalyticsViewModelTest {
         override fun search(query: String): Flow<List<InvoiceEntity>> = flow.map { list -> list.filter { it.clientName.contains(query, true) } }
         override fun getForProject(projectId: String): Flow<List<InvoiceEntity>> = flow.map { list -> list.filter { it.projectId == projectId } }
         override fun getUnpaid(): Flow<List<InvoiceEntity>> = flow.map { list -> list.filter { !it.isPaid } }
+        override suspend fun getByClientName(clientName: String): List<InvoiceEntity> =
+            flow.value.filter { it.clientName == clientName }
         override suspend fun insert(invoice: InvoiceEntity) { flow.value = flow.value + invoice }
         override suspend fun update(invoice: InvoiceEntity) { flow.value = flow.value.map { if (it.id == invoice.id) invoice else it } }
         override suspend fun delete(invoice: InvoiceEntity) { flow.value = flow.value.filterNot { it.id == invoice.id } }
@@ -170,6 +172,8 @@ class AnalyticsViewModelTest {
         override fun search(query: String): Flow<List<ProjectEntity>> = flow.map { list ->
             list.filter { it.name.contains(query, true) || it.clientName.contains(query, true) }
         }
+        override suspend fun getByClientName(clientName: String): List<ProjectEntity> =
+            flow.value.filter { it.clientName == clientName }
         override suspend fun insert(project: ProjectEntity) { flow.value = flow.value + project }
         override suspend fun update(project: ProjectEntity) { flow.value = flow.value.map { if (it.id == project.id) project else it } }
         override suspend fun delete(project: ProjectEntity) { flow.value = flow.value.filterNot { it.id == project.id } }

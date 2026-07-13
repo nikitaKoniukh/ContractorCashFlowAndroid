@@ -127,7 +127,7 @@ class ClientViewModelTest {
             clients.value = clients.value.filterNot { it.id == client.id } + client
         }
 
-        override suspend fun updateClient(client: ClientEntity) {
+        override suspend fun updateClient(client: ClientEntity, previousName: String?) {
             clients.value = clients.value.map { if (it.id == client.id) client else it }
         }
 

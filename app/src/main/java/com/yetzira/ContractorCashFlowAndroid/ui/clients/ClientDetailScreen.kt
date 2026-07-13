@@ -1,6 +1,5 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.clients
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -29,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,9 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ClientAvatar
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,6 +124,12 @@ fun ClientDetailScreen(
             return@Scaffold
         }
 
+        val hasEmail = !client.email.isNullOrBlank()
+        val hasPhone = !client.phone.isNullOrBlank()
+        val hasAddress = !client.address.isNullOrBlank()
+        val hasContact = hasEmail || hasPhone || hasAddress
+        val hasNotes = !client.notes.isNullOrBlank()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -133,8 +139,6 @@ fun ClientDetailScreen(
                 .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            // ── Avatar + Name card ────────────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -148,31 +152,16 @@ fun ClientDetailScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .background(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = client.name.take(1).uppercase(),
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    ClientAvatar(name = client.name, size = 72.dp)
                     Text(
                         text = client.name,
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
 
-            // ── Client Information card ───────────────────────────────
             Card(
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -180,7 +169,6 @@ fun ClientDetailScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // Section header inside card (icon + title centred)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -202,26 +190,68 @@ fun ClientDetailScreen(
                         )
                     }
 
-                    if (!client.email.isNullOrBlank()) {
+                    if (!hasContact) {
                         HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
-                        ClientInfoRow(label = stringResource(R.string.clients_email), value = client.email!!)
-                    }
-                    if (!client.phone.isNullOrBlank()) {
-                        HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
-                        ClientInfoRow(label = stringResource(R.string.clients_phone), value = client.phone!!)
-                    }
-                    if (!client.address.isNullOrBlank()) {
-                        HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
-                        ClientInfoRow(label = stringResource(R.string.clients_address), value = client.address!!)
-                    }
-                    if (!client.notes.isNullOrBlank()) {
-                        HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
-                        ClientInfoRow(label = stringResource(R.string.clients_notes), value = client.notes!!)
+                        Text(
+                            text = stringResource(R.string.clients_no_contact_details),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    } else {
+                        if (hasEmail) {
+                            HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                            ClientInfoRow(
+                                label = stringResource(R.string.clients_email),
+                                value = client.email.orEmpty()
+                            )
+                        }
+                        if (hasPhone) {
+                            HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                            ClientInfoRow(
+                                label = stringResource(R.string.clients_phone),
+                                value = client.phone.orEmpty()
+                            )
+                        }
+                        if (hasAddress) {
+                            HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
+                            ClientInfoRow(
+                                label = stringResource(R.string.clients_address),
+                                value = client.address.orEmpty()
+                            )
+                        }
                     }
                 }
             }
 
-            // ── Delete card ───────────────────────────────────────────
+            if (hasNotes) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = stringResource(R.string.clients_notes),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        HorizontalDivider(color = dividerColor)
+                        Text(
+                            text = client.notes.orEmpty(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+            }
+
             Card(
                 onClick = { showDeleteDialog = true },
                 shape = RoundedCornerShape(16.dp),
@@ -264,7 +294,11 @@ private fun ClientInfoRow(label: String, value: String) {
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 16.dp)
         )
     }
 }

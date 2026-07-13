@@ -175,6 +175,9 @@
     <string name="clients_search_placeholder">Поиск по имени, электронной почте или телефону</string>
     <string name="clients_empty_title">Клиентов не найдено</string>
     <string name="clients_empty_body">Добавьте своего первого клиента для управления контактами.</string>
+    <string name="clients_empty_filtered_title">Нет подходящих клиентов</string>
+    <string name="clients_empty_filtered_body">Попробуйте другой поиск.</string>
+    <string name="clients_no_contact_details">Нет контактных данных</string>
     <string name="clients_detail_title">Детали клиента</string>
     <string name="clients_not_found">Клиент не найден</string>
     <string name="clients_name">Имя</string>

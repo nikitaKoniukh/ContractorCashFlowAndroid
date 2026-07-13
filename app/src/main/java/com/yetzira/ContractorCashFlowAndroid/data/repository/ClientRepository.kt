@@ -2,6 +2,8 @@ package com.yetzira.ContractorCashFlowAndroid.data.repository
 
 import android.util.Log
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ClientDao
+import com.yetzira.ContractorCashFlowAndroid.data.local.dao.InvoiceDao
+import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ProjectDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
 import kotlinx.coroutines.CoroutineScope
@@ -15,12 +17,14 @@ interface ClientRepositoryContract {
     fun searchClients(query: String): Flow<List<ClientEntity>>
     suspend fun getClientById(id: String): ClientEntity?
     suspend fun insertClient(client: ClientEntity)
-    suspend fun updateClient(client: ClientEntity)
+    suspend fun updateClient(client: ClientEntity, previousName: String? = null)
     suspend fun deleteClient(client: ClientEntity)
 }
 
 class ClientRepository(
     private val clientDao: ClientDao,
+    private val projectDao: ProjectDao,
+    private val invoiceDao: InvoiceDao,
     private val syncService: FirestoreSyncService
 ) : ClientRepositoryContract {
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -42,12 +46,44 @@ class ClientRepository(
         }
     }
 
-    override suspend fun updateClient(client: ClientEntity) {
+    override suspend fun updateClient(client: ClientEntity, previousName: String?) {
         val stamped = client.copy(lastModified = System.currentTimeMillis())
         clientDao.update(stamped)
+
+        val oldName = previousName?.trim().orEmpty()
+        val newName = stamped.name.trim()
+        val renamedProjects = if (oldName.isNotEmpty() && oldName != newName) {
+            projectDao.getByClientName(oldName).map { project ->
+                project.copy(clientName = newName, lastModified = System.currentTimeMillis())
+            }.also { projects ->
+                projects.forEach { projectDao.update(it) }
+            }
+        } else {
+            emptyList()
+        }
+        val renamedInvoices = if (oldName.isNotEmpty() && oldName != newName) {
+            invoiceDao.getByClientName(oldName).map { invoice ->
+                invoice.copy(clientName = newName, lastModified = System.currentTimeMillis())
+            }.also { invoices ->
+                invoices.forEach { invoiceDao.update(it) }
+            }
+        } else {
+            emptyList()
+        }
+
         syncScope.launch {
             syncService.syncClient(stamped).onFailure { throwable ->
                 Log.w(TAG, "Client cloud sync failed after local update: ${throwable.message}")
+            }
+            renamedProjects.forEach { project ->
+                syncService.syncProject(project).onFailure { throwable ->
+                    Log.w(TAG, "Project clientName cascade sync failed: ${throwable.message}")
+                }
+            }
+            renamedInvoices.forEach { invoice ->
+                syncService.syncInvoice(invoice).onFailure { throwable ->
+                    Log.w(TAG, "Invoice clientName cascade sync failed: ${throwable.message}")
+                }
             }
         }
     }
@@ -65,4 +101,3 @@ class ClientRepository(
         const val TAG = "KablanProClientRepo"
     }
 }
-

@@ -27,6 +27,8 @@ class ProjectViewModelFactory(
                 clientDao = database.clientDao(),
                 clientRepository = ClientRepository(
                     clientDao = database.clientDao(),
+                    projectDao = database.projectDao(),
+                    invoiceDao = database.invoiceDao(),
                     syncService = syncService
                 ),
                 expenseRepository = ExpenseRepository(

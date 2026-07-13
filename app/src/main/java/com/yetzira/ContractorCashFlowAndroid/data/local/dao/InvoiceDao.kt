@@ -25,6 +25,9 @@ interface InvoiceDao {
     @Query("SELECT * FROM invoices WHERE isPaid = 0 ORDER BY dueDate ASC")
     fun getUnpaid(): Flow<List<InvoiceEntity>>
 
+    @Query("SELECT * FROM invoices WHERE clientName = :clientName")
+    suspend fun getByClientName(clientName: String): List<InvoiceEntity>
+
     @Insert
     suspend fun insert(invoice: InvoiceEntity)
 

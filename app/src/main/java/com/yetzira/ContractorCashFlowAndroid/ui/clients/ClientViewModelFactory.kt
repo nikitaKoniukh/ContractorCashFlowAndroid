@@ -15,6 +15,8 @@ class ClientViewModelFactory(
             return ClientViewModel(
                 repository = ClientRepository(
                     clientDao = database.clientDao(),
+                    projectDao = database.projectDao(),
+                    invoiceDao = database.invoiceDao(),
                     syncService = FirestoreSyncService(database)
                 )
             ) as T

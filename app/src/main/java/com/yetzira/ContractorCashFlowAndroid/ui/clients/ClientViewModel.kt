@@ -122,7 +122,7 @@ class ClientViewModel(
             if (state.id == null) {
                 repository.insertClient(entity)
             } else {
-                repository.updateClient(entity)
+                repository.updateClient(entity, previousName = originalClient?.name)
             }
             onDone()
         }

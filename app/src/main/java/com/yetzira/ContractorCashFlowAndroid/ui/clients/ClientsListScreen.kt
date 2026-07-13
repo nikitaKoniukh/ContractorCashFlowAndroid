@@ -15,17 +15,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -43,17 +42,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
-import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
-import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
+import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
+
+private val EmailBlue = Color(0xFF007AFF)
+private val PhoneGreen = Color(0xFF34C759)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,9 +68,10 @@ fun ClientsListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val deletedMessage = stringResource(R.string.clients_deleted)
     val undoLabel = stringResource(R.string.common_undo)
+    val isSearchActive = state.query.isNotBlank()
 
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -98,11 +100,11 @@ fun ClientsListScreen(
             )
 
             if (state.clients.isEmpty()) {
-                EmptyClientsState()
+                EmptyClientsState(isFiltered = isSearchActive)
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 14.dp, bottom = 20.dp),
+                    contentPadding = PaddingValues(top = 14.dp, bottom = 92.dp),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     itemsIndexed(state.clients, key = { _, client -> client.id }) { index, client ->
@@ -186,51 +188,47 @@ private fun ClientRow(client: ClientEntity, index: Int, lastIndex: Int, onClick:
                 )
             }
 
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
-            )
+            val hasEmail = !client.email.isNullOrBlank()
+            val hasPhone = !client.phone.isNullOrBlank()
+            if (hasEmail || hasPhone) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (!client.email.isNullOrBlank()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = client.email,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (hasEmail) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Email,
+                                contentDescription = null,
+                                tint = EmailBlue,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = client.email.orEmpty(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
                     }
-                }
-
-                if (!client.email.isNullOrBlank() && !client.phone.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-
-                if (!client.phone.isNullOrBlank()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Phone,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = client.phone,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    if (hasPhone) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Phone,
+                                contentDescription = null,
+                                tint = PhoneGreen,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = client.phone.orEmpty(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -239,7 +237,7 @@ private fun ClientRow(client: ClientEntity, index: Int, lastIndex: Int, onClick:
 }
 
 @Composable
-private fun EmptyClientsState() {
+private fun EmptyClientsState(isFiltered: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -248,12 +246,16 @@ private fun EmptyClientsState() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.clients_empty_title),
+            text = stringResource(
+                if (isFiltered) R.string.clients_empty_filtered_title else R.string.clients_empty_title
+            ),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         Text(
-            text = stringResource(R.string.clients_empty_body),
+            text = stringResource(
+                if (isFiltered) R.string.clients_empty_filtered_body else R.string.clients_empty_body
+            ),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp)

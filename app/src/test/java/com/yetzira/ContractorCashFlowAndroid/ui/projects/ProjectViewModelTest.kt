@@ -300,6 +300,9 @@ class ProjectViewModelTest {
             return invoices.map { list -> list.filter { !it.isPaid } }
         }
 
+        override suspend fun getByClientName(clientName: String): List<InvoiceEntity> =
+            invoices.value.filter { it.clientName == clientName }
+
         override suspend fun insert(invoice: InvoiceEntity) {
             invoices.value = invoices.value + invoice
         }
@@ -358,7 +361,7 @@ class ProjectViewModelTest {
         override fun searchClients(query: String) = clientDao.search(query)
         override suspend fun getClientById(id: String) = clientDao.getById(id)
         override suspend fun insertClient(client: ClientEntity) = clientDao.insert(client)
-        override suspend fun updateClient(client: ClientEntity) = clientDao.update(client)
+        override suspend fun updateClient(client: ClientEntity, previousName: String?) = clientDao.update(client)
         override suspend fun deleteClient(client: ClientEntity) = clientDao.delete(client)
     }
 

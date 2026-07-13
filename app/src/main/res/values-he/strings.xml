@@ -175,6 +175,9 @@
     <string name="clients_search_placeholder">חיפוש לפי שם, אימייל או טלפון</string>
     <string name="clients_empty_title">אין עדיין לקוחות</string>
     <string name="clients_empty_body">הוסף את הלקוח הראשון שלך כדי לנהל קשרים.</string>
+    <string name="clients_empty_filtered_title">אין לקוחות תואמים</string>
+    <string name="clients_empty_filtered_body">נסו חיפוש אחר.</string>
+    <string name="clients_no_contact_details">אין פרטי קשר</string>
     <string name="clients_detail_title">פרטי הלקוח</string>
     <string name="clients_not_found">הלקוח לא נמצא</string>
     <string name="clients_name">שם</string>

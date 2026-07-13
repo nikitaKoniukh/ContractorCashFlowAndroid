@@ -19,6 +19,9 @@ interface ProjectDao {
     @Query("SELECT * FROM projects WHERE name LIKE '%' || :query || '%' OR clientName LIKE '%' || :query || '%' ORDER BY createdDate DESC")
     fun search(query: String): Flow<List<ProjectEntity>>
 
+    @Query("SELECT * FROM projects WHERE clientName = :clientName")
+    suspend fun getByClientName(clientName: String): List<ProjectEntity>
+
     @Insert
     suspend fun insert(project: ProjectEntity)
 
