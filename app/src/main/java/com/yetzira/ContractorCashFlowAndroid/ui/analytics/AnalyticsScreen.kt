@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,8 +16,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,22 +39,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
-import com.yetzira.ContractorCashFlowAndroid.ui.components.PeriodFilterBar
+import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsPeriodPicker
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors
-import kotlin.math.max
 import java.util.Locale
 
 @Composable
@@ -59,11 +70,11 @@ fun AnalyticsScreen(
             .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        PeriodFilterBar(
+        AnalyticsPeriodPicker(
             options = AnalyticsPeriod.entries.toList(),
             selectedOption = state.selectedPeriod,
             onOptionSelected = viewModel::setSelectedPeriod,
-            optionLabel = { it.shortLabel },
+            optionLabel = { stringResource(it.chipLabelResId) },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -76,29 +87,72 @@ fun AnalyticsScreen(
 
         InvoiceStatusCard(state = state)
         ExpensesByCategoryCard(state = state)
-        BudgetUtilizationCard(state = state)
+        if (state.hasBudgetData) {
+            BudgetUtilizationCard(state = state)
+        }
         TopProjectsCard(state = state)
     }
 }
 
 @Composable
 private fun KpiRow(state: AnalyticsUiState) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        AnalyticsMetricCard(
-            modifier = Modifier.weight(1f),
-            title = stringResource(R.string.analytics_net_balance),
-            value = formatCurrency(state.netBalance, state.currency),
-            accentColor = if (state.netBalance >= 0.0) KablanProColors.IncomeGreen else KablanProColors.ExpenseRed
-        )
-        AnalyticsMetricCard(
-            modifier = Modifier.weight(1f),
-            title = stringResource(R.string.analytics_overdue),
-            value = formatCurrency(state.overdueAmount, state.currency),
-            accentColor = if (state.overdueAmount > 0.0) KablanProColors.ExpenseRed else MaterialTheme.colorScheme.onSurface
-        )
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val isTablet = maxWidth >= 600.dp
+        if (isTablet) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                AnalyticsMetricCard(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.analytics_income),
+                    value = formatCurrency(state.totalIncome, state.currency),
+                    accentColor = KablanProColors.IncomeGreen,
+                    icon = Icons.AutoMirrored.Filled.TrendingDown
+                )
+                AnalyticsMetricCard(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.analytics_expenses),
+                    value = formatCurrency(state.totalExpenses, state.currency),
+                    accentColor = KablanProColors.ExpenseRed,
+                    icon = Icons.AutoMirrored.Filled.TrendingUp
+                )
+                AnalyticsMetricCard(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.analytics_net_balance),
+                    value = formatCurrency(state.netBalance, state.currency),
+                    accentColor = if (state.netBalance >= 0.0) KablanProColors.IncomeGreen else KablanProColors.ExpenseRed,
+                    icon = Icons.Default.AccountBalance
+                )
+                AnalyticsMetricCard(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.analytics_overdue),
+                    value = formatCurrency(state.overdueAmount, state.currency),
+                    accentColor = if (state.overdueAmount > 0.0) KablanProColors.ExpenseRed else MaterialTheme.colorScheme.onSurface,
+                    icon = Icons.Default.Warning
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                AnalyticsMetricCard(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.analytics_net_balance),
+                    value = formatCurrency(state.netBalance, state.currency),
+                    accentColor = if (state.netBalance >= 0.0) KablanProColors.IncomeGreen else KablanProColors.ExpenseRed,
+                    icon = Icons.Default.AccountBalance
+                )
+                AnalyticsMetricCard(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.analytics_overdue),
+                    value = formatCurrency(state.overdueAmount, state.currency),
+                    accentColor = if (state.overdueAmount > 0.0) KablanProColors.ExpenseRed else MaterialTheme.colorScheme.onSurface,
+                    icon = Icons.Default.Warning
+                )
+            }
+        }
     }
 }
 
@@ -107,14 +161,26 @@ private fun AnalyticsMetricCard(
     title: String,
     value: String,
     accentColor: Color,
+    icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
     AnalyticsCard(modifier = modifier) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = accentColor,
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = value,
@@ -130,7 +196,10 @@ private fun IncomeExpenseDonutCard(state: AnalyticsUiState) {
     AnalyticsCard {
         SectionTitle(title = stringResource(R.string.analytics_income_vs_expenses))
         if (!state.hasDonutData) {
-            EmptySection(message = stringResource(R.string.analytics_empty_income_expenses))
+            EmptySection(
+                message = stringResource(R.string.analytics_empty_income_expenses),
+                icon = Icons.Default.PieChart
+            )
         } else {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -235,7 +304,10 @@ private fun MonthlyTrendCard(state: AnalyticsUiState) {
     AnalyticsCard {
         SectionTitle(title = stringResource(R.string.analytics_monthly_trend))
         if (state.monthlyTrend.isEmpty()) {
-            EmptySection(message = stringResource(R.string.analytics_empty_monthly_trend))
+            EmptySection(
+                message = stringResource(R.string.analytics_empty_monthly_trend),
+                icon = Icons.AutoMirrored.Filled.ShowChart
+            )
         } else {
             Column(
                 modifier = Modifier
@@ -297,7 +369,10 @@ private fun InvoiceStatusCard(state: AnalyticsUiState) {
         SectionTitle(title = stringResource(R.string.analytics_invoice_status))
 
         if (state.invoiceStatusTotal <= 0.0) {
-            EmptySection(message = stringResource(R.string.analytics_empty_invoices))
+            EmptySection(
+                message = stringResource(R.string.analytics_empty_invoices),
+                icon = Icons.Default.Description
+            )
         } else {
             Row(
                 modifier = Modifier
@@ -331,7 +406,7 @@ private fun InvoiceStatusCard(state: AnalyticsUiState) {
             ) {
                 state.invoiceStatus.forEach { segment ->
                     LegendRow(
-                        label = segment.label,
+                        label = stringResource(segment.labelResId),
                         value = "${formatCurrency(segment.amount, state.currency)} • ${formatPercent(segment.percentage)}",
                         color = segment.color
                     )
@@ -346,7 +421,10 @@ private fun ExpensesByCategoryCard(state: AnalyticsUiState) {
     AnalyticsCard {
         SectionTitle(title = stringResource(R.string.analytics_expenses_by_category))
         if (state.expensesByCategory.isEmpty()) {
-            EmptySection(message = stringResource(R.string.analytics_empty_categories))
+            EmptySection(
+                message = stringResource(R.string.analytics_empty_categories),
+                icon = Icons.Default.BarChart
+            )
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 val maxAmount = state.expensesByCategory.maxOfOrNull { it.amount } ?: 1.0
@@ -415,38 +493,79 @@ private fun HorizontalValueBar(
 
 @Composable
 private fun BudgetUtilizationCard(state: AnalyticsUiState) {
-    val averageColor = when {
-        state.averageBudgetUtilization >= 85.0 -> KablanProColors.ExpenseRed
-        state.averageBudgetUtilization >= 60.0 -> KablanProColors.PendingOrange
-        else -> KablanProColors.IncomeGreen
-    }
+    val averageColor = budgetUtilizationColor(state.averageBudgetUtilization)
 
     AnalyticsCard {
         SectionTitle(title = stringResource(R.string.analytics_budget_utilization))
         Text(
-            text = stringResource(R.string.analytics_average_utilization, String.format(Locale.getDefault(), "%.0f%%", state.averageBudgetUtilization)),
+            text = stringResource(
+                R.string.analytics_average_utilization,
+                String.format(Locale.getDefault(), "%.0f%%", state.averageBudgetUtilization)
+            ),
             style = MaterialTheme.typography.titleSmall,
             color = averageColor,
             fontWeight = FontWeight.SemiBold
         )
 
-        if (state.budgetUtilization.isEmpty()) {
-            EmptySection(message = stringResource(R.string.analytics_empty_budgets))
-        } else {
-            Column(
-                modifier = Modifier.padding(top = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                state.budgetUtilization.forEach { item ->
-                    BudgetProjectRow(item = item, currency = state.currency)
-                }
+        Column(
+            modifier = Modifier.padding(top = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            state.budgetUtilization.forEach { item ->
+                BudgetProjectRow(item = item, currency = state.currency)
             }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            BudgetLegendItem(
+                color = KablanProColors.BudgetBlue,
+                label = stringResource(R.string.analytics_budget_under_80)
+            )
+            BudgetLegendItem(
+                color = KablanProColors.PendingOrange,
+                label = stringResource(R.string.analytics_budget_80_to_100)
+            )
+            BudgetLegendItem(
+                color = KablanProColors.ExpenseRed,
+                label = stringResource(R.string.analytics_budget_over_100)
+            )
         }
     }
 }
 
 @Composable
+private fun BudgetLegendItem(color: Color, label: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(color, CircleShape)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
 private fun BudgetProjectRow(item: ProjectBudgetUi, currency: CurrencyOption) {
+    val barColor = budgetUtilizationColor(item.utilization)
+    val fillFraction = if (item.budget > 0.0) {
+        (item.spent / item.budget).toFloat().coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -463,67 +582,22 @@ private fun BudgetProjectRow(item: ProjectBudgetUi, currency: CurrencyOption) {
             Text(
                 text = String.format(Locale.getDefault(), "%.0f%%", item.utilization),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = barColor
             )
         }
 
-        BudgetBar(
-            spentFraction = if (item.budget > 0.0) (item.spent / item.budget).toFloat() else 0f,
-            remainingFraction = if (item.budget > 0.0) (item.remaining / item.budget).toFloat() else 0f
+        HorizontalValueBar(
+            fillFraction = fillFraction,
+            color = barColor,
+            trailingLabel = formatCurrency(item.spent, currency)
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(R.string.analytics_spent, formatCurrency(item.spent, currency)),
-                style = MaterialTheme.typography.labelMedium,
-                color = KablanProColors.PendingOrange
-            )
-            Text(
-                text = stringResource(R.string.analytics_remaining, formatCurrency(item.remaining, currency)),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF8FD3FF)
-            )
-        }
     }
 }
 
-@Composable
-private fun BudgetBar(
-    spentFraction: Float,
-    remainingFraction: Float,
-    modifier: Modifier = Modifier
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = modifier.fillMaxWidth()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(12.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(spentFraction.coerceIn(0f, 1f))
-                    .height(12.dp)
-                    .background(KablanProColors.PendingOrange, RoundedCornerShape(6.dp))
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(12.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(remainingFraction.coerceIn(0f, 1f))
-                    .height(12.dp)
-                    .background(Color(0xFF8FD3FF), RoundedCornerShape(6.dp))
-            )
-        }
-    }
+private fun budgetUtilizationColor(utilization: Double): Color = when {
+    utilization >= 100.0 -> KablanProColors.ExpenseRed
+    utilization >= 80.0 -> KablanProColors.PendingOrange
+    else -> KablanProColors.BudgetBlue
 }
 
 @Composable
@@ -531,7 +605,10 @@ private fun TopProjectsCard(state: AnalyticsUiState) {
     AnalyticsCard {
         SectionTitle(title = stringResource(R.string.analytics_top_projects))
         if (state.topProjects.isEmpty()) {
-            EmptySection(message = stringResource(R.string.analytics_empty_top_projects))
+            EmptySection(
+                message = stringResource(R.string.analytics_empty_top_projects),
+                icon = Icons.Default.Folder
+            )
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 state.topProjects.forEach { item ->
@@ -618,13 +695,27 @@ private fun SectionTitle(title: String) {
 }
 
 @Composable
-private fun EmptySection(message: String) {
-    Text(
-        text = message,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 8.dp)
-    )
+private fun EmptySection(message: String, icon: ImageVector) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(36.dp)
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 private fun formatCurrency(amount: Double, currency: CurrencyOption): String {
@@ -637,4 +728,3 @@ private fun formatSignedCurrency(amount: Double, currency: CurrencyOption): Stri
 }
 
 private fun formatPercent(value: Float): String = String.format(Locale.getDefault(), "%.0f%%", value)
-

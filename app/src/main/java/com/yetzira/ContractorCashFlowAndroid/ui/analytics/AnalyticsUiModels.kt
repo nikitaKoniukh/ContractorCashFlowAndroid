@@ -1,6 +1,8 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.analytics
 
+import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
+import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
@@ -14,12 +16,15 @@ import java.util.Locale
 
 private const val DAY_IN_MILLIS = 86_400_000L
 
-enum class AnalyticsPeriod(val days: Int?, val shortLabel: String) {
-    WEEK(days = 7, shortLabel = "WEEK"),
-    MONTH(days = 30, shortLabel = "30D"),
-    QUARTER(days = 90, shortLabel = "90D"),
-    YEAR(days = 365, shortLabel = "1Y"),
-    ALL(days = null, shortLabel = "All")
+enum class AnalyticsPeriod(
+    val days: Int?,
+    @StringRes val chipLabelResId: Int
+) {
+    WEEK(days = 7, chipLabelResId = R.string.analytics_period_chip_7d),
+    MONTH(days = 30, chipLabelResId = R.string.analytics_period_chip_30d),
+    QUARTER(days = 90, chipLabelResId = R.string.analytics_period_chip_90d),
+    YEAR(days = 365, chipLabelResId = R.string.analytics_period_chip_1y),
+    ALL(days = null, chipLabelResId = R.string.analytics_period_chip_all)
 }
 
 data class AnalyticsUiState(
@@ -44,6 +49,9 @@ data class AnalyticsUiState(
 
     val invoiceStatusTotal: Double
         get() = invoiceStatus.sumOf { it.amount }
+
+    val hasBudgetData: Boolean
+        get() = budgetUtilization.isNotEmpty()
 }
 
 data class MonthlyTrendPointUi(
@@ -53,14 +61,14 @@ data class MonthlyTrendPointUi(
 )
 
 data class InvoiceStatusUi(
-    val label: String,
+    @StringRes val labelResId: Int,
     val amount: Double,
     val percentage: Float,
     val color: Color
 )
 
 data class ExpenseCategoryUi(
-    @androidx.annotation.StringRes val labelResId: Int,
+    @StringRes val labelResId: Int,
     val amount: Double,
     val percentage: Float,
     val color: Color
@@ -112,19 +120,19 @@ internal object AnalyticsCalculator {
 
         val invoiceStatus = listOf(
             InvoiceStatusUi(
-                label = "Paid",
+                labelResId = R.string.analytics_paid,
                 amount = paidAmount,
                 percentage = percentageOf(paidAmount, invoiceStatusTotal),
                 color = KablanProColors.IncomeGreen
             ),
             InvoiceStatusUi(
-                label = "Pending",
+                labelResId = R.string.analytics_pending,
                 amount = pendingAmount,
                 percentage = percentageOf(pendingAmount, invoiceStatusTotal),
                 color = KablanProColors.PendingOrange
             ),
             InvoiceStatusUi(
-                label = "Overdue",
+                labelResId = R.string.analytics_overdue,
                 amount = overdueStatusAmount,
                 percentage = percentageOf(overdueStatusAmount, invoiceStatusTotal),
                 color = KablanProColors.ExpenseRed
@@ -179,7 +187,7 @@ internal object AnalyticsCalculator {
                 )
             }
             .sortedByDescending { it.utilization }
-            .take(10)
+            .take(8)
 
         val averageBudgetUtilization = budgetUtilization
             .map { it.utilization }
@@ -297,4 +305,3 @@ private fun AnalyticsPeriod.toDateRange(now: Long): LongRange? {
     val periodDays = days ?: return null
     return (now - (periodDays * DAY_IN_MILLIS))..now
 }
-

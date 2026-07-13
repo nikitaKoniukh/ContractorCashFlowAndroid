@@ -199,6 +199,15 @@
     <string name="analytics_period_1y">שנה אחרונה</string>
     <string name="analytics_period_all">כל הזמן</string>
     <string name="analytics_paid">שולם</string>
+    <string name="analytics_pending">ממתין</string>
+    <string name="analytics_period_chip_7d">7D</string>
+    <string name="analytics_period_chip_30d">30D</string>
+    <string name="analytics_period_chip_90d">90D</string>
+    <string name="analytics_period_chip_1y">1Y</string>
+    <string name="analytics_period_chip_all">All</string>
+    <string name="analytics_budget_under_80">&lt; 80%</string>
+    <string name="analytics_budget_80_to_100">80–100%</string>
+    <string name="analytics_budget_over_100">&gt; 100%</string>
     <string name="analytics_unpaid">לא שולם</string>
 
     <!-- Labor Strings -->
