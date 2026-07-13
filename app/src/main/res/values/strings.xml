@@ -117,6 +117,8 @@
     <string name="projects_invoice_overdue">Overdue</string>
     <string name="projects_invoice_pending">Pending</string>
     <string name="projects_budget_reduction_warning">Warning: new budget is below current expenses.</string>
+    <string name="projects_expected_completion_footer">The expected date when this project should be completed</string>
+    <string name="projects_inactive_footer">Inactive projects are hidden from some views but data is preserved</string>
     <string name="projects_client_detail_placeholder">Client Detail Screen</string>
 
     <string name="expenses_new">New Expense</string>

@@ -104,6 +104,8 @@
     <string name="projects_invoice_overdue">עוקב</string>
     <string name="projects_invoice_pending">ממתין</string>
     <string name="projects_budget_reduction_warning">אזהרה: התקציב החדש נמוך מההוצאות הנוכחיות.</string>
+    <string name="projects_expected_completion_footer">התאריך הצפוי לסיום הפרויקט</string>
+    <string name="projects_inactive_footer">פרויקטים לא פעילים מוסתרים מחלק מהמסכים, אך הנתונים נשמרים</string>
     <string name="projects_client_detail_placeholder">מסך פרטי לקוח</string>
 
     <string name="expenses_new">הוצאה חדשה</string>

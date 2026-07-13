@@ -98,6 +98,8 @@
     <string name="projects_invoice_overdue">Просрочено</string>
     <string name="projects_invoice_pending">В ожидании</string>
     <string name="projects_budget_reduction_warning">Предупреждение: новый бюджет ниже текущих расходов.</string>
+    <string name="projects_expected_completion_footer">Ожидаемая дата завершения проекта</string>
+    <string name="projects_inactive_footer">Неактивные проекты скрыты в некоторых экранах, но данные сохраняются</string>
     <string name="projects_client_detail_placeholder">Экран деталей клиента</string>
 
     <string name="expenses_new">Новый расход</string>

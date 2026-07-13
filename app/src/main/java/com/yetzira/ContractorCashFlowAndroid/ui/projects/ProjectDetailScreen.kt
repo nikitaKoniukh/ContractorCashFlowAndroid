@@ -244,7 +244,8 @@ fun ProjectDetailScreen(
                     income = state.totalIncome,
                     expenses = state.totalExpenses,
                     currency = currency,
-                    budget = project.budget
+                    budget = project.budget,
+                    profitMargin = state.profitMargin
                 )
             }
 
@@ -425,6 +426,7 @@ private fun FinancialSummaryCard(
     expenses: Double,
     currency: CurrencyOption,
     budget: Double,
+    profitMargin: Double,
     modifier: Modifier = Modifier
 ) {
     val incomeColor = Color(0xFF34C759)
@@ -502,6 +504,31 @@ private fun FinancialSummaryCard(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                }
+
+                if (income > 0.0) {
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                        thickness = 0.5.dp
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_profit_margin),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = String.format(Locale.getDefault(), "%.1f%%", profitMargin),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = if (profitMargin >= 0) incomeColor else expenseColor
+                        )
+                    }
                 }
             }
         }
