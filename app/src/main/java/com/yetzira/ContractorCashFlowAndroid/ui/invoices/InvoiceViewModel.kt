@@ -7,7 +7,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.notification.InvoiceNotificationSchedulerContract
-import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountFromDouble
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +44,7 @@ class InvoiceViewModel(
                 when (filter) {
                     InvoiceStatusFilter.ALL -> true
                     InvoiceStatusFilter.PAID -> invoice.isPaid
-                    InvoiceStatusFilter.UNPAID -> !invoice.isPaid
+                    InvoiceStatusFilter.UNPAID -> !invoice.isPaid && invoice.dueDate >= now
                     InvoiceStatusFilter.OVERDUE -> !invoice.isPaid && invoice.dueDate < now
                 }
             }
@@ -88,7 +88,7 @@ class InvoiceViewModel(
                 useExistingClient = clients.any { it.name == invoice.clientName },
                 selectedClientName = invoice.clientName,
                 enteredClientName = invoice.clientName,
-                amount = formatAmountInput(invoice.amount.toLong().toString()),
+                amount = formatAmountFromDouble(invoice.amount),
                 dueDate = invoice.dueDate,
                 isPaid = invoice.isPaid,
                 projectId = invoice.projectId,

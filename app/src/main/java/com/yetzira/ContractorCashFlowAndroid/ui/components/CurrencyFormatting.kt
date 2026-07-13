@@ -5,6 +5,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.roundToLong
 
 private val groupingSymbols = DecimalFormatSymbols(Locale.US).apply {
     groupingSeparator = '.'
@@ -23,6 +24,9 @@ fun formatAmountInput(raw: String): String {
         .joinToString(".")
         .reversed()
 }
+
+fun formatAmountFromDouble(amount: Double): String =
+    formatAmountInput(abs(amount).roundToLong().toString())
 
 fun parseAmountInput(raw: String): Double? {
     val normalized = raw

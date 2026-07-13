@@ -6,28 +6,30 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -48,7 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,11 +57,11 @@ import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
-import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
-import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
+import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
+import com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -80,9 +81,10 @@ fun InvoicesListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showFilterMenu by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<InvoiceListItemUi?>(null) }
+    val hasActiveFilterOrSearch = state.query.isNotBlank() || state.statusFilter != InvoiceStatusFilter.ALL
 
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -90,7 +92,7 @@ fun InvoicesListScreen(
             FloatingActionButton(onClick = onCreate) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "New Invoice"
+                    contentDescription = stringResource(R.string.invoices_new)
                 )
             }
         }
@@ -114,16 +116,27 @@ fun InvoicesListScreen(
                     placeholder = stringResource(R.string.invoices_list_search)
                 )
                 Box {
-                    TextButton(onClick = { showFilterMenu = true }) {
-                        Text(text = state.statusFilter.name)
+                    TextButton(
+                        onClick = { showFilterMenu = true },
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(
+                                if (state.statusFilter != InvoiceStatusFilter.ALL) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                }
+                            )
+                    ) {
+                        Text(text = invoiceFilterLabel(state.statusFilter))
                     }
-                    androidx.compose.material3.DropdownMenu(
+                    DropdownMenu(
                         expanded = showFilterMenu,
                         onDismissRequest = { showFilterMenu = false }
                     ) {
                         InvoiceStatusFilter.entries.forEach { filter ->
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text(filter.name) },
+                            DropdownMenuItem(
+                                text = { Text(invoiceFilterLabel(filter)) },
                                 onClick = {
                                     viewModel.setStatusFilter(filter)
                                     showFilterMenu = false
@@ -134,50 +147,56 @@ fun InvoicesListScreen(
                 }
             }
 
-            if (state.invoices.isEmpty()) {
-                EmptyInvoicesState(onCreate = onCreate)
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
-                    contentPadding = PaddingValues(top = 14.dp, bottom = 92.dp)
-                ) {
-                    itemsIndexed(state.invoices, key = { _, item -> item.invoice.id }) { index, item ->
-                        val shape = groupedRowShape(index, state.invoices.lastIndex)
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = { value ->
-                                if (value != SwipeToDismissBoxValue.Settled) {
-                                    pendingDelete = item
-                                    return@rememberSwipeToDismissBoxState false
+            when {
+                state.invoices.isEmpty() && hasActiveFilterOrSearch -> {
+                    EmptyFilteredInvoicesState()
+                }
+                state.invoices.isEmpty() -> {
+                    EmptyInvoicesState(onCreate = onCreate)
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(0.dp),
+                        contentPadding = PaddingValues(top = 14.dp, bottom = 92.dp)
+                    ) {
+                        itemsIndexed(state.invoices, key = { _, item -> item.invoice.id }) { index, item ->
+                            val shape = groupedRowShape(index, state.invoices.lastIndex)
+                            val dismissState = rememberSwipeToDismissBoxState(
+                                confirmValueChange = { value ->
+                                    if (value != SwipeToDismissBoxValue.Settled) {
+                                        pendingDelete = item
+                                        return@rememberSwipeToDismissBoxState false
+                                    }
+                                    true
                                 }
-                                true
-                            }
-                        )
+                            )
 
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            backgroundContent = {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(shape)
-                                        .background(MaterialTheme.colorScheme.errorContainer)
-                                        .padding(horizontal = 16.dp),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
-                                    Text(text = stringResource(R.string.common_delete))
+                            SwipeToDismissBox(
+                                state = dismissState,
+                                backgroundContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(shape)
+                                            .background(MaterialTheme.colorScheme.errorContainer)
+                                            .padding(horizontal = 16.dp),
+                                        contentAlignment = Alignment.CenterEnd
+                                    ) {
+                                        Text(text = stringResource(R.string.common_delete))
+                                    }
+                                },
+                                content = {
+                                    InvoiceRow(
+                                        item = item,
+                                        currency = currency,
+                                        index = index,
+                                        lastIndex = state.invoices.lastIndex,
+                                        onClick = { onEdit(item.invoice.id) }
+                                    )
                                 }
-                            },
-                            content = {
-                                InvoiceRow(
-                                    item = item,
-                                    currency = currency,
-                                    index = index,
-                                    lastIndex = state.invoices.lastIndex,
-                                    onClick = { onEdit(item.invoice.id) }
-                                )
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
@@ -204,7 +223,14 @@ fun InvoicesListScreen(
             }
         )
     }
+}
 
+@Composable
+private fun invoiceFilterLabel(filter: InvoiceStatusFilter): String = when (filter) {
+    InvoiceStatusFilter.ALL -> stringResource(R.string.invoices_filter_all)
+    InvoiceStatusFilter.PAID -> stringResource(R.string.invoices_filter_paid)
+    InvoiceStatusFilter.UNPAID -> stringResource(R.string.invoices_filter_unpaid)
+    InvoiceStatusFilter.OVERDUE -> stringResource(R.string.invoices_filter_overdue)
 }
 
 @Composable
@@ -217,12 +243,12 @@ private fun EmptyInvoicesState(onCreate: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No invoices yet",
+            text = stringResource(R.string.invoices_empty_title),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Create your first invoice to start tracking income.",
+            text = stringResource(R.string.invoices_empty_body),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
@@ -230,9 +256,32 @@ private fun EmptyInvoicesState(onCreate: () -> Unit) {
         FloatingActionButton(onClick = onCreate) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "New Invoice"
+                contentDescription = stringResource(R.string.invoices_new)
             )
         }
+    }
+}
+
+@Composable
+private fun EmptyFilteredInvoicesState() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.invoices_empty_filtered_title),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(R.string.invoices_empty_filtered_body),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }
 
@@ -263,8 +312,16 @@ private fun InvoiceRow(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
-                val amountColor = if (item.invoice.isPaid) Color(0xFF34C759) else MaterialTheme.colorScheme.onSurface
-                Text(text = formatCurrencyAmount(item.invoice.amount, currency), color = amountColor)
+                val amountColor = if (item.invoice.isPaid) {
+                    Color(0xFF34C759)
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+                Text(
+                    text = formatCurrencyAmount(item.invoice.amount, currency),
+                    color = amountColor,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
 
             HorizontalDivider(
@@ -273,8 +330,7 @@ private fun InvoiceRow(
             )
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -332,9 +388,9 @@ private fun InvoiceStatusBadge(isPaid: Boolean, isOverdue: Boolean) {
     Text(
         text = label,
         color = color,
-        style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
+        style = BadgeTextStyle,
         modifier = Modifier
-            .background(color.copy(alpha = 0.15f), androidx.compose.foundation.shape.CircleShape)
+            .background(color.copy(alpha = 0.15f), CircleShape)
             .padding(horizontal = 8.dp, vertical = 3.dp)
     )
 }

@@ -132,7 +132,7 @@ fun InvoiceDetailScreen(
     ) { innerPadding ->
         if (invoice == null) {
             Text(
-                text = "Invoice not found",
+                text = stringResource(R.string.invoices_not_found),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -142,9 +142,22 @@ fun InvoiceDetailScreen(
         }
 
         val isPaid = invoice.isPaid
-        val amountColor = if (isPaid) Color(0xFF34C759) else Color(0xFFFF3B30)
-        val statusText = if (isPaid) stringResource(R.string.projects_invoice_paid) else if (item.isOverdue) stringResource(R.string.projects_invoice_overdue) else stringResource(R.string.projects_invoice_pending)
-        val statusColor = if (isPaid) Color(0xFF34C759) else if (item.isOverdue) Color(0xFFFF3B30) else Color(0xFFFF9500)
+        val isOverdue = item.isOverdue
+        val amountColor = if (isPaid) Color(0xFF34C759) else MaterialTheme.colorScheme.onSurface
+        val statusText = if (isPaid) {
+            stringResource(R.string.projects_invoice_paid)
+        } else if (isOverdue) {
+            stringResource(R.string.projects_invoice_overdue)
+        } else {
+            stringResource(R.string.projects_invoice_pending)
+        }
+        val statusColor = if (isPaid) {
+            Color(0xFF34C759)
+        } else if (isOverdue) {
+            Color(0xFFFF3B30)
+        } else {
+            Color(0xFFFF9500)
+        }
 
         Column(
             modifier = Modifier
@@ -220,7 +233,8 @@ fun InvoiceDetailScreen(
                     DetailRow(
                         icon = Icons.Default.CalendarToday,
                         label = stringResource(R.string.invoices_detail_due_date),
-                        value = formatDate(invoice.dueDate)
+                        value = formatDate(invoice.dueDate),
+                        valueColor = if (isOverdue) Color(0xFFFF3B30) else MaterialTheme.colorScheme.onSurface
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = dividerColor)
                     // Paid row with checkmark
@@ -371,7 +385,12 @@ private fun SectionHeader(icon: ImageVector, title: String) {
 }
 
 @Composable
-private fun DetailRow(icon: ImageVector, label: String, value: String) {
+private fun DetailRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -395,7 +414,7 @@ private fun DetailRow(icon: ImageVector, label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = valueColor
         )
     }
 }
