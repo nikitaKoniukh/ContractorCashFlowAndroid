@@ -119,26 +119,16 @@ fun PaywallScreen(
     val isPurchasing by viewModel.isPurchasing.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val isRestoring by viewModel.isRestoring.collectAsStateWithLifecycle()
+    val statusMessage by viewModel.statusMessage.collectAsStateWithLifecycle()
+    val hasPendingPurchase by viewModel.hasPendingPurchase.collectAsStateWithLifecycle()
 
     // Debug logging
     LaunchedEffect(products) {
         Log.d("PaywallScreen", "products updated: count=${products.size}")
-        products.forEach { p ->
-            Log.d("PaywallScreen", "  - ${p.productId}: ${p.name}")
-            p.subscriptionOfferDetails?.forEach { offer ->
-                Log.d("PaywallScreen", "    offer: basePlan=${offer.basePlanId}")
-            }
-        }
     }
 
     val yearlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_YEARLY }
     val monthlyProduct = products.firstOrNull { it.productId == BillingProduct.PRO_MONTHLY }
-
-    // Debug product matching
-    LaunchedEffect(yearlyProduct, monthlyProduct) {
-        Log.d("PaywallScreen", "yearlyProduct matched: ${yearlyProduct != null}")
-        Log.d("PaywallScreen", "monthlyProduct matched: ${monthlyProduct != null}")
-    }
 
     // Localized strings for plan construction (must be read outside remember)
     val monthlyTitle    = stringResource(R.string.paywall_plan_monthly_title)
@@ -174,6 +164,7 @@ fun PaywallScreen(
 
     val selectedPlan = plans.firstOrNull { it.id == selectedPlanId }
     val selectedProduct = selectedPlan?.productDetails
+    val canSubscribe = selectedProduct != null && !isPurchasing && !isLoading
 
     LaunchedEffect(plans) {
         if (plans.none { it.id == selectedPlanId }) {
@@ -182,10 +173,14 @@ fun PaywallScreen(
     }
 
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showStatusDialog by remember { mutableStateOf(false) }
     var legalUrl by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(isProUser) { if (isProUser) onDismiss() }
     LaunchedEffect(errorMessage) { showErrorDialog = errorMessage != null }
+    LaunchedEffect(statusMessage, hasPendingPurchase) {
+        showStatusDialog = statusMessage != null || hasPendingPurchase
+    }
 
     if (showErrorDialog && errorMessage != null) {
         AlertDialog(
@@ -194,6 +189,19 @@ fun PaywallScreen(
             text = { Text(errorMessage.orEmpty()) },
             confirmButton = {
                 TextButton(onClick = { showErrorDialog = false; viewModel.clearError() }) {
+                    Text(stringResource(R.string.paywall_error_ok))
+                }
+            }
+        )
+    }
+
+    if (showStatusDialog && statusMessage != null && errorMessage == null) {
+        AlertDialog(
+            onDismissRequest = { showStatusDialog = false; viewModel.clearStatusMessage() },
+            title = { Text(stringResource(R.string.paywall_status_title)) },
+            text = { Text(statusMessage.orEmpty()) },
+            confirmButton = {
+                TextButton(onClick = { showStatusDialog = false; viewModel.clearStatusMessage() }) {
                     Text(stringResource(R.string.paywall_error_ok))
                 }
             }
@@ -369,9 +377,11 @@ fun PaywallScreen(
                         context.findActivity()?.let {
                             viewModel.launchPurchaseFlow(it, product, basePlanId)
                         } ?: Log.e("PaywallScreen", "Cannot launch purchase flow: no Activity in LocalContext")
+                    } else {
+                        viewModel.reloadProducts()
                     }
                 },
-                enabled = !isPurchasing,
+                enabled = canSubscribe || (!isPurchasing && products.isEmpty()),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

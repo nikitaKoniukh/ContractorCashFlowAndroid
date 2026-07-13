@@ -142,7 +142,7 @@ fun ProjectsListScreen(
     }
 
     val onCreateProjectAttempt = {
-        if (purchaseManager.canCreateProject(uiState.projects.size)) {
+        if (purchaseManager.canCreateProject(uiState.totalProjectCount)) {
             onCreateProject()
         } else {
             paywallMessage = context.getString(

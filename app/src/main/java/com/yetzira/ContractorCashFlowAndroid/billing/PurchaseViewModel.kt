@@ -17,8 +17,10 @@ class PurchaseViewModel(
     val isLoading = purchaseManager.isLoading
     val isPurchasing = purchaseManager.isPurchasing
     val errorMessage = purchaseManager.errorMessage
+    val statusMessage = purchaseManager.statusMessage
     val activePurchase = purchaseManager.activePurchase
     val isRestoring = purchaseManager.isRestoring
+    val hasPendingPurchase = purchaseManager.hasPendingPurchase
 
     fun launchPurchaseFlow(activity: Activity, productDetails: ProductDetails, basePlanId: String) {
         purchaseManager.launchPurchaseFlow(activity, productDetails, basePlanId)
@@ -48,6 +50,10 @@ class PurchaseViewModel(
 
     fun clearError() {
         purchaseManager.clearError()
+    }
+
+    fun clearStatusMessage() {
+        purchaseManager.clearStatusMessage()
     }
 
     fun toggleDevProOverride() {

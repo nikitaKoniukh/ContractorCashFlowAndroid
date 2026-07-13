@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.projects
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierGate
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ClientDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ExpenseDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.InvoiceDao
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -33,7 +35,8 @@ class ProjectViewModel(
     private val clientDao: ClientDao,
     private val clientRepository: ClientRepositoryContract,
     private val expenseRepository: ExpenseRepositoryContract,
-    private val invoiceRepository: InvoiceRepositoryContract
+    private val invoiceRepository: InvoiceRepositoryContract,
+    private val purchaseManager: FreeTierGate
 ) : ViewModel() {
 
     private val searchQuery = MutableStateFlow("")
@@ -50,9 +53,10 @@ class ProjectViewModel(
     val projectsUiState: StateFlow<ProjectListUiState> = combine(
         searchQuery,
         projectsFlow,
+        repository.getAllProjects(),
         expenseDao.getAll(),
         invoiceDao.getAll()
-    ) { query, projects, expenses, invoices ->
+    ) { query, projects, allProjects, expenses, invoices ->
         val rows = projects.map { project ->
             val projectExpenses = expenses.filter { it.projectId == project.id }
             val projectInvoices = invoices.filter { it.projectId == project.id }
@@ -74,7 +78,8 @@ class ProjectViewModel(
 
         ProjectListUiState(
             query = query,
-            projects = rows
+            projects = rows,
+            totalProjectCount = allProjects.size
         )
     }.stateIn(
         scope = viewModelScope,
@@ -127,7 +132,8 @@ class ProjectViewModel(
         endDate: Long? = null,
         notes: String = "",
         isActive: Boolean = true,
-        onSuccess: () -> Unit
+        onSuccess: () -> Unit,
+        onFreeTierLimitReached: () -> Unit = {}
     ) {
         viewModelScope.launch {
             val budget = parseAmountInput(budgetText) ?: 0.0
@@ -137,6 +143,12 @@ class ProjectViewModel(
             val normalizedNotes = notes.trim()
             val clientName = if (useExistingClient) normalizedSelectedClientName else normalizedNewClientName
             if (normalizedName.isBlank() || clientName.isBlank() || budget <= 0.0) return@launch
+
+            val currentCount = repository.getAllProjects().first().size
+            if (!purchaseManager.canCreateProject(currentCount)) {
+                onFreeTierLimitReached()
+                return@launch
+            }
 
             if (!useExistingClient && normalizedNewClientName.isNotBlank()) {
                 val existingClient = clientDao.findByNameIgnoreCase(normalizedNewClientName)

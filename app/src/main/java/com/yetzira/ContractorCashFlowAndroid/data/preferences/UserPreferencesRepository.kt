@@ -38,6 +38,10 @@ interface SettingsPreferencesRepositoryContract {
 }
 
 interface SubscriptionPreferencesRepositoryContract {
+    val subscriptionIsPro: Flow<Boolean>
+    val subscriptionPlanName: Flow<String?>
+    val subscriptionRenewalDate: Flow<Long?>
+
     suspend fun setSubscription(
         isPro: Boolean,
         planName: String? = null,

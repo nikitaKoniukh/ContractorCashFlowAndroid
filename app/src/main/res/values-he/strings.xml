@@ -349,7 +349,7 @@
     <string name="paywall_plan_monthly_period">/ חודש</string>
     <string name="paywall_plan_yearly_title">KablanPro שנתי</string>
     <string name="paywall_plan_yearly_period">/ שנה</string>
-    <string name="paywall_savings_badge_fallback">חסוך 58%%</string>
+    <string name="paywall_savings_badge_fallback">חסוך 17%%</string>
     <string name="paywall_savings_badge_format">חסוך %d%%</string>
     <string name="paywall_period_days">%d ימים</string>
     <string name="paywall_period_weeks">%d שבועות</string>
@@ -543,6 +543,7 @@
     <string name="billing_purchase_failed_code">הרכישה נכשלה (קוד %1$d).</string>
     <string name="billing_ack_failed">אישור הרכישה נכשל: %1$s</string>
     <string name="billing_refresh_failed">רענון הרכישות נכשל: %1$s</string>
+    <string name="billing_restore_none_found">לא נמצא מנוי פעיל לשחזור.</string>
 
 </resources>
 

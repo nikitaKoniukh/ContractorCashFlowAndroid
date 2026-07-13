@@ -546,7 +546,11 @@ fun SettingsScreen(
                 val versionLabel = if (devProOverride) "$appVersionValue ⭐" else appVersionValue
                 SettingsVersionRow(
                     value = versionLabel,
-                    onLongPress = { purchaseViewModel.toggleDevProOverride() }
+                    onLongPress = {
+                        if (com.yetzira.ContractorCashFlowAndroid.BuildConfig.DEBUG) {
+                            purchaseViewModel.toggleDevProOverride()
+                        }
+                    }
                 )
             }
         }

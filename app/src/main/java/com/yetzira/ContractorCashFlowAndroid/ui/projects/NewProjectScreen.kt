@@ -59,6 +59,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierLimit
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
@@ -66,6 +69,7 @@ import com.yetzira.ContractorCashFlowAndroid.review.InAppReviewHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -81,6 +85,11 @@ fun NewProjectScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    var showPaywall by remember { mutableStateOf(false) }
+    val paywallMessage = stringResource(R.string.paywall_limit_projects, FreeTierLimit.MAX_PROJECTS)
+    val purchaseViewModel: PurchaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = remember { PurchaseViewModelFactory(context) }
+    )
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val existingClients by viewModel.existingClients.collectAsState()
@@ -156,7 +165,8 @@ fun NewProjectScreen(
                                         InAppReviewHelper.onProjectCreated(context)
                                     }
                                     onBack()
-                                }
+                                },
+                                onFreeTierLimitReached = { showPaywall = true }
                             )
                         },
                         enabled = canSave
@@ -487,6 +497,17 @@ fun NewProjectScreen(
                 }
             }
         }
+    }
+
+    if (showPaywall) {
+        PaywallSheet(
+            viewModel = purchaseViewModel,
+            onDismiss = {
+                showPaywall = false
+                onBack()
+            },
+            limitReachedMessage = paywallMessage
+        )
     }
 }
 

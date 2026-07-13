@@ -31,7 +31,13 @@ class LaborViewModelTest {
                 LaborDetailsEntity(id = "w2", workerName = "Ben", laborType = LaborType.DAILY.name)
             )
         )
-        val viewModel = LaborViewModel(repository)
+        val viewModel = LaborViewModel(
+            repository,
+            object : com.yetzira.ContractorCashFlowAndroid.billing.FreeTierGate {
+                override fun canCreateProject(currentCount: Int) = true
+                override fun canCreateWorker(currentCount: Int) = true
+            }
+        )
 
         val updated = viewModel.updateForm(LaborFormUiState(workerName = "alex"))
 
@@ -76,7 +82,13 @@ class LaborViewModelTest {
         )
 
         val repository = FakeLaborRepository(workers = workers, expenses = expenses, projects = projects)
-        val viewModel = LaborViewModel(repository)
+        val viewModel = LaborViewModel(
+            repository,
+            object : com.yetzira.ContractorCashFlowAndroid.billing.FreeTierGate {
+                override fun canCreateProject(currentCount: Int) = true
+                override fun canCreateWorker(currentCount: Int) = true
+            }
+        )
         val collectJob = launch { viewModel.listUiState.collect { } }
         advanceUntilIdle()
 
@@ -93,7 +105,13 @@ class LaborViewModelTest {
     fun `delete worker triggers repository call`() = runTest {
         val worker = LaborDetailsEntity(id = "w1", workerName = "Alex", laborType = LaborType.HOURLY.name)
         val repository = FakeLaborRepository(workers = listOf(worker))
-        val viewModel = LaborViewModel(repository)
+        val viewModel = LaborViewModel(
+            repository,
+            object : com.yetzira.ContractorCashFlowAndroid.billing.FreeTierGate {
+                override fun canCreateProject(currentCount: Int) = true
+                override fun canCreateWorker(currentCount: Int) = true
+            }
+        )
 
         viewModel.deleteWorker(worker)
         advanceUntilIdle()

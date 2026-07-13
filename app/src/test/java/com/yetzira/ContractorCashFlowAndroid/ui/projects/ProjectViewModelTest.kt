@@ -45,7 +45,11 @@ class ProjectViewModelTest {
         clientDao = clientDao,
         clientRepository = FakeClientRepository(clientDao),
         expenseRepository = FakeExpenseRepository(expenseDao),
-        invoiceRepository = FakeInvoiceRepository(invoiceDao)
+        invoiceRepository = FakeInvoiceRepository(invoiceDao),
+        purchaseManager = object : com.yetzira.ContractorCashFlowAndroid.billing.FreeTierGate {
+            override fun canCreateProject(currentCount: Int) = true
+            override fun canCreateWorker(currentCount: Int) = true
+        }
     )
 
     @Test

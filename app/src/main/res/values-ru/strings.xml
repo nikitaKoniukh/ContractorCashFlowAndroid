@@ -349,7 +349,7 @@
     <string name="paywall_plan_monthly_period">/ месяц</string>
     <string name="paywall_plan_yearly_title">KablanPro Ежегодно</string>
     <string name="paywall_plan_yearly_period">/ год</string>
-    <string name="paywall_savings_badge_fallback">ЭКОНОМИЯ 58%%</string>
+    <string name="paywall_savings_badge_fallback">ЭКОНОМИЯ 17%%</string>
     <string name="paywall_savings_badge_format">ЭКОНОМИЯ %d%%</string>
     <string name="paywall_period_days">%d дней</string>
     <string name="paywall_period_weeks">%d недель</string>
@@ -543,6 +543,7 @@
     <string name="billing_purchase_failed_code">Покупка не удалась (код %1$d).</string>
     <string name="billing_ack_failed">Подтверждение не удалось: %1$s</string>
     <string name="billing_refresh_failed">Не удалось обновить покупки: %1$s</string>
+    <string name="billing_restore_none_found">Активная подписка для восстановления не найдена.</string>
 
 </resources>
 

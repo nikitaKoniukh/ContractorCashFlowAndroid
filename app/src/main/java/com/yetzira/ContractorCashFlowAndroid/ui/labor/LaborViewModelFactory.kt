@@ -2,12 +2,14 @@ package com.yetzira.ContractorCashFlowAndroid.ui.labor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.repository.LaborRepository
 import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
 
 class LaborViewModelFactory(
-    private val database: AppDatabase
+    private val database: AppDatabase,
+    private val applicationContext: android.content.Context
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LaborViewModel::class.java)) {
@@ -18,7 +20,8 @@ class LaborViewModelFactory(
                     expenseDao = database.expenseDao(),
                     projectDao = database.projectDao(),
                     syncService = FirestoreSyncService(database)
-                )
+                ),
+                purchaseManager = PurchaseManagerProvider.getInstance(applicationContext)
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

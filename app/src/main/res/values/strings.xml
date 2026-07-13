@@ -380,7 +380,7 @@
     <string name="paywall_plan_monthly_period">/ month</string>
     <string name="paywall_plan_yearly_title">KablanPro Yearly</string>
     <string name="paywall_plan_yearly_period">/ year</string>
-    <string name="paywall_savings_badge_fallback">SAVE 58%%</string>
+    <string name="paywall_savings_badge_fallback">SAVE 17%%</string>
     <string name="paywall_savings_badge_format">SAVE %d%%</string>
     <string name="paywall_period_days">%d-day</string>
     <string name="paywall_period_weeks">%d-week</string>
@@ -392,6 +392,7 @@
     <string name="paywall_terms_of_use">Terms of Use</string>
     <string name="paywall_privacy_policy">Privacy Policy</string>
     <string name="paywall_error_title">Error</string>
+    <string name="paywall_status_title">Subscription</string>
     <string name="paywall_error_ok">OK</string>
     <string name="paywall_close">Close</string>
     <string name="paywall_title">Upgrade to KablanPro Pro</string>
@@ -574,4 +575,5 @@
     <string name="billing_purchase_failed_code">Purchase failed (code %1$d).</string>
     <string name="billing_ack_failed">Acknowledgment failed: %1$s</string>
     <string name="billing_refresh_failed">Failed to refresh purchases: %1$s</string>
+    <string name="billing_restore_none_found">No active subscription found to restore.</string>
 </resources>

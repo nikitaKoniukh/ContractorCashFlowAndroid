@@ -22,7 +22,9 @@ data class CategoryBreakdownUi(
 
 data class ProjectListUiState(
     val query: String = "",
-    val projects: List<ProjectListItemUi> = emptyList()
+    val projects: List<ProjectListItemUi> = emptyList(),
+    /** Unfiltered total used for free-tier create gates (ignore search). */
+    val totalProjectCount: Int = 0
 )
 
 data class ProjectDetailUiState(

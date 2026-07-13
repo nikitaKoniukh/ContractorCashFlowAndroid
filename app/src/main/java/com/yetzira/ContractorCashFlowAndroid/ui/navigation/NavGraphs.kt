@@ -72,7 +72,7 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
     ) {
         composable(ProjectRoutes.LIST) {
             val context = LocalContext.current
-            val factory = remember { ProjectViewModelFactory(AppDatabase.getInstance(context)) }
+            val factory = remember { ProjectViewModelFactory(AppDatabase.getInstance(context), context.applicationContext) }
             val viewModel: ProjectViewModel = viewModel(factory = factory)
 
             ProjectsListScreen(
@@ -84,7 +84,7 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
 
         composable(ProjectRoutes.NEW) {
             val context = LocalContext.current
-            val factory = remember { ProjectViewModelFactory(AppDatabase.getInstance(context)) }
+            val factory = remember { ProjectViewModelFactory(AppDatabase.getInstance(context), context.applicationContext) }
             val viewModel: ProjectViewModel = viewModel(factory = factory)
             NewProjectScreen(
                 viewModel = viewModel,
@@ -97,7 +97,7 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
             arguments = listOf(navArgument("projectId") { type = NavType.StringType })
         ) { backStackEntry ->
             val context = LocalContext.current
-            val factory = remember { ProjectViewModelFactory(AppDatabase.getInstance(context)) }
+            val factory = remember { ProjectViewModelFactory(AppDatabase.getInstance(context), context.applicationContext) }
             val viewModel: ProjectViewModel = viewModel(factory = factory)
             val projectId = backStackEntry.arguments?.getString("projectId").orEmpty()
 
@@ -119,7 +119,7 @@ fun NavGraphBuilder.projectsGraph(navController: NavController) {
             arguments = listOf(navArgument("projectId") { type = NavType.StringType })
         ) { backStackEntry ->
             val context = LocalContext.current
-            val factory = remember { ProjectViewModelFactory(AppDatabase.getInstance(context)) }
+            val factory = remember { ProjectViewModelFactory(AppDatabase.getInstance(context), context.applicationContext) }
             val viewModel: ProjectViewModel = viewModel(factory = factory)
             val projectId = backStackEntry.arguments?.getString("projectId").orEmpty()
             EditProjectScreen(
@@ -328,7 +328,7 @@ fun NavGraphBuilder.laborGraph(
     ) {
         composable(LaborRoutes.LIST) {
             val context = LocalContext.current
-            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context)) }
+            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context), context.applicationContext) }
             val viewModel: LaborViewModel = viewModel(factory = factory)
 
             LaborListScreen(
@@ -340,7 +340,7 @@ fun NavGraphBuilder.laborGraph(
 
         composable(LaborRoutes.ADD) {
             val context = LocalContext.current
-            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context)) }
+            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context), context.applicationContext) }
             val viewModel: LaborViewModel = viewModel(factory = factory)
             AddLaborScreen(
                 viewModel = viewModel,
@@ -353,7 +353,7 @@ fun NavGraphBuilder.laborGraph(
             arguments = listOf(navArgument("workerId") { type = NavType.StringType })
         ) { backStackEntry ->
             val context = LocalContext.current
-            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context)) }
+            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context), context.applicationContext) }
             val viewModel: LaborViewModel = viewModel(factory = factory)
             val workerId = backStackEntry.arguments?.getString("workerId").orEmpty()
 
@@ -371,7 +371,7 @@ fun NavGraphBuilder.laborGraph(
             arguments = listOf(navArgument("workerId") { type = NavType.StringType })
         ) { backStackEntry ->
             val context = LocalContext.current
-            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context)) }
+            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context), context.applicationContext) }
             val viewModel: LaborViewModel = viewModel(factory = factory)
             val workerId = backStackEntry.arguments?.getString("workerId").orEmpty()
             val detail by viewModel.detailUiState.collectAsState()

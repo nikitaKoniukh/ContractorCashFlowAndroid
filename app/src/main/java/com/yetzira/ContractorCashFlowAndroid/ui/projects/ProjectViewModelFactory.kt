@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.projects
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ClientRepository
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepository
@@ -10,7 +11,8 @@ import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepository
 import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
 
 class ProjectViewModelFactory(
-    private val database: AppDatabase
+    private val database: AppDatabase,
+    private val applicationContext: android.content.Context
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ProjectViewModel::class.java)) {
@@ -42,7 +44,8 @@ class ProjectViewModelFactory(
                     clientDao = database.clientDao(),
                     projectDao = database.projectDao(),
                     syncService = syncService
-                )
+                ),
+                purchaseManager = PurchaseManagerProvider.getInstance(applicationContext)
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

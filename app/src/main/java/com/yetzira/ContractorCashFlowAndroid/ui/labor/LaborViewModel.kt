@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.labor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierGate
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
@@ -17,7 +18,8 @@ import java.util.Date
 import java.util.Locale
 
 class LaborViewModel(
-    private val repository: LaborRepositoryContract
+    private val repository: LaborRepositoryContract,
+    private val purchaseManager: FreeTierGate
 ) : ViewModel() {
 
     private var workers: List<LaborDetailsEntity> = emptyList()
@@ -127,9 +129,17 @@ class LaborViewModel(
         )
     }
 
-    fun saveWorker(state: LaborFormUiState, onDone: () -> Unit) {
+    fun saveWorker(
+        state: LaborFormUiState,
+        onDone: () -> Unit,
+        onFreeTierLimitReached: () -> Unit = {}
+    ) {
         viewModelScope.launch {
             if (state.workerName.isBlank()) return@launch
+            if (state.id == null && !purchaseManager.canCreateWorker(workers.size)) {
+                onFreeTierLimitReached()
+                return@launch
+            }
             val entity = LaborDetailsEntity(
                 id = state.id ?: java.util.UUID.randomUUID().toString(),
                 workerName = state.workerName.trim(),

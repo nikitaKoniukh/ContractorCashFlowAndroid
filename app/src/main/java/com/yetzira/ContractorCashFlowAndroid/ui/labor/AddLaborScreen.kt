@@ -21,10 +21,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierLimit
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
+import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
+import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +39,13 @@ fun AddLaborScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     var formState by remember { mutableStateOf(LaborFormUiState()) }
+    var showPaywall by remember { mutableStateOf(false) }
+    val paywallMessage = stringResource(R.string.paywall_limit_workers, FreeTierLimit.MAX_WORKERS)
+    val purchaseViewModel: PurchaseViewModel = viewModel(
+        factory = remember { PurchaseViewModelFactory(context) }
+    )
 
     LaunchedEffect(Unit) {
         viewModel.setOriginalWorker(null)
@@ -56,7 +68,13 @@ fun AddLaborScreen(
                 },
                 actions = {
                     TextButton(
-                        onClick = { viewModel.saveWorker(formState, onDone = onBack) },
+                        onClick = {
+                            viewModel.saveWorker(
+                                state = formState,
+                                onDone = onBack,
+                                onFreeTierLimitReached = { showPaywall = true }
+                            )
+                        },
                         enabled = formState.canSave
                     ) { Text(stringResource(R.string.action_save)) }
                 }
@@ -71,6 +89,17 @@ fun AddLaborScreen(
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                 .padding(top = KablanProLayoutDefaults.TopSectionSpacing)
                 .verticalScroll(rememberScrollState())
+        )
+    }
+
+    if (showPaywall) {
+        PaywallSheet(
+            viewModel = purchaseViewModel,
+            onDismiss = {
+                showPaywall = false
+                onBack()
+            },
+            limitReachedMessage = paywallMessage
         )
     }
 }
