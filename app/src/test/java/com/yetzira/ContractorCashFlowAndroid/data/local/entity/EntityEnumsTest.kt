@@ -26,7 +26,7 @@ class EntityEnumsTest {
     @Test
     fun `expense category visual metadata is present`() {
         ExpenseCategory.entries.forEach { category ->
-            assertTrue(category.displayName.isNotBlank())
+            assertTrue(category.labelResId != 0)
             assertNotNull(category.iconResId)
         }
     }

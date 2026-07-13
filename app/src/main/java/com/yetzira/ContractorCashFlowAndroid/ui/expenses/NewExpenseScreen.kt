@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,7 +32,9 @@ import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.notification.BudgetWarningNotifier
+import com.yetzira.ContractorCashFlowAndroid.review.InAppReviewHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +48,7 @@ fun NewExpenseScreen(
     val saveResult by viewModel.lastSaveResult.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val budgetHighMessage = stringResource(R.string.expenses_budget_warning_high)
@@ -63,6 +67,7 @@ fun NewExpenseScreen(
             ExpenseSaveResult.None -> Unit
             ExpenseSaveResult.Saved -> {
                 viewModel.resetSaveResult()
+                scope.launch { InAppReviewHelper.onExpenseCreated(context) }
                 onBack()
             }
             is ExpenseSaveResult.BudgetWarning -> {
@@ -70,7 +75,8 @@ fun NewExpenseScreen(
                     utilizationPercent = result.utilizationPercent,
                     projectName = result.projectName,
                     totalExpenses = result.totalExpenses,
-                    budget = result.budget
+                    budget = result.budget,
+                    projectId = result.projectId
                 )
                 snackbarHostState.showSnackbar(
                     if (result.utilizationPercent >= 100) {
@@ -80,6 +86,7 @@ fun NewExpenseScreen(
                     }
                 )
                 viewModel.resetSaveResult()
+                scope.launch { InAppReviewHelper.onExpenseCreated(context) }
                 onBack()
             }
         }

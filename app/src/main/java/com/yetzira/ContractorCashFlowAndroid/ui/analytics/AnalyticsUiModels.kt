@@ -60,7 +60,7 @@ data class InvoiceStatusUi(
 )
 
 data class ExpenseCategoryUi(
-    val label: String,
+    @androidx.annotation.StringRes val labelResId: Int,
     val amount: Double,
     val percentage: Float,
     val color: Color
@@ -137,8 +137,7 @@ internal object AnalyticsCalculator {
                 category?.let {
                     val amount = items.sumOf { item -> item.amount }
                     ExpenseCategoryUi(
-                        label = category.name.lowercase()
-                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
+                        labelResId = category.labelResId,
                         amount = amount,
                         percentage = percentageOf(amount, totalExpenses),
                         color = Color(category.chartColor)

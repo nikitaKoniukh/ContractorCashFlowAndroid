@@ -28,7 +28,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
         LaborDetailsEntity::class,
         DeletedRecordEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -90,6 +90,25 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * Bridges experimental v7 installs and aligns identity hash while keeping data.
+         * Ensures deleted_records exists for devices that skipped the main-line 6→7 migration.
+         */
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS deleted_records (
+                        collection TEXT NOT NULL,
+                        recordId TEXT NOT NULL,
+                        deletedAt INTEGER NOT NULL,
+                        PRIMARY KEY(collection, recordId)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -106,8 +125,11 @@ abstract class AppDatabase : RoomDatabase() {
                         MIGRATION_3_4,
                         MIGRATION_4_5,
                         MIGRATION_5_6,
-                        MIGRATION_6_7
+                        MIGRATION_6_7,
+                        MIGRATION_7_8
                     )
+                    .fallbackToDestructiveMigrationOnDowngrade()
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance
@@ -115,4 +137,3 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-

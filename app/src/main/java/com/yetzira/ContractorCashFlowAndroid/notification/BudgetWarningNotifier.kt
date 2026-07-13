@@ -3,12 +3,16 @@ package com.yetzira.ContractorCashFlowAndroid.notification
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.yetzira.ContractorCashFlowAndroid.KablanProApplication
+import com.yetzira.ContractorCashFlowAndroid.MainActivity
 import com.yetzira.ContractorCashFlowAndroid.R
 import java.text.NumberFormat
 import java.util.Locale
@@ -19,7 +23,8 @@ class BudgetWarningNotifier(private val context: Context) {
         utilizationPercent: Int,
         projectName: String = "",
         totalExpenses: Double = 0.0,
-        budget: Double = 0.0
+        budget: Double = 0.0,
+        projectId: String? = null
     ) {
         ensureChannel()
 
@@ -46,12 +51,27 @@ class BudgetWarningNotifier(private val context: Context) {
             }
         }
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val contentIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            if (!projectId.isNullOrBlank()) {
+                putExtra(NotificationDeepLink.EXTRA_TYPE, NotificationDeepLink.TYPE_PROJECT)
+                putExtra(NotificationDeepLink.EXTRA_PROJECT_ID, projectId)
+            }
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            (projectId ?: "budget").hashCode(),
+            contentIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, KablanProApplication.CHANNEL_BUDGET_WARNINGS)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -61,7 +81,8 @@ class BudgetWarningNotifier(private val context: Context) {
             ) == PackageManager.PERMISSION_GRANTED
             if (!granted) return
         }
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        val notificationId = projectId?.let { ("budget_$it").hashCode() } ?: NOTIFICATION_ID
+        NotificationManagerCompat.from(context).notify(notificationId, notification)
     }
 
     fun cancel() {
@@ -70,11 +91,11 @@ class BudgetWarningNotifier(private val context: Context) {
 
     private fun ensureChannel() {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val existing = manager.getNotificationChannel(CHANNEL_ID)
-        if (existing != null) return
+        val channelId = KablanProApplication.CHANNEL_BUDGET_WARNINGS
+        if (manager.getNotificationChannel(channelId) != null) return
 
         val channel = NotificationChannel(
-            CHANNEL_ID,
+            channelId,
             context.getString(R.string.notification_channel_budget),
             NotificationManager.IMPORTANCE_HIGH
         )
@@ -82,7 +103,6 @@ class BudgetWarningNotifier(private val context: Context) {
     }
 
     private companion object {
-        const val CHANNEL_ID = "kablanpro_budget_warnings"
         const val NOTIFICATION_ID = 2001
     }
 }

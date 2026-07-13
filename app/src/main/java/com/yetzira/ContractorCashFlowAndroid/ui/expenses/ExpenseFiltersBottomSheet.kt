@@ -88,7 +88,8 @@ fun ExpenseFiltersBottomSheet(
                 )
                 FilterSelectorRow(
                     label = stringResource(R.string.expenses_filters_category_label),
-                    value = state.category?.name ?: stringResource(R.string.expenses_filters_all),
+                    value = state.category?.let { stringResource(it.labelResId) }
+                        ?: stringResource(R.string.expenses_filters_all),
                     onClick = { categoryMenu = true }
                 )
                 DropdownMenu(
@@ -104,7 +105,7 @@ fun ExpenseFiltersBottomSheet(
                     )
                     ExpenseCategory.entries.forEach { category ->
                         DropdownMenuItem(
-                            text = { Text(category.name) },
+                            text = { Text(stringResource(category.labelResId)) },
                             onClick = {
                                 state = state.copy(category = category)
                                 categoryMenu = false

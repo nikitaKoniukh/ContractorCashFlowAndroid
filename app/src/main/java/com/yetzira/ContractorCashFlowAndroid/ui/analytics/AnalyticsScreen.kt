@@ -358,7 +358,7 @@ private fun ExpensesByCategoryCard(state: AnalyticsUiState) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = category.label,
+                                text = stringResource(category.labelResId),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold
                             )

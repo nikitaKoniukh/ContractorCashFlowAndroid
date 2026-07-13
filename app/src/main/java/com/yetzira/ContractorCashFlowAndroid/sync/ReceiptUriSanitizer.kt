@@ -1,10 +1,19 @@
 package com.yetzira.ContractorCashFlowAndroid.sync
 
 /**
- * Receipt images live only on the capturing device (local file/content URIs).
- * Syncing those paths to Firestore breaks other devices; strip them on write/read.
+ * Receipt images: local file/content URIs must never be synced to Firestore.
+ * Remote Storage / HTTPS URLs are kept so other devices can download them.
  */
 object ReceiptUriSanitizer {
+    fun forCloudWrite(uri: String?): String? {
+        if (uri.isNullOrBlank()) return null
+        return when {
+            ReceiptStorageHelper.isRemoteUri(uri) -> uri
+            else -> null
+        }
+    }
+
+    /** Alias used by sync paths that strip local URIs before cloud write. */
     fun forCloudSync(uri: String?): String? {
         if (uri.isNullOrBlank()) return null
         return if (isLocalDeviceUri(uri)) null else uri

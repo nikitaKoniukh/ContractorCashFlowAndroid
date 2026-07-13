@@ -68,7 +68,8 @@ sealed class ExpenseSaveResult {
         val utilizationPercent: Int,
         val projectName: String = "",
         val totalExpenses: Double = 0.0,
-        val budget: Double = 0.0
+        val budget: Double = 0.0,
+        val projectId: String? = null
     ) : ExpenseSaveResult()
 }
 

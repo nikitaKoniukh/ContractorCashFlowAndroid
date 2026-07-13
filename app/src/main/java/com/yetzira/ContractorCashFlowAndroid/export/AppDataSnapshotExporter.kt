@@ -7,6 +7,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import kotlinx.coroutines.flow.first
@@ -42,6 +43,7 @@ class DataExportService(
         val expenses = database.expenseDao().getAll().first()
         val invoices = database.invoiceDao().getAll().first()
         val clients = database.clientDao().getAll().first()
+        val labor = database.laborDetailsDao().getAll().first()
 
         val payload = DataExportPayload(
             exportedAt = now.toIso8601(),
@@ -71,7 +73,8 @@ class DataExportService(
             },
             expenses = expenses.map { it.toExportExpense() },
             invoices = invoices.map { it.toExportInvoice(now) },
-            clients = clients.map { it.toExportClient() }
+            clients = clients.map { it.toExportClient() },
+            labor = labor.map { it.toExportLabor() }
         )
 
         return gson.toJson(payload)
@@ -98,7 +101,8 @@ private data class DataExportPayload(
     val projects: List<ExportProject>,
     val expenses: List<ExportExpense>,
     val invoices: List<ExportInvoice>,
-    val clients: List<ExportClient>
+    val clients: List<ExportClient>,
+    val labor: List<ExportLabor>
 )
 
 private data class ExportPreferences(
@@ -159,6 +163,18 @@ private data class ExportClient(
     val lastModified: String
 )
 
+private data class ExportLabor(
+    val id: String,
+    val workerName: String,
+    val laborType: String,
+    val hourlyRate: Double?,
+    val dailyRate: Double?,
+    val contractPrice: Double?,
+    val notes: String?,
+    val createdDate: String,
+    val lastModified: String
+)
+
 private fun ExpenseEntity.toExportExpense(): ExportExpense = ExportExpense(
     id = id,
     category = category,
@@ -195,6 +211,19 @@ private fun ClientEntity.toExportClient(): ExportClient = ExportClient(
     notes = notes,
     lastModified = lastModified.toIso8601()
 )
+
+private fun LaborDetailsEntity.toExportLabor(): ExportLabor =
+    ExportLabor(
+        id = id,
+        workerName = workerName,
+        laborType = laborType,
+        hourlyRate = hourlyRate,
+        dailyRate = dailyRate,
+        contractPrice = contractPrice,
+        notes = notes,
+        createdDate = createdDate.toIso8601(),
+        lastModified = lastModified.toIso8601()
+    )
 
 private fun Long.toIso8601(): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)

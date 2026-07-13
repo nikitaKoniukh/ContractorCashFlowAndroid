@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -78,7 +77,6 @@ import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
@@ -150,11 +148,6 @@ fun SettingsScreen(
     ) { uri ->
         uri?.let(viewModel::exportData)
     }
-    val themeLabels = mapOf(
-        ThemeModeOption.SYSTEM to stringResource(R.string.settings_theme_system),
-        ThemeModeOption.LIGHT to stringResource(R.string.settings_theme_light),
-        ThemeModeOption.DARK to stringResource(R.string.settings_theme_dark)
-    )
 
     // --- Notification explanation dialog state ---
     var pendingNotificationToggle by remember { mutableStateOf<NotificationToggleType?>(null) }
@@ -429,17 +422,6 @@ fun SettingsScreen(
                 leadingIcon = Icons.Default.AttachMoney,
                 description = stringResource(R.string.settings_currency_description),
                 onOptionSelected = viewModel::setCurrency
-            )
-
-            SettingsPickerSection(
-                title = stringResource(R.string.settings_section_theme),
-                rowTitle = stringResource(R.string.settings_section_theme),
-                selectedLabel = themeLabels[state.selectedThemeMode]
-                    ?: stringResource(R.string.settings_theme_system),
-                options = ThemeModeOption.entries.toList(),
-                optionLabel = { themeLabels[it] ?: it.name },
-                leadingIcon = Icons.Default.Palette,
-                onOptionSelected = viewModel::setThemeMode
             )
 
             SettingsSectionHeader(stringResource(R.string.settings_section_notifications))

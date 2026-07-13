@@ -26,11 +26,74 @@ object OcrService {
     )
 
     /**
-     * Parse a receipt image from [uri] and extract structured data.
+     * Parse a receipt image or PDF from [uri] and extract structured data.
      */
     suspend fun parseFromUri(context: Context, uri: Uri): ScannedReceiptData {
+        if (isPdf(context, uri)) {
+            return parseFromPdf(context, uri)
+        }
         val inputImage = InputImage.fromFilePath(context, uri)
         return processImage(inputImage)
+    }
+
+    private fun isPdf(context: Context, uri: Uri): Boolean {
+        val mime = context.contentResolver.getType(uri)
+        if (mime == "application/pdf") return true
+        val path = uri.path?.lowercase().orEmpty()
+        return path.endsWith(".pdf")
+    }
+
+    /**
+     * Render PDF pages with [android.graphics.pdf.PdfRenderer] and OCR each page
+     * (mirrors iOS PDFKit → Vision fallback).
+     */
+    private suspend fun parseFromPdf(context: Context, uri: Uri): ScannedReceiptData {
+        return try {
+            val pfd = context.contentResolver.openFileDescriptor(uri, "r")
+                ?: return ScannedReceiptData(null, null, "", "")
+            pfd.use { descriptor ->
+                val renderer = android.graphics.pdf.PdfRenderer(descriptor)
+                renderer.use { pdf ->
+                    val allLines = mutableListOf<String>()
+                    for (i in 0 until pdf.pageCount) {
+                        pdf.openPage(i).use { page ->
+                            val scale = 2
+                            val bitmap = Bitmap.createBitmap(
+                                page.width * scale,
+                                page.height * scale,
+                                Bitmap.Config.ARGB_8888
+                            )
+                            val canvas = android.graphics.Canvas(bitmap)
+                            canvas.drawColor(android.graphics.Color.WHITE)
+                            canvas.scale(scale.toFloat(), scale.toFloat())
+                            page.render(
+                                bitmap,
+                                null,
+                                null,
+                                android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+                            )
+                            val pageResult = parseFromBitmap(bitmap)
+                            if (pageResult.rawText.isNotBlank()) {
+                                allLines.addAll(pageResult.rawText.split('\n'))
+                            }
+                            bitmap.recycle()
+                        }
+                    }
+                    if (allLines.isEmpty()) {
+                        ScannedReceiptData(null, null, "", "")
+                    } else {
+                        ScannedReceiptData(
+                            amount = extractTotalAmount(allLines),
+                            date = extractDate(allLines),
+                            description = bestDescription(allLines),
+                            rawText = allLines.joinToString("\n")
+                        )
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            ScannedReceiptData(null, null, "", "")
+        }
     }
 
     /**

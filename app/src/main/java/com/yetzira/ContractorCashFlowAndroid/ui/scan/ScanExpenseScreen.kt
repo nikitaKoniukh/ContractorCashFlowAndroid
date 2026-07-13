@@ -339,7 +339,15 @@ private fun copyUriToInternalStorage(context: Context, sourceUri: Uri): Uri? {
     return try {
         val receiptsDir = File(context.filesDir, "receipts").apply { mkdirs() }
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val destFile = File(receiptsDir, "receipt_$timestamp.jpg")
+        val mime = context.contentResolver.getType(sourceUri).orEmpty()
+        val extension = when {
+            mime == "application/pdf" -> "pdf"
+            mime.contains("png") -> "png"
+            mime.contains("webp") -> "webp"
+            sourceUri.path?.lowercase()?.endsWith(".pdf") == true -> "pdf"
+            else -> "jpg"
+        }
+        val destFile = File(receiptsDir, "receipt_$timestamp.$extension")
 
         context.contentResolver.openInputStream(sourceUri)?.use { input ->
             destFile.outputStream().use { output ->

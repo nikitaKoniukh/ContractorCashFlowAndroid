@@ -208,12 +208,15 @@ fun ScannedExpenseReviewScreen(
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        val categoryOptions = ExpenseCategory.entries
+                        val categoryLabels = categoryOptions.map { stringResource(it.labelResId) }
                         ModernDropdown(
                             label = stringResource(R.string.expenses_form_category_label),
-                            options = ExpenseCategory.entries.map { it.name },
-                            selected = category.name,
-                            onSelected = { name ->
-                                ExpenseCategory.fromString(name)?.let { category = it }
+                            options = categoryLabels,
+                            selected = stringResource(category.labelResId),
+                            onSelected = { label ->
+                                val index = categoryLabels.indexOf(label)
+                                if (index >= 0) category = categoryOptions[index]
                             },
                             modifier = Modifier.fillMaxWidth()
                         )

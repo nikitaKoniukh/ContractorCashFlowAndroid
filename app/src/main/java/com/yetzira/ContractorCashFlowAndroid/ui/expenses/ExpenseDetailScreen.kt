@@ -146,7 +146,7 @@ fun ExpenseDetailScreen(
         }
 
         val category = ExpenseCategory.fromString(expense.category)
-        val categoryName = category?.displayName ?: expense.category
+        val categoryName = category?.let { stringResource(it.labelResId) } ?: expense.category
 
         Column(
             modifier = Modifier

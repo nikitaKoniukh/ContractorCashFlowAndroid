@@ -2,7 +2,6 @@ package com.yetzira.ContractorCashFlowAndroid.ui.settings
 
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.AppLanguageOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.ThemeModeOption
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -19,7 +18,6 @@ class SettingsUiModelsTest {
         assertNull(state.userEmail)
         assertEquals(AppLanguageOption.HEBREW, state.selectedLanguage)
         assertEquals(CurrencyOption.ILS, state.selectedCurrency)
-        assertEquals(ThemeModeOption.SYSTEM, state.selectedThemeMode)
         assertFalse(state.invoiceRemindersEnabled)
         assertFalse(state.overdueAlertsEnabled)
         assertFalse(state.budgetWarningsEnabled)
