@@ -106,6 +106,10 @@
     <string name="projects_budget_reduction_warning">אזהרה: התקציב החדש נמוך מההוצאות הנוכחיות.</string>
     <string name="projects_expected_completion_footer">התאריך הצפוי לסיום הפרויקט</string>
     <string name="projects_inactive_footer">פרויקטים לא פעילים מוסתרים מחלק מהמסכים, אך הנתונים נשמרים</string>
+    <string name="projects_no_expenses">לא נרשמו הוצאות</string>
+    <string name="projects_add_first_expense">הוסף הוצאה ראשונה</string>
+    <string name="projects_no_invoices">לא נוצרו חשבוניות</string>
+    <string name="projects_add_first_invoice">הוסף חשבונית ראשונה</string>
     <string name="projects_client_detail_placeholder">מסך פרטי לקוח</string>
 
     <string name="expenses_new">הוצאה חדשה</string>

@@ -33,6 +33,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -271,8 +272,10 @@ fun ProjectDetailScreen(
                 )
             }
 
-            item {
-                CategoryBreakdownSection(categories = state.categories)
+            if (state.categories.isNotEmpty()) {
+                item {
+                    CategoryBreakdownSection(categories = state.categories)
+                }
             }
 
             item {
@@ -288,51 +291,63 @@ fun ProjectDetailScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TextButton(onClick = onAddExpense) {
-                        Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_expense))
+                    if (state.expenses.isNotEmpty()) {
+                        TextButton(onClick = onAddExpense) {
+                            Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_expense))
+                        }
                     }
                 }
             }
 
-            items(state.expenses, key = { it.id }) { expense ->
-                val dismissState = rememberSwipeToDismissBoxState(
-                    confirmValueChange = { value ->
-                        if (value != SwipeToDismissBoxValue.Settled) {
-                            viewModel.deleteExpense(expense)
-                        }
-                        true
-                    }
-                )
-                LaunchedEffect(dismissState.currentValue) {
-                    if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-                        val result = snackbarHostState.showSnackbar(
-                            message = expenseDeletedMessage,
-                            actionLabel = undoLabel
-                        )
-                        if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
-                            viewModel.undoDeleteExpense()
-                        }
-                    }
+            if (state.expenses.isEmpty()) {
+                item {
+                    ProjectSectionEmptyState(
+                        message = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_no_expenses),
+                        actionLabel = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_first_expense),
+                        onAction = onAddExpense
+                    )
                 }
-                SwipeToDismissBox(
-                    state = dismissState,
-                    backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.errorContainer)
-                                .padding(horizontal = 16.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            val deleteText = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete)
-                            Text(text = deleteText)
+            } else {
+                items(state.expenses, key = { it.id }) { expense ->
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { value ->
+                            if (value != SwipeToDismissBoxValue.Settled) {
+                                viewModel.deleteExpense(expense)
+                            }
+                            true
                         }
-                    },
-                    content = {
-                        ExpenseRow(expense = expense, currency = currency, onClick = { onOpenExpense(expense.id) })
+                    )
+                    LaunchedEffect(dismissState.currentValue) {
+                        if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+                            val result = snackbarHostState.showSnackbar(
+                                message = expenseDeletedMessage,
+                                actionLabel = undoLabel
+                            )
+                            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                                viewModel.undoDeleteExpense()
+                            }
+                        }
                     }
-                )
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        backgroundContent = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.errorContainer)
+                                    .padding(horizontal = 16.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                val deleteText = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete)
+                                Text(text = deleteText)
+                            }
+                        },
+                        content = {
+                            ExpenseRow(expense = expense, currency = currency, onClick = { onOpenExpense(expense.id) })
+                        }
+                    )
+                }
             }
 
             item {
@@ -348,51 +363,63 @@ fun ProjectDetailScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    TextButton(onClick = onAddInvoice) {
-                        Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_invoice))
+                    if (state.invoices.isNotEmpty()) {
+                        TextButton(onClick = onAddInvoice) {
+                            Text(text = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_invoice))
+                        }
                     }
                 }
             }
 
-            items(state.invoices, key = { it.id }) { invoice ->
-                val dismissState = rememberSwipeToDismissBoxState(
-                    confirmValueChange = { value ->
-                        if (value != SwipeToDismissBoxValue.Settled) {
-                            viewModel.deleteInvoice(invoice)
-                        }
-                        true
-                    }
-                )
-                LaunchedEffect(dismissState.currentValue) {
-                    if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-                        val result = snackbarHostState.showSnackbar(
-                            message = invoiceDeletedMessage,
-                            actionLabel = undoLabel
-                        )
-                        if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
-                            viewModel.undoDeleteInvoice()
-                        }
-                    }
+            if (state.invoices.isEmpty()) {
+                item {
+                    ProjectSectionEmptyState(
+                        message = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_no_invoices),
+                        actionLabel = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_add_first_invoice),
+                        onAction = onAddInvoice
+                    )
                 }
-                SwipeToDismissBox(
-                    state = dismissState,
-                    backgroundContent = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.errorContainer)
-                                .padding(horizontal = 16.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            val deleteText = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete)
-                            Text(text = deleteText)
+            } else {
+                items(state.invoices, key = { it.id }) { invoice ->
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { value ->
+                            if (value != SwipeToDismissBoxValue.Settled) {
+                                viewModel.deleteInvoice(invoice)
+                            }
+                            true
                         }
-                    },
-                    content = {
-                        InvoiceRow(invoice = invoice, currency = currency, onClick = { onOpenInvoice(invoice.id) })
+                    )
+                    LaunchedEffect(dismissState.currentValue) {
+                        if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+                            val result = snackbarHostState.showSnackbar(
+                                message = invoiceDeletedMessage,
+                                actionLabel = undoLabel
+                            )
+                            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                                viewModel.undoDeleteInvoice()
+                            }
+                        }
                     }
-                )
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        backgroundContent = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.errorContainer)
+                                    .padding(horizontal = 16.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                val deleteText = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_delete)
+                                Text(text = deleteText)
+                            }
+                        },
+                        content = {
+                            InvoiceRow(invoice = invoice, currency = currency, onClick = { onOpenInvoice(invoice.id) })
+                        }
+                    )
+                }
             }
         }
 
@@ -416,6 +443,31 @@ private fun ExportToggleRow(
             modifier = Modifier.weight(1f)
         )
         Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
+private fun ProjectSectionEmptyState(
+    message: String,
+    actionLabel: String,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        OutlinedButton(onClick = onAction) {
+            Text(actionLabel)
+        }
     }
 }
 

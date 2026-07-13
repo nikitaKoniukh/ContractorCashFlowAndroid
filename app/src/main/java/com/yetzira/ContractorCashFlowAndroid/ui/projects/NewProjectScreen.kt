@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -210,12 +211,48 @@ fun NewProjectScreen(
                     }
 
                     if (useExistingClient && hasExistingClients) {
-                        IosDropdownField(
-                            options = existingClients,
-                            selectedClientName = selectedClientName,
-                            onSelected = { selectedClientName = it },
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        )
+                        val selectedClient = existingClients.firstOrNull {
+                            it.name.equals(selectedClientName, ignoreCase = true)
+                        }
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            IosDropdownField(
+                                options = existingClients,
+                                selectedClientName = selectedClientName,
+                                onSelected = { selectedClientName = it },
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                            if (selectedClient != null) {
+                                val email = selectedClient.email?.trim().orEmpty()
+                                val phone = selectedClient.phone?.trim().orEmpty()
+                                if (email.isNotEmpty() || phone.isNotEmpty()) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(start = 16.dp),
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                    )
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        if (email.isNotEmpty()) {
+                                            Text(
+                                                text = email,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        if (phone.isNotEmpty()) {
+                                            Text(
+                                                text = phone,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     } else {
                         IosTextField(
                             value = clientName,
@@ -227,12 +264,22 @@ fun NewProjectScreen(
                 }
 
                 if (duplicateTypedClient) {
-                    Text(
-                        text = stringResource(R.string.projects_duplicate_client_warning),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = Color(0xFFFF9500)
+                        )
+                        Text(
+                            text = stringResource(R.string.projects_duplicate_client_warning),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 if (showNewClientInfoSection) {
@@ -351,12 +398,68 @@ fun NewProjectScreen(
                     )
                 }
 
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.projects_expected_completion),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Switch(
+                                    checked = hasExpectedCompletion,
+                                    onCheckedChange = { enabled ->
+                                        hasExpectedCompletion = enabled
+                                        expectedEndDate = if (enabled) {
+                                            expectedEndDate ?: startOfDayMillis(System.currentTimeMillis())
+                                        } else {
+                                            null
+                                        }
+                                    }
+                                )
+                            }
+
+                            AnimatedVisibility(visible = hasExpectedCompletion) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(start = 16.dp),
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                    )
+                                    EndDatePickerRow(
+                                        endDate = expectedEndDate ?: startOfDayMillis(System.currentTimeMillis()),
+                                        onDateSelected = { expectedEndDate = it }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    if (hasExpectedCompletion) {
+                        Text(
+                            text = stringResource(R.string.projects_expected_completion_footer),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
+                    }
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -374,50 +477,13 @@ fun NewProjectScreen(
                                 onCheckedChange = { isActive = it }
                             )
                         }
-
-                        HorizontalDivider(
-                            modifier = Modifier.padding(start = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.projects_expected_completion),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Switch(
-                                checked = hasExpectedCompletion,
-                                onCheckedChange = { enabled ->
-                                    hasExpectedCompletion = enabled
-                                    expectedEndDate = if (enabled) {
-                                        expectedEndDate ?: startOfDayMillis(System.currentTimeMillis())
-                                    } else {
-                                        null
-                                    }
-                                }
-                            )
-                        }
-
-                        AnimatedVisibility(visible = hasExpectedCompletion) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(start = 16.dp),
-                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                                )
-                                EndDatePickerRow(
-                                    endDate = expectedEndDate ?: startOfDayMillis(System.currentTimeMillis()),
-                                    onDateSelected = { expectedEndDate = it }
-                                )
-                            }
-                        }
                     }
+                    Text(
+                        text = stringResource(R.string.projects_inactive_footer),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
                 }
             }
         }

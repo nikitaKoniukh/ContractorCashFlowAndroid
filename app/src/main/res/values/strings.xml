@@ -119,6 +119,10 @@
     <string name="projects_budget_reduction_warning">Warning: new budget is below current expenses.</string>
     <string name="projects_expected_completion_footer">The expected date when this project should be completed</string>
     <string name="projects_inactive_footer">Inactive projects are hidden from some views but data is preserved</string>
+    <string name="projects_no_expenses">No expenses recorded</string>
+    <string name="projects_add_first_expense">Add First Expense</string>
+    <string name="projects_no_invoices">No invoices created</string>
+    <string name="projects_add_first_invoice">Add First Invoice</string>
     <string name="projects_client_detail_placeholder">Client Detail Screen</string>
 
     <string name="expenses_new">New Expense</string>
