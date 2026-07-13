@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -65,6 +65,7 @@ import com.yetzira.ContractorCashFlowAndroid.billing.FreeTierLimit
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
 import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
+import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.StatPill
 import com.yetzira.ContractorCashFlowAndroid.ui.components.WorkerAvatar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
@@ -104,8 +105,10 @@ fun LaborListScreen(
     var showPaywall by remember { mutableStateOf(false) }
     var paywallMessage by remember { mutableStateOf<String?>(null) }
 
+    val hasSearchOrFilters = state.query.isNotBlank() || state.filters.isActive
+
     val onAddAttempt = {
-        if (purchaseManager.canCreateWorker(state.workers.size)) {
+        if (purchaseManager.canCreateWorker(state.totalWorkerCount)) {
             onAdd()
         } else {
             paywallMessage = context.getString(
@@ -122,7 +125,10 @@ fun LaborListScreen(
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         floatingActionButton = {
             FloatingActionButton(onClick = onAddAttempt) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Worker")
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.labor_add)
+                )
             }
         }
     ) { innerPadding ->
@@ -132,8 +138,6 @@ fun LaborListScreen(
                 .padding(innerPadding)
                 .padding(horizontal = Space20)
         ) {
-
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -147,6 +151,62 @@ fun LaborListScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = Space20, bottom = Space8),
+                        horizontalArrangement = Arrangement.spacedBy(Space8),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ModernSearchBar(
+                            value = state.query,
+                            onValueChange = viewModel::setSearchQuery,
+                            modifier = Modifier.weight(1f),
+                            placeholder = stringResource(R.string.labor_search_placeholder)
+                        )
+                        IconButton(
+                            onClick = { showFilters = true },
+                            modifier = Modifier
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(
+                                    if (state.filters.isActive) {
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    }
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = stringResource(R.string.labor_filters_sheet_title)
+                            )
+                        }
+                        Box {
+                            IconButton(onClick = { showSortMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Sort,
+                                    contentDescription = stringResource(R.string.labor_sort_recently_added)
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showSortMenu,
+                                onDismissRequest = { showSortMenu = false }
+                            ) {
+                                LaborSortOption.entries.forEach { option ->
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(option.labelResId)) },
+                                        onClick = {
+                                            viewModel.setSort(option)
+                                            showSortMenu = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = Space8),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -155,47 +215,18 @@ fun LaborListScreen(
                             style = SectionHeaderStyle,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "${state.workers.size}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                            )
-                            IconButton(onClick = { showFilters = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.FilterList,
-                                    contentDescription = "Filter"
-                                )
-                            }
-                            Box {
-                                IconButton(onClick = { showSortMenu = true }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.Sort,
-                                        contentDescription = "Sort"
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = showSortMenu,
-                                    onDismissRequest = { showSortMenu = false }
-                                ) {
-                                    LaborSortOption.entries.forEach { option ->
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(option.labelResId)) },
-                                            onClick = {
-                                                viewModel.setSort(option)
-                                                showSortMenu = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        Text(
+                            text = "${state.workers.size}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        )
                     }
                 }
 
                 if (state.workers.isEmpty()) {
                     item {
                         EmptyWorkersState(
+                            isFiltered = hasSearchOrFilters || state.totalWorkerCount > 0,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = Space20, bottom = 96.dp)
@@ -224,12 +255,18 @@ fun LaborListScreen(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .clip(shape)
-                                        .background(if (isSwiping) MaterialTheme.colorScheme.errorContainer else Color.Transparent)
+                                        .background(
+                                            if (isSwiping) {
+                                                MaterialTheme.colorScheme.errorContainer
+                                            } else {
+                                                Color.Transparent
+                                            }
+                                        )
                                         .padding(horizontal = 16.dp),
                                     contentAlignment = Alignment.CenterEnd
                                 ) {
                                     if (isSwiping) {
-                                        Text(text = "Delete")
+                                        Text(text = stringResource(R.string.common_delete))
                                     }
                                 }
                             },
@@ -246,7 +283,6 @@ fun LaborListScreen(
                         )
                     }
 
-                    // Extra bottom space so the final card clears the FAB area.
                     item { Spacer(modifier = Modifier.size(96.dp)) }
                 }
             }
@@ -273,13 +309,20 @@ fun LaborListScreen(
     pendingDelete?.let { worker ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete worker?") },
+            title = { Text(stringResource(R.string.labor_delete_worker_title)) },
             text = {
                 Text(
                     if (worker.linkedExpenseCount > 0) {
-                        "${worker.worker.workerName} will be deleted. ${worker.linkedExpenseCount} linked expense(s) will remain but unlinked."
+                        stringResource(
+                            R.string.labor_delete_worker_message_with_linked,
+                            worker.worker.workerName,
+                            worker.linkedExpenseCount
+                        )
                     } else {
-                        "${worker.worker.workerName} will be deleted."
+                        stringResource(
+                            R.string.labor_delete_worker_message,
+                            worker.worker.workerName
+                        )
                     }
                 )
             },
@@ -287,10 +330,12 @@ fun LaborListScreen(
                 TextButton(onClick = {
                     viewModel.deleteWorker(worker.worker)
                     pendingDelete = null
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.action_delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+                TextButton(onClick = { pendingDelete = null }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
             }
         )
     }
@@ -305,19 +350,26 @@ fun LaborListScreen(
 }
 
 @Composable
-private fun EmptyWorkersState(modifier: Modifier = Modifier) {
+private fun EmptyWorkersState(
+    isFiltered: Boolean,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.labor_empty_title),
+            text = stringResource(
+                if (isFiltered) R.string.labor_empty_filtered_title else R.string.labor_empty_title
+            ),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         Text(
-            text = stringResource(R.string.labor_empty_body),
+            text = stringResource(
+                if (isFiltered) R.string.labor_empty_filtered_body else R.string.labor_empty_body
+            ),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp)
@@ -325,10 +377,11 @@ private fun EmptyWorkersState(modifier: Modifier = Modifier) {
     }
 }
 
-// ── Summary Card ─────────────────────────────────────────────────────────────
-
 @Composable
 private fun SummaryCard(summary: LaborSummaryUi, currency: CurrencyOption) {
+    val showDays = summary.daysWorked > 0
+    val showHours = summary.totalHours > 0
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -342,7 +395,6 @@ private fun SummaryCard(summary: LaborSummaryUi, currency: CurrencyOption) {
             modifier = Modifier.padding(start = Space8)
         )
 
-        // Row 1: Worker Cost + Total Workers
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Space12)
@@ -363,25 +415,33 @@ private fun SummaryCard(summary: LaborSummaryUi, currency: CurrencyOption) {
             )
         }
 
-        // Row 2: keep the bottom row visible so ALL TIME is always a 2x2 grid.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Space12)
-        ) {
-            AllTimeMetricCard(
-                label = stringResource(R.string.labor_summary_total_days),
-                value = "${summary.daysWorked}",
-                icon = Icons.Default.CalendarToday,
-                color = KablanProColors.PendingOrange,
-                modifier = Modifier.weight(1f)
-            )
-            AllTimeMetricCard(
-                label = stringResource(R.string.labor_summary_total_hours),
-                value = "${summary.totalHours.toInt()}",
-                icon = Icons.Default.Schedule,
-                color = KablanProColors.HourlyTeal,
-                modifier = Modifier.weight(1f)
-            )
+        if (showDays || showHours) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Space12)
+            ) {
+                if (showDays) {
+                    AllTimeMetricCard(
+                        label = stringResource(R.string.labor_summary_total_days),
+                        value = "${summary.daysWorked}",
+                        icon = Icons.Default.CalendarToday,
+                        color = KablanProColors.PendingOrange,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (showHours) {
+                    AllTimeMetricCard(
+                        label = stringResource(R.string.labor_summary_total_hours),
+                        value = "${summary.totalHours.toInt()}",
+                        icon = Icons.Default.Schedule,
+                        color = KablanProColors.HourlyTeal,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (showDays != showHours) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
         }
     }
 }
@@ -430,8 +490,6 @@ private fun AllTimeMetricCard(
     }
 }
 
-// ── Worker Card ───────────────────────────────────────────────────────────────
-
 @Composable
 private fun WorkerCard(
     worker: WorkerMetricsUi,
@@ -454,7 +512,6 @@ private fun WorkerCard(
                 .padding(Space16),
             verticalArrangement = Arrangement.spacedBy(Space8)
         ) {
-            // ── Header: avatar + name/rate + type badge ───────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Space12)
@@ -471,22 +528,20 @@ private fun WorkerCard(
                         fontWeight = FontWeight.Medium,
                         maxLines = 1
                     )
-                    val rateLabel = worker.rateLabel
-                    if (rateLabel.isNotBlank() && rateLabel != "-") {
+                    val rateAmount = worker.effectiveRateAmount
+                    if (rateAmount != null) {
                         Text(
-                            text = rateLabel,
+                            text = formatCurrencyAmount(rateAmount, currency) + worker.rateSuffix,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f)
                         )
                     }
                 }
 
-                // Labor type badge
                 Text(
-                    text = worker.laborType?.name
-                        ?.lowercase()
-                        ?.replaceFirstChar { it.uppercase() }
-                        ?: "Unknown",
+                    text = stringResource(
+                        worker.laborType?.labelResId ?: R.string.labor_type_hourly
+                    ),
                     style = BadgeTextStyle,
                     color = KablanProColors.WorkerPurple,
                     modifier = Modifier
@@ -504,7 +559,6 @@ private fun WorkerCard(
                 )
             }
 
-            // ── Stats pills: hours + days ─────────────────────────────────
             val showHours = worker.hourlyUnitsWorked > 0
             val showDays = worker.dailyUnitsWorked > 0
             if (showHours || showDays) {
@@ -531,7 +585,6 @@ private fun WorkerCard(
                 }
             }
 
-            // ── Projects breakdown ────────────────────────────────────────
             if (worker.projectBreakdown.isNotEmpty()) {
                 Column(
                     modifier = Modifier.padding(top = Space8),
@@ -566,7 +619,6 @@ private fun WorkerCard(
                 }
             }
 
-            // ── Total Amount footer ───────────────────────────────────────
             HorizontalDivider(
                 modifier = Modifier.padding(top = Space8),
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)

@@ -450,6 +450,13 @@
     <string name="labor_delete_worker_title">Delete worker?</string>
     <string name="labor_delete_worker_message">%1$s will be deleted.</string>
     <string name="labor_delete_worker_message_with_linked">%1$s will be deleted. %2$d linked expense(s) will remain but unlinked.</string>
+    <string name="labor_empty_filtered_title">No matching workers</string>
+    <string name="labor_empty_filtered_body">No worker entries match your current filters.</string>
+    <string name="labor_form_section_basic">Worker</string>
+    <string name="labor_form_section_rates">Rates</string>
+    <string name="labor_form_section_notes">Notes</string>
+    <string name="labor_show_all_expenses">Show All (%1$d)</string>
+    <string name="labor_created_date">Created Date</string>
 
     <!-- Expense Form Strings -->
     <string name="expenses_form_units_label">Units worked</string>

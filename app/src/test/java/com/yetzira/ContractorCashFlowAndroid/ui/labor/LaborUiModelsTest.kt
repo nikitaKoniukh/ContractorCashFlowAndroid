@@ -4,6 +4,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntit
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -28,7 +29,7 @@ class LaborUiModelsTest {
     }
 
     @Test
-    fun `worker metrics rate label maps correctly by labor type`() {
+    fun `worker metrics effective rate maps correctly by labor type`() {
         val worker = LaborDetailsEntity(
             id = "w1",
             workerName = "Alex",
@@ -44,9 +45,27 @@ class LaborUiModelsTest {
         val daily = WorkerMetricsUi(worker, LaborType.DAILY, 0.0, 0.0, 0, emptyList(), 0)
         val subcontractor = WorkerMetricsUi(worker, LaborType.SUBCONTRACTOR, 0.0, 0.0, 0, emptyList(), 0)
 
-        assertEquals("75.0/hr", hourly.rateLabel)
-        assertEquals("500.0/day", daily.rateLabel)
-        assertEquals("4000.0", subcontractor.rateLabel)
+        assertEquals(75.0, hourly.effectiveRateAmount)
+        assertEquals("/hr", hourly.rateSuffix)
+        assertEquals(500.0, daily.effectiveRateAmount)
+        assertEquals("/day", daily.rateSuffix)
+        assertEquals(4000.0, subcontractor.effectiveRateAmount)
+        assertEquals("", subcontractor.rateSuffix)
+    }
+
+    @Test
+    fun `worker metrics effective rate is null when rate missing`() {
+        val worker = LaborDetailsEntity(
+            id = "w2",
+            workerName = "Sam",
+            laborType = LaborType.HOURLY.name,
+            hourlyRate = null,
+            dailyRate = null,
+            contractPrice = null,
+            notes = null,
+            createdDate = 1L
+        )
+        val metrics = WorkerMetricsUi(worker, LaborType.HOURLY, 0.0, 0.0, 0, emptyList(), 0)
+        assertNull(metrics.effectiveRateAmount)
     }
 }
-

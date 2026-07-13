@@ -2,6 +2,7 @@ package com.yetzira.ContractorCashFlowAndroid.ui.labor
 
 import androidx.annotation.StringRes
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
 
@@ -40,13 +41,16 @@ data class WorkerMetricsUi(
     val dailyUnitsWorked: Double = 0.0,
     val projectBreakdown: List<ProjectCostUi> = emptyList()
 ) {
-    val rateLabel: String
+    val effectiveRateAmount: Double?
         get() = when (laborType) {
-            LaborType.HOURLY -> "${worker.hourlyRate ?: 0.0}${laborType.rateSuffix}"
-            LaborType.DAILY -> "${worker.dailyRate ?: 0.0}${laborType.rateSuffix}"
-            LaborType.SUBCONTRACTOR -> "${worker.contractPrice ?: 0.0}"
-            null -> "-"
+            LaborType.HOURLY -> worker.hourlyRate
+            LaborType.DAILY -> worker.dailyRate
+            LaborType.SUBCONTRACTOR -> worker.contractPrice
+            null -> null
         }
+
+    val rateSuffix: String
+        get() = laborType?.rateSuffix.orEmpty()
 }
 
 data class ProjectCostUi(
@@ -70,7 +74,8 @@ data class LaborListUiState(
     val availableProjects: List<String> = emptyList(),
     val availableMonths: List<LaborMonthOption> = emptyList(),
     val workers: List<WorkerMetricsUi> = emptyList(),
-    val summary: LaborSummaryUi = LaborSummaryUi()
+    val summary: LaborSummaryUi = LaborSummaryUi(),
+    val totalWorkerCount: Int = 0
 )
 
 data class LaborFormUiState(
@@ -88,6 +93,7 @@ data class LaborFormUiState(
 
 data class LaborDetailUiState(
     val worker: LaborDetailsEntity? = null,
-    val metrics: WorkerMetricsUi? = null
+    val metrics: WorkerMetricsUi? = null,
+    val recentExpenses: List<ExpenseEntity> = emptyList()
 )
 

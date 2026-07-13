@@ -394,6 +394,16 @@
     <string name="labor_filters_done">בוצע</string>
     <string name="labor_screen_add_title">הוסף עובד</string>
     <string name="labor_screen_edit_title">ערוך עובד</string>
+    <string name="labor_empty_filtered_title">אין עובדים תואמים</string>
+    <string name="labor_empty_filtered_body">אין עובדים שתואמים למסננים הנוכחיים.</string>
+    <string name="labor_form_section_basic">עובד</string>
+    <string name="labor_form_section_rates">תעריפים</string>
+    <string name="labor_form_section_notes">הערות</string>
+    <string name="labor_show_all_expenses">הצג הכל (%1$d)</string>
+    <string name="labor_created_date">תאריך יצירה</string>
+    <string name="labor_delete_worker_title">למחוק עובד?</string>
+    <string name="labor_delete_worker_message">%1$s יימחק.</string>
+    <string name="labor_delete_worker_message_with_linked">%1$s יימחק. %2$d הוצאות מקושרות יישארו אך ינותקו.</string>
 
     <!-- Expense Form Strings -->
     <string name="expenses_form_units_label">יחידות עבודה</string>

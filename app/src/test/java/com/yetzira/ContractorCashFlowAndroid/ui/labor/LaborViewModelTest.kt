@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -25,7 +24,7 @@ class LaborViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     @Test
-    fun `updateForm detects duplicate worker name`() {
+    fun `updateForm detects duplicate worker name but still allows save`() {
         val repository = FakeLaborRepository(
             workers = listOf(
                 LaborDetailsEntity(id = "w1", workerName = "Alex", laborType = LaborType.HOURLY.name),
@@ -37,7 +36,7 @@ class LaborViewModelTest {
         val updated = viewModel.updateForm(LaborFormUiState(workerName = "alex"))
 
         assertTrue(updated.duplicateWarning)
-        assertFalse(updated.canSave)
+        assertTrue(updated.canSave)
     }
 
     @Test

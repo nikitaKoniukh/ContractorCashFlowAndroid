@@ -361,7 +361,8 @@ fun NavGraphBuilder.laborGraph(
                 workerId = workerId,
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
-                onOpenExpenses = { id -> navController.navigate(LaborRoutes.workerExpenses(id)) }
+                onOpenExpenses = { id -> navController.navigate(LaborRoutes.workerExpenses(id)) },
+                onOpenExpense = { expenseId -> navController.navigate(ExpenseRoutes.detail(expenseId)) }
             )
         }
 

@@ -3,8 +3,9 @@ package com.yetzira.ContractorCashFlowAndroid.ui.labor
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
@@ -15,7 +16,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.font.FontWeight
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 
@@ -34,16 +33,15 @@ fun AddLaborScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val listState by viewModel.listUiState.collectAsState()
     var formState by remember { mutableStateOf(LaborFormUiState()) }
 
     LaunchedEffect(Unit) {
         viewModel.setOriginalWorker(null)
-        formState = viewModel.updateForm(LaborFormUiState(), listState.workers.map { it.worker })
+        formState = viewModel.updateForm(LaborFormUiState())
     }
 
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier.fillMaxSize(),
         topBar = {
             KablanProTopBar(
@@ -67,12 +65,12 @@ fun AddLaborScreen(
     ) { innerPadding ->
         LaborFormContent(
             state = formState,
-            onChange = { formState = viewModel.updateForm(it, listState.workers.map { worker -> worker.worker }) },
+            onChange = { formState = viewModel.updateForm(it) },
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                 .padding(top = KablanProLayoutDefaults.TopSectionSpacing)
+                .verticalScroll(rememberScrollState())
         )
     }
 }
-

@@ -122,7 +122,7 @@ class LaborViewModel(
         return state.copy(
             workerName = trimmedName,
             duplicateWarning = duplicate,
-            canSave = trimmedName.isNotBlank() && !duplicate && (original == null || hasChanges),
+            canSave = trimmedName.isNotBlank() && (original == null || hasChanges),
             hasChanges = hasChanges
         )
     }
@@ -166,9 +166,15 @@ class LaborViewModel(
 
     private fun recomputeDetail() {
         val worker = workers.firstOrNull { it.id == selectedWorkerId }
+        val workerExpenses = if (worker == null) {
+            emptyList()
+        } else {
+            expenses.filter { it.workerId == worker.id }.sortedByDescending { it.date }
+        }
         _detailUiState.value = LaborDetailUiState(
             worker = worker,
-            metrics = worker?.let { computeMetrics(it, expenses.filter { expense -> expense.workerId == worker.id }, projects) }
+            metrics = worker?.let { computeMetrics(it, workerExpenses, projects) },
+            recentExpenses = workerExpenses.take(3)
         )
     }
 
@@ -238,7 +244,8 @@ class LaborViewModel(
                 avgDailyCost = if (uniqueDays > 0) totalLaborCost / uniqueDays else 0.0,
                 totalHours = totalHours,
                 periodLabel = if (filterState.monthEnabled) filterState.month?.label ?: "Selected Month" else "All Time"
-            )
+            ),
+            totalWorkerCount = workers.size
         )
     }
 

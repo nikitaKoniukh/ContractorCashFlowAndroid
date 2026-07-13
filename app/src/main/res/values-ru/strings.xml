@@ -394,6 +394,16 @@
     <string name="labor_filters_done">Готово</string>
     <string name="labor_screen_add_title">Добавить рабочего</string>
     <string name="labor_screen_edit_title">Изменить рабочего</string>
+    <string name="labor_empty_filtered_title">Нет подходящих рабочих</string>
+    <string name="labor_empty_filtered_body">Нет сотрудников, соответствующих текущим фильтрам.</string>
+    <string name="labor_form_section_basic">Рабочий</string>
+    <string name="labor_form_section_rates">Ставки</string>
+    <string name="labor_form_section_notes">Заметки</string>
+    <string name="labor_show_all_expenses">Показать все (%1$d)</string>
+    <string name="labor_created_date">Дата создания</string>
+    <string name="labor_delete_worker_title">Удалить рабочего?</string>
+    <string name="labor_delete_worker_message">%1$s будет удалён.</string>
+    <string name="labor_delete_worker_message_with_linked">%1$s будет удалён. %2$d связанных расходов останутся, но будут отвязаны.</string>
 
     <!-- Expense Form Strings -->
     <string name="expenses_form_units_label">Отработанные единицы</string>
