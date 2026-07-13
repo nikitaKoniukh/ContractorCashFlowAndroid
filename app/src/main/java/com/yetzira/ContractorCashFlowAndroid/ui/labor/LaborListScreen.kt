@@ -56,6 +56,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
@@ -192,52 +193,62 @@ fun LaborListScreen(
                     }
                 }
 
-                itemsIndexed(state.workers, key = { _, worker -> worker.worker.id }) { index, worker ->
-                    val shape = groupedRowShape(index, state.workers.lastIndex)
-                    val dismissState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = { value ->
-                            if (value != SwipeToDismissBoxValue.Settled) {
-                                pendingDelete = worker
-                                false
-                            } else true
-                        }
-                    )
-
-                    SwipeToDismissBox(
-                        modifier = Modifier,
-                        state = dismissState,
-                        backgroundContent = {
-                            val isSwiping =
-                                dismissState.currentValue != SwipeToDismissBoxValue.Settled ||
-                                dismissState.targetValue != SwipeToDismissBoxValue.Settled
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(shape)
-                                    .background(if (isSwiping) MaterialTheme.colorScheme.errorContainer else Color.Transparent)
-                                    .padding(horizontal = 16.dp),
-                                contentAlignment = Alignment.CenterEnd
-                            ) {
-                                if (isSwiping) {
-                                    Text(text = "Delete")
-                                }
+                if (state.workers.isEmpty()) {
+                    item {
+                        EmptyWorkersState(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = Space20, bottom = 96.dp)
+                        )
+                    }
+                } else {
+                    itemsIndexed(state.workers, key = { _, worker -> worker.worker.id }) { index, worker ->
+                        val shape = groupedRowShape(index, state.workers.lastIndex)
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { value ->
+                                if (value != SwipeToDismissBoxValue.Settled) {
+                                    pendingDelete = worker
+                                    false
+                                } else true
                             }
-                        },
-                        content = {
-                            WorkerCard(
-                                worker = worker,
-                                currency = currency,
-                                index = index,
-                                lastIndex = state.workers.lastIndex,
-                                onClick = { onEdit(worker.worker.id) },
-                                modifier = Modifier
-                            )
-                        }
-                    )
-                }
+                        )
 
-                // Extra bottom space so the final card clears the FAB area.
-                item { Spacer(modifier = Modifier.size(96.dp)) }
+                        SwipeToDismissBox(
+                            modifier = Modifier,
+                            state = dismissState,
+                            backgroundContent = {
+                                val isSwiping =
+                                    dismissState.currentValue != SwipeToDismissBoxValue.Settled ||
+                                    dismissState.targetValue != SwipeToDismissBoxValue.Settled
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(shape)
+                                        .background(if (isSwiping) MaterialTheme.colorScheme.errorContainer else Color.Transparent)
+                                        .padding(horizontal = 16.dp),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    if (isSwiping) {
+                                        Text(text = "Delete")
+                                    }
+                                }
+                            },
+                            content = {
+                                WorkerCard(
+                                    worker = worker,
+                                    currency = currency,
+                                    index = index,
+                                    lastIndex = state.workers.lastIndex,
+                                    onClick = { onEdit(worker.worker.id) },
+                                    modifier = Modifier
+                                )
+                            }
+                        )
+                    }
+
+                    // Extra bottom space so the final card clears the FAB area.
+                    item { Spacer(modifier = Modifier.size(96.dp)) }
+                }
             }
         }
     }
@@ -289,6 +300,27 @@ fun LaborListScreen(
             viewModel = purchaseViewModel,
             onDismiss = { showPaywall = false },
             limitReachedMessage = paywallMessage
+        )
+    }
+}
+
+@Composable
+private fun EmptyWorkersState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.labor_empty_title),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(R.string.labor_empty_body),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }

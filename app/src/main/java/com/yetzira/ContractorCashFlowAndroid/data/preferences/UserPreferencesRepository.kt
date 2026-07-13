@@ -22,7 +22,6 @@ interface UserPreferencesRepositoryContract {
 
 interface SettingsPreferencesRepositoryContract {
     val appLanguage: Flow<AppLanguageOption>
-    val themeMode: Flow<ThemeModeOption>
     val selectedCurrencyCode: Flow<CurrencyOption>
     val invoiceRemindersEnabled: Flow<Boolean>
     val overdueAlertsEnabled: Flow<Boolean>
@@ -32,7 +31,6 @@ interface SettingsPreferencesRepositoryContract {
     val subscriptionRenewalDate: Flow<Long?>
 
     suspend fun setAppLanguage(language: AppLanguageOption)
-    suspend fun setThemeMode(themeMode: ThemeModeOption)
     suspend fun setSelectedCurrency(currency: CurrencyOption)
     suspend fun setInvoiceRemindersEnabled(enabled: Boolean)
     suspend fun setOverdueAlertsEnabled(enabled: Boolean)
@@ -57,7 +55,6 @@ class UserPreferencesRepository(context: Context) :
     // Preference Keys
     private companion object {
         val APP_LANGUAGE = stringPreferencesKey("app_language")
-        val THEME_MODE = stringPreferencesKey("theme_mode")
         val SELECTED_CURRENCY_CODE = stringPreferencesKey("selected_currency_code")
         val INVOICE_REMINDERS_ENABLED = booleanPreferencesKey("invoice_reminders_enabled")
         val OVERDUE_ALERTS_ENABLED = booleanPreferencesKey("overdue_alerts_enabled")
@@ -76,11 +73,6 @@ class UserPreferencesRepository(context: Context) :
     override val appLanguage: Flow<AppLanguageOption> = dataStore.data.map { preferences ->
         val code = preferences[APP_LANGUAGE] ?: "he"
         AppLanguageOption.fromCode(code)
-    }
-
-    override val themeMode: Flow<ThemeModeOption> = dataStore.data.map { preferences ->
-        val code = preferences[THEME_MODE] ?: ThemeModeOption.SYSTEM.code
-        ThemeModeOption.fromCode(code)
     }
 
     override val selectedCurrencyCode: Flow<CurrencyOption> = dataStore.data.map { preferences ->
@@ -136,13 +128,6 @@ class UserPreferencesRepository(context: Context) :
     override suspend fun setAppLanguage(language: AppLanguageOption) {
         dataStore.edit { preferences ->
             preferences[APP_LANGUAGE] = language.code
-        }
-    }
-
-    override suspend fun setThemeMode(themeMode: ThemeModeOption) {
-        com.yetzira.ContractorCashFlowAndroid.locale.ThemeHelper.saveThemeMode(appContext, themeMode)
-        dataStore.edit { preferences ->
-            preferences[THEME_MODE] = themeMode.code
         }
     }
 

@@ -269,10 +269,6 @@
     <string name="settings_sign_in_with_google">Sign in with Google</string>
     <string name="settings_section_language">Language</string>
     <string name="settings_section_currency">Currency</string>
-    <string name="settings_section_theme">Theme</string>
-    <string name="settings_theme_system">System default</string>
-    <string name="settings_theme_light">Light</string>
-    <string name="settings_theme_dark">Dark</string>
     <string name="settings_section_notifications">Notifications</string>
     <string name="settings_section_subscription">Subscription</string>
     <string name="settings_subscription_pro_badge">👑</string>
@@ -474,13 +470,13 @@
 
     <!-- Scan / Receipt Strings -->
     <string name="scan_title">Scan Receipt</string>
-    <string name="scan_description">Scan a receipt or choose an image to automatically extract expense details.</string>
+    <string name="scan_description">Scan a receipt or choose an image or PDF to automatically extract expense details.</string>
     <string name="scan_document">Scan Document</string>
     <string name="scan_document_subtitle">Use the camera to capture a receipt</string>
     <string name="scan_photos">Choose from Photos</string>
     <string name="scan_photos_subtitle">Select an image from your gallery</string>
     <string name="scan_files">Choose from Files</string>
-    <string name="scan_files_subtitle">Open an image from your files</string>
+    <string name="scan_files_subtitle">Open an image or PDF from your files</string>
     <string name="scan_capture">Capture</string>
     <string name="scan_processing">Analyzing receipt…</string>
     <string name="scan_review_title">Review Expense</string>
