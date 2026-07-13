@@ -106,23 +106,16 @@ object OcrService {
 
     private suspend fun processImage(image: InputImage): ScannedReceiptData {
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-        return try {
+        try {
             val result = recognizer.process(image).await()
             val lines = result.textBlocks.flatMap { it.lines }.map { it.text }
             val rawText = lines.joinToString("\n")
 
-            ScannedReceiptData(
+            return ScannedReceiptData(
                 amount = extractTotalAmount(lines),
                 date = extractDate(lines),
                 description = bestDescription(lines),
                 rawText = rawText
-            )
-        } catch (e: Exception) {
-            ScannedReceiptData(
-                amount = null,
-                date = null,
-                description = "",
-                rawText = ""
             )
         } finally {
             recognizer.close()

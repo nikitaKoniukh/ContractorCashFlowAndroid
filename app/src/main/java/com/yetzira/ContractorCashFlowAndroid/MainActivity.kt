@@ -51,38 +51,29 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val preferencesRepo = UserPreferencesRepository(this)
         // Match iOS: follow system appearance only (no in-app theme toggle).
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
-        val language = runBlocking { preferencesRepo.appLanguage.first() }
-
-        // Keep SharedPreferences in sync with DataStore for attachBaseContext (pre-13).
-        val savedCode = LocaleHelper.getSavedLanguage(this)
-        if (language.code != savedCode) {
-            Log.d(TAG, "Syncing locale DataStore=${language.code} prefs=$savedCode — recreating")
-            LocaleHelper.saveLanguage(this, language.code)
-            recreate()
-            return
-        }
-
-        // Ensure AppCompat per-app locale matches our preference.
-        // On first launch this was already set by KablanProApplication,
-        // but on subsequent launches we still need to keep it in sync
-        // (e.g. user changed language in Settings).
+        val desiredTag = LocaleHelper.getSavedLanguage(this)
         val currentTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-        val desiredTag = language.code
-        if (!currentTag.equals(desiredTag, ignoreCase = true)) {
+        if (currentTag.isNotBlank() && !currentTag.equals(desiredTag, ignoreCase = true)) {
             Log.d(TAG, "Updating AppCompat locale: '$currentTag' → '$desiredTag'")
             AppCompatDelegate.setApplicationLocales(
                 LocaleListCompat.forLanguageTags(desiredTag)
             )
-            // This may trigger Activity recreation — the rest of onCreate
-            // won't execute, but will on the next pass.
             return
         }
 
         Log.d(TAG, "Locale correct: $desiredTag")
+
+        lifecycleScope.launch {
+            val preferencesRepo = UserPreferencesRepository(this@MainActivity)
+            // One-shot: align SharedPreferences mirrors with DataStore if needed.
+            val storedLanguage = preferencesRepo.appLanguage.first()
+            if (storedLanguage.code != LocaleHelper.getSavedLanguage(this@MainActivity)) {
+                LocaleHelper.saveLanguage(this@MainActivity, storedLanguage.code)
+            }
+        }
 
         if (BuildConfig.DEBUG) {
             val apps = FirebaseApp.getApps(this)

@@ -41,6 +41,7 @@ class LaborRepository(
 
     override suspend fun insertWorker(worker: LaborDetailsEntity) {
         val stamped = worker.copy(lastModified = System.currentTimeMillis())
+        syncService.clearLaborTombstone(stamped.id)
         laborDetailsDao.insert(stamped)
         syncScope.launch {
             runCatching { syncService.syncLaborDetails(stamped) }

@@ -7,11 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ClientDao
+import com.yetzira.ContractorCashFlowAndroid.data.local.dao.DeletedRecordDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ExpenseDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.InvoiceDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.LaborDetailsDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ProjectDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.DeletedRecordEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
@@ -23,10 +25,11 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
         ExpenseEntity::class,
         InvoiceEntity::class,
         ClientEntity::class,
-        LaborDetailsEntity::class
+        LaborDetailsEntity::class,
+        DeletedRecordEntity::class
     ],
     version = 8,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
@@ -34,6 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun invoiceDao(): InvoiceDao
     abstract fun clientDao(): ClientDao
     abstract fun laborDetailsDao(): LaborDetailsDao
+    abstract fun deletedRecordDao(): DeletedRecordDao
 
     companion object {
         private val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -71,20 +75,37 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        /**
-         * Some debug builds reached version 7 with an experimental schema.
-         * Keep a no-op bridge so devices on 6/7 can open without wiping data.
-         */
         private val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // No schema changes required for the current entity set.
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS deleted_records (
+                        collection TEXT NOT NULL,
+                        recordId TEXT NOT NULL,
+                        deletedAt INTEGER NOT NULL,
+                        PRIMARY KEY(collection, recordId)
+                    )
+                    """.trimIndent()
+                )
             }
         }
 
+        /**
+         * Bridges experimental v7 installs and aligns identity hash while keeping data.
+         * Ensures deleted_records exists for devices that skipped the main-line 6→7 migration.
+         */
         private val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Align identity hash after experimental v7 builds; keep user data.
-                // Optional leftover tables (e.g. deleted_records) are left in place harmlessly.
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS deleted_records (
+                        collection TEXT NOT NULL,
+                        recordId TEXT NOT NULL,
+                        deletedAt INTEGER NOT NULL,
+                        PRIMARY KEY(collection, recordId)
+                    )
+                    """.trimIndent()
+                )
             }
         }
 
@@ -116,4 +137,3 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-

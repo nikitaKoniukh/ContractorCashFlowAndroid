@@ -420,7 +420,7 @@
     <string name="scan_photos">בחר מהתמונות</string>
     <string name="scan_photos_subtitle">בחר תמונה מהגלריה</string>
     <string name="scan_files">בחר מקבצים</string>
-    <string name="scan_files_subtitle">פתח תמונה או PDF מהקבצים שלך</string>
+    <string name="scan_files_subtitle">פתחו תמונה מהקבצים שלכם</string>
     <string name="scan_capture">צלם</string>
     <string name="scan_processing">מנתח קבלה…</string>
     <string name="scan_review_title">סקירת הוצאה</string>
@@ -458,6 +458,47 @@
     <string name="projects_client_mode_select_existing">בחר קיים</string>
     <string name="projects_new_client_details_optional">פרטי לקוח חדש (אופציונלי)</string>
     <string name="projects_new_client_footer">הוסף פרטי קשר עבור הלקוח החדש. פרטים אלה יישמרו וניתן יהיה לערוך אותם מאוחר יותר.</string>
+
+    <string name="scan_failed_load_image">טעינת התמונה נכשלה</string>
+    <string name="scan_failed_load_file">טעינת הקובץ נכשלה</string>
+    <string name="scan_capture_failed">הצילום נכשל: %1$s</string>
+    <string name="scan_camera_failed">לא ניתן להפעיל את המצלמה. נסו שוב.</string>
+    <string name="scan_ocr_failed">לא ניתן לקרוא את הקבלה. הזינו את הפרטים ידנית.</string>
+    <string name="analytics_income_vs_expenses">הכנסות מול הוצאות</string>
+    <string name="analytics_income">הכנסות</string>
+    <string name="analytics_expenses">הוצאות</string>
+    <string name="analytics_expenses_by_category">הוצאות לפי קטגוריה</string>
+    <string name="analytics_budget_utilization">ניצול תקציב</string>
+    <string name="analytics_average_utilization">ניצול ממוצע: %1$s</string>
+    <string name="analytics_spent">הוצא %1$s</string>
+    <string name="analytics_remaining">נותר %1$s</string>
+    <string name="analytics_empty_income_expenses">אין פעילות הכנסות או הוצאות בתקופה שנבחרה.</string>
+    <string name="analytics_empty_monthly_trend">אין מגמה חודשית זמינה לתקופה זו עדיין.</string>
+    <string name="analytics_empty_invoices">אין חשבוניות התואמות לתקופה שנבחרה.</string>
+    <string name="analytics_empty_categories">אין קטגוריות הוצאה זמינות לתקופה זו.</string>
+    <string name="analytics_empty_budgets">אין עדיין פרויקטים עם תקציב.</string>
+    <string name="analytics_empty_top_projects">לא נרשמו הכנסות לפרויקטים בתקופה זו.</string>
+    <string name="notification_channel_invoice_reminders">תזכורות חשבוניות</string>
+    <string name="notification_channel_invoice_reminders_desc">תזכורות למועדי פירעון של חשבוניות</string>
+    <string name="notification_channel_overdue">התראות פיגור</string>
+    <string name="notification_channel_overdue_desc">התראות על חשבוניות באיחור</string>
+    <string name="notification_channel_budget">אזהרות תקציב</string>
+    <string name="notification_channel_budget_desc">אזהרות כשהתקציב מגיע ל־80%% או 100%%</string>
+    <string name="notification_invoice_reminder_title">תזכורת חשבונית</string>
+    <string name="notification_invoice_update_title">עדכון חשבונית</string>
+    <string name="billing_purchase_failed">הרכישה נכשלה: %1$s</string>
+    <string name="billing_unavailable">חיוב אינו זמין: %1$s</string>
+    <string name="billing_failed_load_products">טעינת מוצרים נכשלה: %1$s</string>
+    <string name="billing_no_active_offer">לא נמצאה הצעה פעילה עבור %1$s</string>
+    <string name="billing_not_available">חיוב אינו זמין. נסו שוב.</string>
+    <string name="billing_temporarily_disconnected">החיוב מנותק זמנית. נסו שוב.</string>
+    <string name="billing_must_install_from_play">הרכישה אינה זמינה: יש להתקין את האפליקציה מ־Google Play.</string>
+    <string name="billing_already_owned">כבר רכשתם את המנוי הזה.</string>
+    <string name="billing_unavailable_product">המנוי אינו זמין כרגע.</string>
+    <string name="billing_purchase_failed_code">הרכישה נכשלה (קוד %1$d).</string>
+    <string name="billing_ack_failed">אישור הרכישה נכשל: %1$s</string>
+    <string name="billing_refresh_failed">רענון הרכישות נכשל: %1$s</string>
+
 </resources>
 
 

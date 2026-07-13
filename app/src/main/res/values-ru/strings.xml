@@ -420,7 +420,7 @@
     <string name="scan_photos">Выбрать из фотографий</string>
     <string name="scan_photos_subtitle">Выберите изображение из галереи</string>
     <string name="scan_files">Выбрать из файлов</string>
-    <string name="scan_files_subtitle">Откройте изображение или PDF из файлов</string>
+    <string name="scan_files_subtitle">Откройте изображение из файлов</string>
     <string name="scan_capture">Снять</string>
     <string name="scan_processing">Анализ чека…</string>
     <string name="scan_review_title">Проверка расхода</string>
@@ -458,6 +458,47 @@
     <string name="projects_client_mode_select_existing">Выбрать существующего</string>
     <string name="projects_new_client_details_optional">Данные нового клиента (необязательно)</string>
     <string name="projects_new_client_footer">Добавьте контактные данные для этого нового клиента. Эти данные будут сохранены и их можно будет отредактировать позже.</string>
+
+    <string name="scan_failed_load_image">Не удалось загрузить изображение</string>
+    <string name="scan_failed_load_file">Не удалось загрузить файл</string>
+    <string name="scan_capture_failed">Съёмка не удалась: %1$s</string>
+    <string name="scan_camera_failed">Не удалось запустить камеру. Попробуйте снова.</string>
+    <string name="scan_ocr_failed">Не удалось прочитать чек. Введите данные вручную.</string>
+    <string name="analytics_income_vs_expenses">Доходы и расходы</string>
+    <string name="analytics_income">Доходы</string>
+    <string name="analytics_expenses">Расходы</string>
+    <string name="analytics_expenses_by_category">Расходы по категориям</string>
+    <string name="analytics_budget_utilization">Использование бюджета</string>
+    <string name="analytics_average_utilization">Среднее использование: %1$s</string>
+    <string name="analytics_spent">Потрачено %1$s</string>
+    <string name="analytics_remaining">Осталось %1$s</string>
+    <string name="analytics_empty_income_expenses">Нет доходов или расходов за выбранный период.</string>
+    <string name="analytics_empty_monthly_trend">Пока нет месячного тренда за этот период.</string>
+    <string name="analytics_empty_invoices">Нет счетов за выбранный период.</string>
+    <string name="analytics_empty_categories">Нет категорий расходов за этот период.</string>
+    <string name="analytics_empty_budgets">Пока нет проектов с бюджетом.</string>
+    <string name="analytics_empty_top_projects">Нет доходов по проектам за этот период.</string>
+    <string name="notification_channel_invoice_reminders">Напоминания о счетах</string>
+    <string name="notification_channel_invoice_reminders_desc">Напоминания о сроках оплаты счетов</string>
+    <string name="notification_channel_overdue">Просрочки</string>
+    <string name="notification_channel_overdue_desc">Уведомления о просроченных счетах</string>
+    <string name="notification_channel_budget">Предупреждения о бюджете</string>
+    <string name="notification_channel_budget_desc">Предупреждения при достижении 80%% или 100%% бюджета</string>
+    <string name="notification_invoice_reminder_title">Напоминание о счёте</string>
+    <string name="notification_invoice_update_title">Обновление счёта</string>
+    <string name="billing_purchase_failed">Покупка не удалась: %1$s</string>
+    <string name="billing_unavailable">Биллинг недоступен: %1$s</string>
+    <string name="billing_failed_load_products">Не удалось загрузить продукты: %1$s</string>
+    <string name="billing_no_active_offer">Нет активного предложения для %1$s</string>
+    <string name="billing_not_available">Биллинг недоступен. Попробуйте снова.</string>
+    <string name="billing_temporarily_disconnected">Биллинг временно отключён. Попробуйте снова.</string>
+    <string name="billing_must_install_from_play">Покупка недоступна: установите приложение из Google Play.</string>
+    <string name="billing_already_owned">У вас уже есть эта подписка.</string>
+    <string name="billing_unavailable_product">Эта подписка сейчас недоступна.</string>
+    <string name="billing_purchase_failed_code">Покупка не удалась (код %1$d).</string>
+    <string name="billing_ack_failed">Подтверждение не удалось: %1$s</string>
+    <string name="billing_refresh_failed">Не удалось обновить покупки: %1$s</string>
+
 </resources>
 
 

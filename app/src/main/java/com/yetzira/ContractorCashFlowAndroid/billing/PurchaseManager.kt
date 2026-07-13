@@ -16,6 +16,7 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
+import com.yetzira.ContractorCashFlowAndroid.R
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.SubscriptionPreferencesRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import kotlinx.coroutines.CompletableDeferred
@@ -93,7 +94,7 @@ class PurchaseManager(
             }
             else -> {
                 Log.w(TAG, "  purchase FAILED: code=${billingResult.responseCode} msg='${billingResult.debugMessage}'")
-                _errorMessage.value = "Purchase failed: ${billingResult.debugMessage}"
+                _errorMessage.value = appContext.getString(R.string.billing_purchase_failed, billingResult.debugMessage)
             }
         }
         _isPurchasing.value = false
@@ -179,7 +180,7 @@ class PurchaseManager(
                         isConnected = connected
                         Log.d(TAG, "onBillingSetupFinished: code=${result.responseCode} connected=$connected msg='${result.debugMessage}'")
                         if (!connected && result.responseCode != BillingClient.BillingResponseCode.SERVICE_DISCONNECTED) {
-                            _errorMessage.value = "Billing unavailable: ${result.debugMessage}"
+                            _errorMessage.value = appContext.getString(R.string.billing_unavailable, result.debugMessage)
                         }
                         deferred.complete(connected)
                     }
@@ -257,7 +258,7 @@ class PurchaseManager(
                 }
             } else {
                 Log.w(TAG, "loadProducts: FAILED code=${result.first.responseCode}")
-                _errorMessage.value = "Failed to load products: ${result.first.debugMessage}"
+                _errorMessage.value = appContext.getString(R.string.billing_failed_load_products, result.first.debugMessage)
             }
         } finally {
             _isLoading.value = false
@@ -295,7 +296,7 @@ class PurchaseManager(
 
         if (offerToken == null) {
             Log.e(TAG, "launchPurchaseFlow: no offer token found for basePlanId=$basePlanId")
-            _errorMessage.value = "No active offer found for ${productDetails.productId}"
+            _errorMessage.value = appContext.getString(R.string.billing_no_active_offer, productDetails.productId)
             return
         }
 
@@ -305,7 +306,7 @@ class PurchaseManager(
         scope.launch {
             if (!ensureConnected()) {
                 Log.w(TAG, "launchPurchaseFlow: not connected, aborting")
-                _errorMessage.value = "Billing not available. Please try again."
+                _errorMessage.value = appContext.getString(R.string.billing_not_available)
                 _isPurchasing.value = false
                 return@launch
             }
@@ -329,20 +330,20 @@ class PurchaseManager(
                     BillingClient.BillingResponseCode.SERVICE_DISCONNECTED -> {
                         isConnected = false
                         scheduleReconnect()
-                        _errorMessage.value = "Billing temporarily disconnected. Please try again in a moment."
+                        _errorMessage.value = appContext.getString(R.string.billing_temporarily_disconnected)
                     }
                     BillingClient.BillingResponseCode.DEVELOPER_ERROR -> {
-                        _errorMessage.value = "Purchase unavailable: app must be installed from Google Play (internal testing track)."
+                        _errorMessage.value = appContext.getString(R.string.billing_must_install_from_play)
                     }
                     BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> {
-                        _errorMessage.value = "You already own this subscription."
+                        _errorMessage.value = appContext.getString(R.string.billing_already_owned)
                         checkCurrentEntitlements()
                     }
                     BillingClient.BillingResponseCode.ITEM_UNAVAILABLE -> {
-                        _errorMessage.value = "This subscription is currently unavailable."
+                        _errorMessage.value = appContext.getString(R.string.billing_unavailable_product)
                     }
                     else -> {
-                        _errorMessage.value = "Purchase failed (code ${result.responseCode}): ${result.debugMessage}"
+                        _errorMessage.value = appContext.getString(R.string.billing_purchase_failed_code, result.responseCode)
                     }
                 }
                 _isPurchasing.value = false
@@ -387,7 +388,7 @@ class PurchaseManager(
         Log.d(TAG, "acknowledge: code=${result.responseCode} msg='${result.debugMessage}'")
         if (result.responseCode != BillingClient.BillingResponseCode.OK) {
             Log.e(TAG, "acknowledge: FAILED")
-            _errorMessage.value = "Acknowledgment failed: ${result.debugMessage}"
+            _errorMessage.value = appContext.getString(R.string.billing_ack_failed, result.debugMessage)
             return false
         }
         return true
@@ -432,7 +433,7 @@ class PurchaseManager(
         Log.d(TAG, "checkCurrentEntitlements: code=${result.first.responseCode} purchases=${result.second.size}")
         if (result.first.responseCode != BillingClient.BillingResponseCode.OK) {
             Log.w(TAG, "checkCurrentEntitlements: FAILED msg='${result.first.debugMessage}'")
-            _errorMessage.value = "Failed to refresh purchases: ${result.first.debugMessage}"
+            _errorMessage.value = appContext.getString(R.string.billing_refresh_failed, result.first.debugMessage)
             return
         }
 
@@ -534,10 +535,6 @@ class PurchaseManager(
 
     fun canCreateProject(currentCount: Int): Boolean =
         _isProUser.value || currentCount < FreeTierLimit.MAX_PROJECTS
-
-    fun canCreateExpense(currentCount: Int): Boolean = true
-
-    fun canCreateInvoice(currentCount: Int): Boolean = true
 
     fun canCreateWorker(currentCount: Int): Boolean =
         _isProUser.value || currentCount < FreeTierLimit.MAX_WORKERS

@@ -33,6 +33,7 @@ class ClientRepository(
 
     override suspend fun insertClient(client: ClientEntity) {
         val stamped = client.copy(lastModified = System.currentTimeMillis())
+        syncService.clearClientTombstone(stamped.id)
         clientDao.insert(stamped)
         syncScope.launch {
             syncService.syncClient(stamped).onFailure { throwable ->

@@ -1,19 +1,24 @@
 package com.yetzira.ContractorCashFlowAndroid.ui.navigation
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
+import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepository
+import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
 import com.yetzira.ContractorCashFlowAndroid.ui.scan.ScanExpenseScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.scan.ScannedExpenseReviewScreen
+import kotlinx.coroutines.launch
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.analytics.AnalyticsViewModelFactory
@@ -58,7 +63,6 @@ import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsViewModelFactory
 import androidx.navigation.navArgument
-import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 
 fun NavGraphBuilder.projectsGraph(navController: NavController) {
     navigation(
@@ -218,7 +222,16 @@ fun NavGraphBuilder.expensesGraph(navController: NavController) {
             arguments = listOf(navArgument("imageUri") { type = NavType.StringType })
         ) { backStackEntry ->
             val context = LocalContext.current
+            val scope = rememberCoroutineScope()
             val db = remember { AppDatabase.getInstance(context) }
+            val expenseRepository = remember {
+                ExpenseRepository(
+                    expenseDao = db.expenseDao(),
+                    projectDao = db.projectDao(),
+                    laborDetailsDao = db.laborDetailsDao(),
+                    syncService = FirestoreSyncService(db)
+                )
+            }
             val imageUriStr = Uri.decode(backStackEntry.arguments?.getString("imageUri").orEmpty())
             val imageUri = Uri.parse(imageUriStr)
             val activeProjects by db.projectDao().getAll().collectAsState(initial = emptyList())
@@ -227,9 +240,14 @@ fun NavGraphBuilder.expensesGraph(navController: NavController) {
                 imageUri = imageUri,
                 activeProjects = activeProjects.filter { it.isActive },
                 onSave = { expense ->
-                    kotlinx.coroutines.MainScope().launch {
-                        db.expenseDao().insert(expense)
-                        navController.popBackStack(ExpenseRoutes.LIST, inclusive = false)
+                    scope.launch {
+                        runCatching {
+                            expenseRepository.insertExpense(expense)
+                        }.onFailure { throwable ->
+                            Log.w("KablanProScan", "Failed to save scanned expense: ${throwable.message}")
+                        }.onSuccess {
+                            navController.popBackStack(ExpenseRoutes.LIST, inclusive = false)
+                        }
                     }
                 },
                 onBack = { navController.popBackStack() }

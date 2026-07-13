@@ -71,12 +71,12 @@ fun ScanExpenseScreen(
             if (savedUri != null) {
                 onImageCaptured(savedUri)
             } else {
-                Toast.makeText(context, "Failed to load image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.scan_failed_load_image), Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    // File picker launcher (images + PDFs)
+    // File picker launcher (images only — PDF is not supported by ML Kit OCR)
     val filePickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -85,7 +85,7 @@ fun ScanExpenseScreen(
             if (savedUri != null) {
                 onImageCaptured(savedUri)
             } else {
-                Toast.makeText(context, "Failed to load file", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.scan_failed_load_file), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -144,7 +144,13 @@ fun ScanExpenseScreen(
                                                 preview,
                                                 imageCapture
                                             )
-                                        } catch (_: Exception) { }
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                ctx,
+                                                ctx.getString(R.string.scan_camera_failed),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     },
                                     ContextCompat.getMainExecutor(ctx)
                                 )
@@ -241,7 +247,7 @@ fun ScanExpenseScreen(
                         label = stringResource(R.string.scan_files),
                         subtitle = stringResource(R.string.scan_files_subtitle),
                         onClick = {
-                            filePickerLauncher.launch(arrayOf("image/*", "application/pdf"))
+                            filePickerLauncher.launch(arrayOf("image/*"))
                         }
                     )
                 }
@@ -319,7 +325,11 @@ private fun capturePhoto(
             }
 
             override fun onError(exception: ImageCaptureException) {
-                Toast.makeText(context, "Capture failed: ${exception.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scan_capture_failed, exception.message.orEmpty()),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     )

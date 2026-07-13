@@ -6,13 +6,17 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.dao.InvoiceDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ClientRepositoryContract
+import com.yetzira.ContractorCashFlowAndroid.data.repository.ExpenseRepositoryContract
+import com.yetzira.ContractorCashFlowAndroid.data.repository.InvoiceRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.data.repository.ProjectRepositoryContract
 import com.yetzira.ContractorCashFlowAndroid.testutil.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -29,6 +33,21 @@ class ProjectViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
+    private fun createViewModel(
+        repo: FakeProjectRepository = FakeProjectRepository(),
+        expenseDao: FakeExpenseDao = FakeExpenseDao(),
+        invoiceDao: FakeInvoiceDao = FakeInvoiceDao(),
+        clientDao: FakeClientDao = FakeClientDao()
+    ) = ProjectViewModel(
+        repository = repo,
+        expenseDao = expenseDao,
+        invoiceDao = invoiceDao,
+        clientDao = clientDao,
+        clientRepository = FakeClientRepository(clientDao),
+        expenseRepository = FakeExpenseRepository(expenseDao),
+        invoiceRepository = FakeInvoiceRepository(invoiceDao)
+    )
+
     @Test
     fun `projectsUiState computes totals and balance`() = runTest {
         val repo = FakeProjectRepository(
@@ -42,7 +61,7 @@ class ProjectViewModelTest {
         )
         val clientDao = FakeClientDao()
 
-        val viewModel = ProjectViewModel(repo, expenseDao, invoiceDao, clientDao, FakeClientRepository(clientDao))
+        val viewModel = createViewModel(repo, expenseDao, invoiceDao, clientDao)
         val collectJob = launch { viewModel.projectsUiState.collect { } }
         advanceUntilIdle()
 
@@ -60,7 +79,7 @@ class ProjectViewModelTest {
         val expenseDao = FakeExpenseDao()
         val invoiceDao = FakeInvoiceDao()
         val clientDao = FakeClientDao()
-        val viewModel = ProjectViewModel(repo, expenseDao, invoiceDao, clientDao, FakeClientRepository(clientDao))
+        val viewModel = createViewModel(repo, expenseDao, invoiceDao, clientDao)
 
         var successCalled = false
         viewModel.createProject(
@@ -87,7 +106,7 @@ class ProjectViewModelTest {
     @Test
     fun `createProject rejects invalid input`() = runTest {
         val repo = FakeProjectRepository()
-        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao(), FakeClientRepository())
+        val viewModel = createViewModel(repo)
 
         viewModel.createProject(
             name = "",
@@ -112,7 +131,7 @@ class ProjectViewModelTest {
         val clientDao = FakeClientDao(
             initial = listOf(ClientEntity(id = "c1", name = "Gindi", email = "gindi@g.com"))
         )
-        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), clientDao, FakeClientRepository(clientDao))
+        val viewModel = createViewModel(repo = repo, clientDao = clientDao)
 
         var successCalled = false
         viewModel.createProject(
@@ -138,7 +157,7 @@ class ProjectViewModelTest {
     @Test
     fun `createProject saves end date when provided`() = runTest {
         val repo = FakeProjectRepository()
-        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao(), FakeClientRepository())
+        val viewModel = createViewModel(repo)
         val expectedEndDate = 1_750_118_400_000L
 
         viewModel.createProject(
@@ -164,7 +183,7 @@ class ProjectViewModelTest {
     fun `delete and undo project restores item`() = runTest {
         val project = ProjectEntity(id = "p1", name = "A", clientName = "B", budget = 100.0)
         val repo = FakeProjectRepository(projects = listOf(project))
-        val viewModel = ProjectViewModel(repo, FakeExpenseDao(), FakeInvoiceDao(), FakeClientDao(), FakeClientRepository())
+        val viewModel = createViewModel(repo)
 
         val collectJob = launch { viewModel.projectsUiState.collect { } }
 
@@ -341,6 +360,33 @@ class ProjectViewModelTest {
         override suspend fun insertClient(client: ClientEntity) = clientDao.insert(client)
         override suspend fun updateClient(client: ClientEntity) = clientDao.update(client)
         override suspend fun deleteClient(client: ClientEntity) = clientDao.delete(client)
+    }
+
+    private class FakeExpenseRepository(
+        private val expenseDao: FakeExpenseDao
+    ) : ExpenseRepositoryContract {
+        override fun getAllExpenses() = expenseDao.getAll()
+        override suspend fun getExpenseById(id: String) = expenseDao.getById(id)
+        override suspend fun insertExpense(expense: ExpenseEntity) = expenseDao.insert(expense)
+        override suspend fun updateExpense(expense: ExpenseEntity) = expenseDao.update(expense)
+        override suspend fun deleteExpense(expense: ExpenseEntity) = expenseDao.delete(expense)
+        override fun getAllProjects(): Flow<List<ProjectEntity>> = flowOf(emptyList())
+        override suspend fun getProjectById(id: String): ProjectEntity? = null
+        override fun getAllWorkers(): Flow<List<LaborDetailsEntity>> = flowOf(emptyList())
+        override fun getProjectTotalExpenses(projectId: String) = expenseDao.getTotalForProject(projectId)
+    }
+
+    private class FakeInvoiceRepository(
+        private val invoiceDao: FakeInvoiceDao
+    ) : InvoiceRepositoryContract {
+        override fun getAllInvoices() = invoiceDao.getAll()
+        override suspend fun getInvoiceById(id: String) = invoiceDao.getById(id)
+        override suspend fun insertInvoice(invoice: InvoiceEntity) = invoiceDao.insert(invoice)
+        override suspend fun updateInvoice(invoice: InvoiceEntity) = invoiceDao.update(invoice)
+        override suspend fun deleteInvoice(invoice: InvoiceEntity) = invoiceDao.delete(invoice)
+        override fun getAllClients(): Flow<List<ClientEntity>> = flowOf(emptyList())
+        override suspend fun insertClient(client: ClientEntity) = Unit
+        override fun getAllProjects(): Flow<List<ProjectEntity>> = flowOf(emptyList())
     }
 }
 

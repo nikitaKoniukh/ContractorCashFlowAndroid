@@ -17,8 +17,10 @@ import com.yetzira.ContractorCashFlowAndroid.R
 
 class InvoiceReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val title = intent.getStringExtra(EXTRA_TITLE) ?: "Invoice Reminder"
-        val message = intent.getStringExtra(EXTRA_MESSAGE) ?: "Invoice update"
+        val title = intent.getStringExtra(EXTRA_TITLE)
+            ?: context.getString(R.string.notification_invoice_reminder_title)
+        val message = intent.getStringExtra(EXTRA_MESSAGE)
+            ?: context.getString(R.string.notification_invoice_update_title)
         val invoiceId = intent.getStringExtra(NotificationDeepLink.EXTRA_INVOICE_ID)
         val kind = intent.getStringExtra(NotificationDeepLink.EXTRA_INVOICE_NOTIF_KIND)
             ?: NotificationDeepLink.TYPE_REMINDER
@@ -38,7 +40,7 @@ class InvoiceReminderReceiver : BroadcastReceiver() {
         }
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        ensureChannel(manager, channelId, kind)
+        ensureChannel(manager, channelId, kind, context)
 
         val contentIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -74,12 +76,17 @@ class InvoiceReminderReceiver : BroadcastReceiver() {
         manager.notify(notificationId, notification)
     }
 
-    private fun ensureChannel(manager: NotificationManager, channelId: String, kind: String) {
+    private fun ensureChannel(
+        manager: NotificationManager,
+        channelId: String,
+        kind: String,
+        context: Context
+    ) {
         if (manager.getNotificationChannel(channelId) != null) return
         val (name, importance) = if (kind == NotificationDeepLink.TYPE_OVERDUE) {
-            "Overdue Alerts" to NotificationManager.IMPORTANCE_HIGH
+            context.getString(R.string.notification_channel_overdue) to NotificationManager.IMPORTANCE_HIGH
         } else {
-            "Invoice Reminders" to NotificationManager.IMPORTANCE_DEFAULT
+            context.getString(R.string.notification_channel_invoice_reminders) to NotificationManager.IMPORTANCE_DEFAULT
         }
         manager.createNotificationChannel(NotificationChannel(channelId, name, importance))
     }

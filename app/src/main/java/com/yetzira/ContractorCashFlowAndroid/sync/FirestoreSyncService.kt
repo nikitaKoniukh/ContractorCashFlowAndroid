@@ -12,6 +12,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.yetzira.ContractorCashFlowAndroid.data.local.AppDatabase
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ClientEntity
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.DeletedRecordEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.InvoiceEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborDetailsEntity
@@ -54,11 +55,9 @@ class FirestoreSyncService(
         val remoteReceipt = runCatching {
             ReceiptStorageHelper.ensureRemoteUrl(context, expense.id, expense.receiptImageUri)
         }.getOrNull()
+        // Prefer Storage URL; never write local file/content URIs to Firestore.
         val cloudReceipt = ReceiptUriSanitizer.forCloudWrite(remoteReceipt)
-        // Keep local Room pointing at local file; only cloud gets Storage URL.
-        if (cloudReceipt != null && cloudReceipt != expense.receiptImageUri && ReceiptStorageHelper.isLocalUri(expense.receiptImageUri)) {
-            // no-op on local entity — cloud field only
-        }
+            ?: ReceiptUriSanitizer.forCloudSync(expense.receiptImageUri)
         return writeDocument(
             collection = COLLECTION_EXPENSES,
             id = expense.id,
@@ -120,15 +119,27 @@ class FirestoreSyncService(
         )
     )
 
-    suspend fun deleteProject(id: String): Result<Unit> = deleteDocument(COLLECTION_PROJECTS, id)
+    suspend fun deleteProject(id: String): Result<Unit> = deleteWithTombstone(COLLECTION_PROJECTS, id)
 
-    suspend fun deleteExpense(id: String): Result<Unit> = deleteDocument(COLLECTION_EXPENSES, id)
+    suspend fun deleteExpense(id: String): Result<Unit> = deleteWithTombstone(COLLECTION_EXPENSES, id)
 
-    suspend fun deleteInvoice(id: String): Result<Unit> = deleteDocument(COLLECTION_INVOICES, id)
+    suspend fun deleteInvoice(id: String): Result<Unit> = deleteWithTombstone(COLLECTION_INVOICES, id)
 
-    suspend fun deleteClient(id: String): Result<Unit> = deleteDocument(COLLECTION_CLIENTS, id)
+    suspend fun deleteClient(id: String): Result<Unit> = deleteWithTombstone(COLLECTION_CLIENTS, id)
 
-    suspend fun deleteLaborDetails(id: String): Result<Unit> = deleteDocument(COLLECTION_LABOR_DETAILS, id)
+    suspend fun deleteLaborDetails(id: String): Result<Unit> =
+        deleteWithTombstone(COLLECTION_LABOR_DETAILS, id)
+
+    /** Clears a local tombstone after an undo / re-insert so push won't delete the restored record. */
+    suspend fun clearTombstone(collection: String, id: String) {
+        database.deletedRecordDao().delete(collection, id)
+    }
+
+    suspend fun clearProjectTombstone(id: String) = clearTombstone(COLLECTION_PROJECTS, id)
+    suspend fun clearExpenseTombstone(id: String) = clearTombstone(COLLECTION_EXPENSES, id)
+    suspend fun clearInvoiceTombstone(id: String) = clearTombstone(COLLECTION_INVOICES, id)
+    suspend fun clearClientTombstone(id: String) = clearTombstone(COLLECTION_CLIENTS, id)
+    suspend fun clearLaborTombstone(id: String) = clearTombstone(COLLECTION_LABOR_DETAILS, id)
 
     /** Push all local Room data up to Firestore (local → cloud). */
     override suspend fun pushAllData(): Result<Unit> {
@@ -156,6 +167,14 @@ class FirestoreSyncService(
             }
             laborDetails.forEach { item ->
                 runSyncStage("push laborDetails/${item.id}") { syncLaborDetails(item).getOrThrow() }
+            }
+
+            // Retry pending remote deletes so failed offline deletes eventually succeed.
+            database.deletedRecordDao().getAll().forEach { tombstone ->
+                runSyncStage("push delete ${tombstone.collection}/${tombstone.recordId}") {
+                    deleteDocument(tombstone.collection, tombstone.recordId).getOrThrow()
+                    database.deletedRecordDao().delete(tombstone.collection, tombstone.recordId)
+                }
             }
         }
     }
@@ -212,6 +231,21 @@ class FirestoreSyncService(
                 .set(data, SetOptions.merge())
                 .await()
         }
+    }
+
+    private suspend fun deleteWithTombstone(collection: String, id: String): Result<Unit> {
+        database.deletedRecordDao().insert(
+            DeletedRecordEntity(
+                collection = collection,
+                recordId = id,
+                deletedAt = System.currentTimeMillis()
+            )
+        )
+        val result = deleteDocument(collection, id)
+        if (result.isSuccess) {
+            database.deletedRecordDao().delete(collection, id)
+        }
+        return result
     }
 
     private suspend fun deleteDocument(collection: String, id: String): Result<Unit> {
@@ -297,6 +331,7 @@ class FirestoreSyncService(
 
     private suspend fun mergeProjects(remote: List<ProjectEntity>) {
         remote.forEach { remoteItem ->
+            if (database.deletedRecordDao().exists(COLLECTION_PROJECTS, remoteItem.id)) return@forEach
             val local = database.projectDao().getById(remoteItem.id)
             if (local == null) database.projectDao().insert(remoteItem)
             else if (remoteItem.lastModified >= local.lastModified) database.projectDao().update(remoteItem)
@@ -306,6 +341,7 @@ class FirestoreSyncService(
     private suspend fun mergeExpenses(remote: List<ExpenseEntity>) {
         val context = FirebaseApp.getInstance().applicationContext
         remote.forEach { remoteItem ->
+            if (database.deletedRecordDao().exists(COLLECTION_EXPENSES, remoteItem.id)) return@forEach
             val withLocalReceipt = remoteItem.copy(
                 receiptImageUri = ReceiptStorageHelper.ensureLocalUri(
                     context = context,
@@ -328,6 +364,7 @@ class FirestoreSyncService(
 
     private suspend fun mergeInvoices(remote: List<InvoiceEntity>) {
         remote.forEach { remoteItem ->
+            if (database.deletedRecordDao().exists(COLLECTION_INVOICES, remoteItem.id)) return@forEach
             val sanitized = sanitizeInvoiceForeignKeys(remoteItem)
             val local = database.invoiceDao().getById(remoteItem.id)
             if (local == null) database.invoiceDao().insert(sanitized)
@@ -357,6 +394,7 @@ class FirestoreSyncService(
 
     private suspend fun mergeClients(remote: List<ClientEntity>) {
         remote.forEach { remoteItem ->
+            if (database.deletedRecordDao().exists(COLLECTION_CLIENTS, remoteItem.id)) return@forEach
             val local = database.clientDao().getById(remoteItem.id)
             if (local == null) database.clientDao().insert(remoteItem)
             else if (remoteItem.lastModified >= local.lastModified) database.clientDao().update(remoteItem)
@@ -365,6 +403,7 @@ class FirestoreSyncService(
 
     private suspend fun mergeLaborDetails(remote: List<LaborDetailsEntity>) {
         remote.forEach { remoteItem ->
+            if (database.deletedRecordDao().exists(COLLECTION_LABOR_DETAILS, remoteItem.id)) return@forEach
             val local = database.laborDetailsDao().getById(remoteItem.id)
             if (local == null) database.laborDetailsDao().insert(remoteItem)
             else if (remoteItem.lastModified >= local.lastModified) database.laborDetailsDao().update(remoteItem)
@@ -401,7 +440,7 @@ class FirestoreSyncService(
             unitsWorked = document.getDouble("unitsWorked"),
             laborTypeSnapshot = document.getString("laborTypeSnapshot"),
             notes = document.getString("notes"),
-            receiptImageUri = document.getString("receiptImageUri"),
+            receiptImageUri = ReceiptUriSanitizer.forLocalMerge(document.getString("receiptImageUri")),
             lastModified = document.getLong("lastModified") ?: 0L
         )
     }

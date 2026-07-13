@@ -54,9 +54,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.R
-import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseManagerProvider
-import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModel
-import com.yetzira.ContractorCashFlowAndroid.billing.PurchaseViewModelFactory
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
@@ -64,7 +61,6 @@ import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
 import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
-import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -79,26 +75,11 @@ fun InvoicesListScreen(
 ) {
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
-    val purchaseManager = remember(context) { PurchaseManagerProvider.getInstance(context.applicationContext) }
-    val purchaseViewModel: PurchaseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = remember { PurchaseViewModelFactory(context) }
-    )
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
     val state by viewModel.listUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showFilterMenu by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<InvoiceListItemUi?>(null) }
-    var showPaywall by remember { mutableStateOf(false) }
-    var paywallMessage by remember { mutableStateOf<String?>(null) }
-
-    val onCreateAttempt = {
-        if (purchaseManager.canCreateInvoice(state.invoices.size)) {
-            onCreate()
-        } else {
-            paywallMessage = context.getString(R.string.paywall_limit_invoices)
-            showPaywall = true
-        }
-    }
 
     Scaffold(
     contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -106,7 +87,7 @@ fun InvoicesListScreen(
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(onClick = onCreateAttempt) {
+            FloatingActionButton(onClick = onCreate) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "New Invoice"
@@ -154,7 +135,7 @@ fun InvoicesListScreen(
             }
 
             if (state.invoices.isEmpty()) {
-                EmptyInvoicesState(onCreate = onCreateAttempt)
+                EmptyInvoicesState(onCreate = onCreate)
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -224,13 +205,6 @@ fun InvoicesListScreen(
         )
     }
 
-    if (showPaywall) {
-        PaywallSheet(
-            viewModel = purchaseViewModel,
-            onDismiss = { showPaywall = false },
-            limitReachedMessage = paywallMessage
-        )
-    }
 }
 
 @Composable

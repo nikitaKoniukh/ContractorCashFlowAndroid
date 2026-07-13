@@ -51,7 +51,8 @@ class UserPreferencesRepository(context: Context) :
     UserPreferencesRepositoryContract,
     SettingsPreferencesRepositoryContract,
     SubscriptionPreferencesRepositoryContract {
-    private val dataStore = context.dataStore
+    private val appContext = context.applicationContext
+    private val dataStore = appContext.dataStore
 
     // Preference Keys
     private companion object {
@@ -139,6 +140,7 @@ class UserPreferencesRepository(context: Context) :
     }
 
     override suspend fun setThemeMode(themeMode: ThemeModeOption) {
+        com.yetzira.ContractorCashFlowAndroid.locale.ThemeHelper.saveThemeMode(appContext, themeMode)
         dataStore.edit { preferences ->
             preferences[THEME_MODE] = themeMode.code
         }

@@ -96,7 +96,7 @@ class BudgetWarningNotifier(private val context: Context) {
 
         val channel = NotificationChannel(
             channelId,
-            "Budget Warnings",
+            context.getString(R.string.notification_channel_budget),
             NotificationManager.IMPORTANCE_HIGH
         )
         manager.createNotificationChannel(channel)

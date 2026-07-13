@@ -42,6 +42,7 @@ class InvoiceRepository(
 
     override suspend fun insertInvoice(invoice: InvoiceEntity) {
         val stamped = invoice.copy(lastModified = System.currentTimeMillis())
+        syncService.clearInvoiceTombstone(stamped.id)
         invoiceDao.insert(stamped)
         syncScope.launch {
             runCatching { syncService.syncInvoice(stamped) }
@@ -70,6 +71,7 @@ class InvoiceRepository(
 
     override suspend fun insertClient(client: ClientEntity) {
         val stamped = client.copy(lastModified = System.currentTimeMillis())
+        syncService.clearClientTombstone(stamped.id)
         clientDao.insert(stamped)
         syncScope.launch {
             runCatching { syncService.syncClient(stamped) }

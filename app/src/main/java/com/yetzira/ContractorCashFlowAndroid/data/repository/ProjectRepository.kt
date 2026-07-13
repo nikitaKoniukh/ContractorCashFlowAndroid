@@ -1,6 +1,7 @@
 package com.yetzira.ContractorCashFlowAndroid.data.repository
 
 import android.util.Log
+import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ExpenseDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.dao.ProjectDao
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
 import com.yetzira.ContractorCashFlowAndroid.sync.FirestoreSyncService
@@ -8,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 interface ProjectRepositoryContract {
@@ -21,6 +23,7 @@ interface ProjectRepositoryContract {
 
 class ProjectRepository(
     private val projectDao: ProjectDao,
+    private val expenseDao: ExpenseDao,
     private val syncService: FirestoreSyncService
 ) : ProjectRepositoryContract {
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -33,6 +36,7 @@ class ProjectRepository(
 
     override suspend fun insertProject(project: ProjectEntity) {
         val stamped = project.copy(lastModified = System.currentTimeMillis())
+        syncService.clearProjectTombstone(stamped.id)
         projectDao.insert(stamped)
         syncScope.launch {
             syncService.syncProject(stamped).onFailure { throwable ->
@@ -52,8 +56,15 @@ class ProjectRepository(
     }
 
     override suspend fun deleteProject(project: ProjectEntity) {
+        // Capture child expenses before Room CASCADE removes them locally.
+        val childExpenseIds = expenseDao.getForProject(project.id).first().map { it.id }
         projectDao.delete(project)
         syncScope.launch {
+            childExpenseIds.forEach { expenseId ->
+                syncService.deleteExpense(expenseId).onFailure { throwable ->
+                    Log.w(TAG, "Cascaded expense cloud delete failed: ${throwable.message}")
+                }
+            }
             syncService.deleteProject(project.id).onFailure { throwable ->
                 Log.w(TAG, "Project cloud delete failed after local delete: ${throwable.message}")
             }
@@ -64,4 +75,3 @@ class ProjectRepository(
         const val TAG = "KablanProProjectRepo"
     }
 }
-
