@@ -49,23 +49,34 @@ class FirestoreSyncService(
         )
     )
 
-    suspend fun syncExpense(expense: ExpenseEntity): Result<Unit> = writeDocument(
-        collection = COLLECTION_EXPENSES,
-        id = expense.id,
-        data = mapOf(
-            "category" to expense.category,
-            "amount" to expense.amount,
-            "descriptionText" to expense.descriptionText,
-            "date" to expense.date,
-            "projectId" to expense.projectId,
-            "workerId" to expense.workerId,
-            "unitsWorked" to expense.unitsWorked,
-            "laborTypeSnapshot" to expense.laborTypeSnapshot,
-            "notes" to expense.notes,
-            "receiptImageUri" to expense.receiptImageUri,
-            "lastModified" to expense.lastModified
+    suspend fun syncExpense(expense: ExpenseEntity): Result<Unit> {
+        val context = FirebaseApp.getInstance().applicationContext
+        val remoteReceipt = runCatching {
+            ReceiptStorageHelper.ensureRemoteUrl(context, expense.id, expense.receiptImageUri)
+        }.getOrNull()
+        val cloudReceipt = ReceiptUriSanitizer.forCloudWrite(remoteReceipt)
+        // Keep local Room pointing at local file; only cloud gets Storage URL.
+        if (cloudReceipt != null && cloudReceipt != expense.receiptImageUri && ReceiptStorageHelper.isLocalUri(expense.receiptImageUri)) {
+            // no-op on local entity — cloud field only
+        }
+        return writeDocument(
+            collection = COLLECTION_EXPENSES,
+            id = expense.id,
+            data = mapOf(
+                "category" to expense.category,
+                "amount" to expense.amount,
+                "descriptionText" to expense.descriptionText,
+                "date" to expense.date,
+                "projectId" to expense.projectId,
+                "workerId" to expense.workerId,
+                "unitsWorked" to expense.unitsWorked,
+                "laborTypeSnapshot" to expense.laborTypeSnapshot,
+                "notes" to expense.notes,
+                "receiptImageUri" to cloudReceipt,
+                "lastModified" to expense.lastModified
+            )
         )
-    )
+    }
 
     suspend fun syncInvoice(invoice: InvoiceEntity): Result<Unit> = writeDocument(
         collection = COLLECTION_INVOICES,
@@ -293,11 +304,25 @@ class FirestoreSyncService(
     }
 
     private suspend fun mergeExpenses(remote: List<ExpenseEntity>) {
+        val context = FirebaseApp.getInstance().applicationContext
         remote.forEach { remoteItem ->
-            val sanitized = sanitizeExpenseForeignKeys(remoteItem)
+            val withLocalReceipt = remoteItem.copy(
+                receiptImageUri = ReceiptStorageHelper.ensureLocalUri(
+                    context = context,
+                    expenseId = remoteItem.id,
+                    remoteOrLocalUri = remoteItem.receiptImageUri
+                ) ?: remoteItem.receiptImageUri?.takeIf { ReceiptStorageHelper.isLocalUri(it) }
+            )
+            val sanitized = sanitizeExpenseForeignKeys(withLocalReceipt)
             val local = database.expenseDao().getById(remoteItem.id)
-            if (local == null) database.expenseDao().insert(sanitized)
-            else if (sanitized.lastModified >= local.lastModified) database.expenseDao().update(sanitized)
+            if (local == null) {
+                database.expenseDao().insert(sanitized)
+            } else if (sanitized.lastModified >= local.lastModified) {
+                // Prefer keeping an existing local receipt file if remote had none usable
+                val mergedReceipt = sanitized.receiptImageUri
+                    ?: local.receiptImageUri?.takeIf { ReceiptStorageHelper.isLocalUri(it) }
+                database.expenseDao().update(sanitized.copy(receiptImageUri = mergedReceipt))
+            }
         }
     }
 

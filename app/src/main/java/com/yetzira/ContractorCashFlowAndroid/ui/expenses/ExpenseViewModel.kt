@@ -285,13 +285,15 @@ class ExpenseViewModel(
                 utilizationPercent = 100,
                 projectName = project.name,
                 totalExpenses = totalExpenses,
-                budget = project.budget
+                budget = project.budget,
+                projectId = projectId
             )
             utilization >= 80 -> ExpenseSaveResult.BudgetWarning(
                 utilizationPercent = 80,
                 projectName = project.name,
                 totalExpenses = totalExpenses,
-                budget = project.budget
+                budget = project.budget,
+                projectId = projectId
             )
             else -> null
         }

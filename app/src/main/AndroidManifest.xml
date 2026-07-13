@@ -28,10 +28,20 @@
             android:name=".notification.InvoiceReminderReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".notification.BootCompletedReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name="com.yetzira.ContractorCashFlowAndroid.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.KablanPro">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -44,6 +44,8 @@ import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborListScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborViewModel
 import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborViewModelFactory
+import com.yetzira.ContractorCashFlowAndroid.ui.labor.WorkerExpensesListScreen
+import androidx.compose.runtime.LaunchedEffect
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.EditProjectScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.NewProjectScreen
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectDetailScreen
@@ -338,7 +340,28 @@ fun NavGraphBuilder.laborGraph(
             EditLaborScreen(
                 workerId = workerId,
                 viewModel = viewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onOpenExpenses = { id -> navController.navigate(LaborRoutes.workerExpenses(id)) }
+            )
+        }
+
+        composable(
+            route = LaborRoutes.WORKER_EXPENSES,
+            arguments = listOf(navArgument("workerId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val context = LocalContext.current
+            val factory = remember { LaborViewModelFactory(AppDatabase.getInstance(context)) }
+            val viewModel: LaborViewModel = viewModel(factory = factory)
+            val workerId = backStackEntry.arguments?.getString("workerId").orEmpty()
+            val detail by viewModel.detailUiState.collectAsState()
+            LaunchedEffect(workerId) { viewModel.selectWorker(workerId) }
+            WorkerExpensesListScreen(
+                workerId = workerId,
+                workerName = detail.worker?.workerName.orEmpty(),
+                onBack = { navController.popBackStack() },
+                onOpenExpense = { expenseId ->
+                    navController.navigate(ExpenseRoutes.detail(expenseId))
+                }
             )
         }
     }

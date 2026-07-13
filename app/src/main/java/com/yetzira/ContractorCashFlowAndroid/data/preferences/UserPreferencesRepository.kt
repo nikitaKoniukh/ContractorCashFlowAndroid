@@ -67,6 +67,8 @@ class UserPreferencesRepository(context: Context) :
         val SAVED_EXPENSE_COUNT = longPreferencesKey("saved_expense_count")
         val HAS_RATED = booleanPreferencesKey("has_rated")
         val DECLINED_REVIEW_AFTER_EXPENSES = booleanPreferencesKey("declined_review_after_expenses")
+        val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
+        val PENDING_REVIEW_PROMPT = booleanPreferencesKey("pending_review_prompt")
     }
 
     // Flow getters
@@ -119,6 +121,14 @@ class UserPreferencesRepository(context: Context) :
 
     val declinedReviewAfterExpenses: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[DECLINED_REVIEW_AFTER_EXPENSES] ?: false
+    }
+
+    val hasSeenOnboarding: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[HAS_SEEN_ONBOARDING] ?: false
+    }
+
+    val pendingReviewPrompt: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PENDING_REVIEW_PROMPT] ?: false
     }
 
     // Suspend setters
@@ -197,6 +207,18 @@ class UserPreferencesRepository(context: Context) :
     suspend fun setDeclinedReviewAfterExpenses(declined: Boolean) {
         dataStore.edit { preferences ->
             preferences[DECLINED_REVIEW_AFTER_EXPENSES] = declined
+        }
+    }
+
+    suspend fun setHasSeenOnboarding(seen: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[HAS_SEEN_ONBOARDING] = seen
+        }
+    }
+
+    suspend fun setPendingReviewPrompt(pending: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PENDING_REVIEW_PROMPT] = pending
         }
     }
 }

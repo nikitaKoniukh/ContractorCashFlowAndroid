@@ -20,6 +20,28 @@
     <string name="tab_analytics_description">Вкладка аналитики</string>
     <string name="tab_settings_description">Вкладка параметров</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_track_projects_title">Управление проектами</string>
+    <string name="onboarding_track_projects_description">Создавайте и управляйте строительными проектами. Устанавливайте бюджеты, назначайте клиентов и храните всё в одном месте.</string>
+    <string name="onboarding_log_expenses_title">Учёт расходов</string>
+    <string name="onboarding_log_expenses_description">Записывайте каждый расход по категории и дате. Следите за использованием бюджета в реальном времени.</string>
+    <string name="onboarding_create_invoices_title">Создание счетов</string>
+    <string name="onboarding_create_invoices_description">Создавайте профессиональные счета, отправляйте клиентам и отслеживайте статус оплаты. Отмечайте счёт оплаченным одним нажатием.</string>
+    <string name="onboarding_manage_workers_title">Управление работниками</string>
+    <string name="onboarding_manage_workers_description">Добавляйте сотрудников, отслеживайте их ставки и часы, назначайте на проекты. Вся ваша команда в одном месте.</string>
+    <string name="onboarding_financial_analytics_title">Финансовая аналитика</string>
+    <string name="onboarding_financial_analytics_description">Визуализируйте денежный поток с помощью интерактивных графиков. Расходы по категориям, тренды доходов и прибыльность проектов — всё на виду.</string>
+    <string name="onboarding_skip">Пропустить</string>
+    <string name="onboarding_back">Назад</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_get_started">Начать</string>
+    <string name="onboarding_page_indicator">Страница %1$d из %2$d</string>
+
+    <string name="review_title">Нравится приложение?</string>
+    <string name="review_message">Ваш отзыв помогает нам стать лучше. Хотите оценить нас в Play Store?</string>
+    <string name="review_yes">Оценить</string>
+    <string name="review_not_now">Не сейчас</string>
+
     <string name="common_back">Назад</string>
     <string name="common_save">Сохранить</string>
     <string name="common_delete">Удалить</string>
@@ -336,6 +358,18 @@
     <string name="labor_form_contract_price_label">Цена контракта</string>
     <string name="labor_form_notes_label">Заметки</string>
     <string name="labor_form_type_label">Тип работы</string>
+    <string name="labor_type_hourly">Почасовая</string>
+    <string name="labor_type_daily">Поденная</string>
+    <string name="labor_type_subcontractor">Субподрядчик</string>
+    <string name="labor_worker_not_found">Рабочий не найден</string>
+    <string name="labor_worker_statistics">Статистика работника</string>
+    <string name="labor_total_earned">Всего заработано</string>
+    <string name="labor_units_worked">Часы / единицы</string>
+    <string name="labor_days_worked">Дней отработано</string>
+    <string name="labor_projects_label">Проекты</string>
+    <string name="labor_view_expenses">Смотреть расходы</string>
+    <string name="labor_linked_expenses_count">%1$d связанных расходов</string>
+    <string name="labor_worker_expenses_title">%1$s — Расходы</string>
     <string name="labor_filters_title">Тип работы</string>
     <string name="labor_filters_all">Все</string>
     <string name="labor_filters_all_projects">Все проекты</string>

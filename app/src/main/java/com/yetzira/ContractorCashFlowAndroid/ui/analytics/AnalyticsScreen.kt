@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.ui.components.AnalyticsCard
@@ -356,7 +357,7 @@ private fun ExpensesByCategoryCard(state: AnalyticsUiState) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = category.label,
+                                text = stringResource(category.labelResId),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold
                             )

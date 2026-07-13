@@ -90,14 +90,16 @@ private fun LaborTypeDropdown(
     onSelected: (LaborType) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val options = LaborType.entries
+    val labels = options.map { stringResource(it.labelResId) }
     ModernDropdown(
         label = stringResource(R.string.labor_form_type_label),
-        options = LaborType.entries.map { it.name },
-        selected = selected.name,
-        onSelected = { selectedName ->
-            val type = LaborType.entries.find { it.name == selectedName }
-            if (type != null) {
-                onSelected(type)
+        options = labels,
+        selected = stringResource(selected.labelResId),
+        onSelected = { selectedLabel ->
+            val index = labels.indexOf(selectedLabel)
+            if (index >= 0) {
+                onSelected(options[index])
             }
         },
         modifier = modifier

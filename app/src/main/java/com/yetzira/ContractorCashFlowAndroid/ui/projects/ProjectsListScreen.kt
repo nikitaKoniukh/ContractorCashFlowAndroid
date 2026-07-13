@@ -96,6 +96,50 @@ fun ProjectsListScreen(
     var paywallMessage by remember { mutableStateOf<String?>(null) }
     val deletedSuffix = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.projects_deleted)
     val undoLabel = stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.common_undo)
+    val pendingReview by preferencesRepository.pendingReviewPrompt.collectAsState(initial = false)
+    var showReviewDialog by remember { mutableStateOf(false) }
+    val activity = context as? android.app.Activity
+
+    androidx.compose.runtime.LaunchedEffect(pendingReview) {
+        if (pendingReview) {
+            kotlinx.coroutines.delay(600)
+            showReviewDialog = true
+        }
+    }
+
+    if (showReviewDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showReviewDialog = false
+                scope.launch { com.yetzira.ContractorCashFlowAndroid.review.InAppReviewHelper.decline(context) }
+            },
+            title = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.review_title)) },
+            text = { Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.review_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showReviewDialog = false
+                    scope.launch {
+                        if (activity != null) {
+                            com.yetzira.ContractorCashFlowAndroid.review.InAppReviewHelper.acceptAndLaunch(activity)
+                        } else {
+                            preferencesRepository.setHasRated(true)
+                            preferencesRepository.setPendingReviewPrompt(false)
+                        }
+                    }
+                }) {
+                    Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.review_yes))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showReviewDialog = false
+                    scope.launch { com.yetzira.ContractorCashFlowAndroid.review.InAppReviewHelper.decline(context) }
+                }) {
+                    Text(stringResource(com.yetzira.ContractorCashFlowAndroid.R.string.review_not_now))
+                }
+            }
+        )
+    }
 
     val onCreateProjectAttempt = {
         if (purchaseManager.canCreateProject(uiState.projects.size)) {

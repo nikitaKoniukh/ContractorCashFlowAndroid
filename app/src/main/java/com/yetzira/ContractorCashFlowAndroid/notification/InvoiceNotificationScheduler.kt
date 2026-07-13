@@ -51,20 +51,24 @@ class InvoiceNotificationScheduler(
             .format(amount)
 
         if (invoiceRemindersEnabled) {
-            scheduleWorker(
+            scheduleAlarm(
                 requestCode = reminderRequestCode(invoiceId),
                 triggerAtMillis = dueDate - THREE_DAYS_MS,
                 title = context.getString(R.string.notif_invoice_due_soon_title),
-                message = context.getString(R.string.notif_invoice_due_soon_body, clientName, formattedAmount)
+                message = context.getString(R.string.notif_invoice_due_soon_body, clientName, formattedAmount),
+                invoiceId = invoiceId,
+                kind = NotificationDeepLink.TYPE_REMINDER
             )
         }
 
         if (overdueAlertsEnabled) {
-            scheduleWorker(
+            scheduleAlarm(
                 requestCode = overdueRequestCode(invoiceId),
                 triggerAtMillis = dueDate + ONE_DAY_MS,
                 title = context.getString(R.string.notif_invoice_overdue_title),
-                message = context.getString(R.string.notif_invoice_overdue_body, clientName, formattedAmount)
+                message = context.getString(R.string.notif_invoice_overdue_body, clientName, formattedAmount),
+                invoiceId = invoiceId,
+                kind = NotificationDeepLink.TYPE_OVERDUE
             )
         }
     }
@@ -89,20 +93,30 @@ class InvoiceNotificationScheduler(
 
     override fun cancel(invoiceId: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.cancel(createPendingIntent(reminderRequestCode(invoiceId), "", ""))
-        alarmManager.cancel(createPendingIntent(overdueRequestCode(invoiceId), "", ""))
+        alarmManager.cancel(
+            createPendingIntent(
+                reminderRequestCode(invoiceId), "", "", invoiceId, NotificationDeepLink.TYPE_REMINDER
+            )
+        )
+        alarmManager.cancel(
+            createPendingIntent(
+                overdueRequestCode(invoiceId), "", "", invoiceId, NotificationDeepLink.TYPE_OVERDUE
+            )
+        )
     }
 
-    private fun scheduleWorker(
+    private fun scheduleAlarm(
         requestCode: Int,
         triggerAtMillis: Long,
         title: String,
-        message: String
+        message: String,
+        invoiceId: String,
+        kind: String
     ) {
         if (triggerAtMillis <= System.currentTimeMillis()) return
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val pendingIntent = createPendingIntent(requestCode, title, message)
+        val pendingIntent = createPendingIntent(requestCode, title, message, invoiceId, kind)
         if (canUseExactAlarms(alarmManager)) {
             try {
                 alarmManager.setExactAndAllowWhileIdle(
@@ -147,10 +161,18 @@ class InvoiceNotificationScheduler(
         }
     }
 
-    private fun createPendingIntent(requestCode: Int, title: String, message: String): PendingIntent {
+    private fun createPendingIntent(
+        requestCode: Int,
+        title: String,
+        message: String,
+        invoiceId: String,
+        kind: String
+    ): PendingIntent {
         val intent = Intent(context, InvoiceReminderReceiver::class.java)
             .putExtra(InvoiceReminderReceiver.EXTRA_TITLE, title)
             .putExtra(InvoiceReminderReceiver.EXTRA_MESSAGE, message)
+            .putExtra(NotificationDeepLink.EXTRA_INVOICE_ID, invoiceId)
+            .putExtra(NotificationDeepLink.EXTRA_INVOICE_NOTIF_KIND, kind)
         return PendingIntent.getBroadcast(
             context,
             requestCode,

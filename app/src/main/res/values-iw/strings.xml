@@ -26,6 +26,28 @@
     <string name="tab_analytics_description">כרטיסיית ניתוח</string>
     <string name="tab_settings_description">כרטיסיית הגדרות</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_track_projects_title">ניהול פרויקטים</string>
+    <string name="onboarding_track_projects_description">צרו ונהלו את פרויקטי הבנייה שלכם. הגדירו תקציבים, שייכו לקוחות ושמרו הכל מסודר במקום אחד.</string>
+    <string name="onboarding_log_expenses_title">רישום הוצאות</string>
+    <string name="onboarding_log_expenses_description">תעדו כל הוצאה לפי קטגוריה ותאריך. עקבו אחר ניצול התקציב בזמן אמת כדי שלא תחרגו.</string>
+    <string name="onboarding_create_invoices_title">יצירת חשבוניות</string>
+    <string name="onboarding_create_invoices_description">הפיקו חשבוניות מקצועיות, שלחו ללקוחות ועקבו אחר סטטוס התשלום. סמנו חשבונית כשולמה בלחיצה אחת.</string>
+    <string name="onboarding_manage_workers_title">ניהול עובדים</string>
+    <string name="onboarding_manage_workers_description">הוסיפו את חברי הצוות, עקבו אחר שכרם ושעות העבודה ושייכו עובדים לפרויקטים. כל כוח העבודה שלכם, מאורגן במקום אחד.</string>
+    <string name="onboarding_financial_analytics_title">ניתוח פיננסי</string>
+    <string name="onboarding_financial_analytics_description">הציגו את תזרים המזומנים שלכם בגרפים אינטראקטיביים. צפו בהוצאות לפי קטגוריה, מגמות הכנסה ורווחיות פרויקטים.</string>
+    <string name="onboarding_skip">דלג</string>
+    <string name="onboarding_back">חזרה</string>
+    <string name="onboarding_next">הבא</string>
+    <string name="onboarding_get_started">בואו נתחיל</string>
+    <string name="onboarding_page_indicator">עמוד %1$d מתוך %2$d</string>
+
+    <string name="review_title">נהנים מהאפליקציה?</string>
+    <string name="review_message">המשוב שלכם עוזר לנו להשתפר. תרצו לדרג אותנו בחנות האפליקציות?</string>
+    <string name="review_yes">דרגו עכשיו</string>
+    <string name="review_not_now">לא עכשיו</string>
+
     <string name="common_back">חזור</string>
     <string name="common_save">שמור</string>
     <string name="common_delete">מחק</string>
@@ -342,6 +364,18 @@
     <string name="labor_form_contract_price_label">מחיר חוזה</string>
     <string name="labor_form_notes_label">הערות</string>
     <string name="labor_form_type_label">סוג עבודה</string>
+    <string name="labor_type_hourly">שכר לשעה</string>
+    <string name="labor_type_daily">שכר יומי</string>
+    <string name="labor_type_subcontractor">קבלן משנה</string>
+    <string name="labor_worker_not_found">עובד לא נמצא</string>
+    <string name="labor_worker_statistics">סטטיסטיקת עובד</string>
+    <string name="labor_total_earned">סה״כ השתכרות</string>
+    <string name="labor_units_worked">שעות / יחידות</string>
+    <string name="labor_days_worked">ימי עבודה</string>
+    <string name="labor_projects_label">פרויקטים</string>
+    <string name="labor_view_expenses">צפייה בהוצאות</string>
+    <string name="labor_linked_expenses_count">%1$d הוצאות מקושרות</string>
+    <string name="labor_worker_expenses_title">%1$s — הוצאות</string>
     <string name="labor_filters_title">סוג עבודה</string>
     <string name="labor_filters_all">הכל</string>
     <string name="labor_filters_all_projects">כל הפרויקטים</string>

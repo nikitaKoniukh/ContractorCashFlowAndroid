@@ -25,7 +25,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
         ClientEntity::class,
         LaborDetailsEntity::class
     ],
-    version = 6,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -71,6 +71,23 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * Some debug builds reached version 7 with an experimental schema.
+         * Keep a no-op bridge so devices on 6/7 can open without wiping data.
+         */
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // No schema changes required for the current entity set.
+            }
+        }
+
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Align identity hash after experimental v7 builds; keep user data.
+                // Optional leftover tables (e.g. deleted_records) are left in place harmlessly.
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -81,7 +98,17 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "kablan_pro_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(
+                        MIGRATION_1_2,
+                        MIGRATION_2_3,
+                        MIGRATION_3_4,
+                        MIGRATION_4_5,
+                        MIGRATION_5_6,
+                        MIGRATION_6_7,
+                        MIGRATION_7_8
+                    )
+                    .fallbackToDestructiveMigrationOnDowngrade()
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

@@ -144,6 +144,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.storage.ktx)
 
     // Google Play Billing
     implementation(libs.google.play.billing)
@@ -152,6 +153,8 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.google.play.review)
+    implementation(libs.google.play.review.ktx)
 
     // ML Kit Text Recognition
     implementation(libs.mlkit.text.recognition)

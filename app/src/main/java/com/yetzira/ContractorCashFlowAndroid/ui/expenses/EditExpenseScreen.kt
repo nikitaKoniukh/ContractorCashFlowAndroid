@@ -71,7 +71,8 @@ fun EditExpenseScreen(
                     utilizationPercent = result.utilizationPercent,
                     projectName = result.projectName,
                     totalExpenses = result.totalExpenses,
-                    budget = result.budget
+                    budget = result.budget,
+                    projectId = result.projectId
                 )
                 snackbarHostState.showSnackbar(
                     if (result.utilizationPercent >= 100) {

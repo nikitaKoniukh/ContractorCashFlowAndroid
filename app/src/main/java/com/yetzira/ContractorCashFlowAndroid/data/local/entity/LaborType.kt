@@ -1,22 +1,25 @@
 package com.yetzira.ContractorCashFlowAndroid.data.local.entity
 
+import androidx.annotation.StringRes
+import com.yetzira.ContractorCashFlowAndroid.R
+
 enum class LaborType(
-    val displayName: String,
+    @StringRes val labelResId: Int,
     val usesQuantity: Boolean,
     val rateSuffix: String
 ) {
     HOURLY(
-        displayName = "שכר לשעה",
+        labelResId = R.string.labor_type_hourly,
         usesQuantity = true,
         rateSuffix = "/hr"
     ),
     DAILY(
-        displayName = "שכר יומי",
+        labelResId = R.string.labor_type_daily,
         usesQuantity = true,
         rateSuffix = "/day"
     ),
     SUBCONTRACTOR(
-        displayName = "קבלן משנה",
+        labelResId = R.string.labor_type_subcontractor,
         usesQuantity = false,
         rateSuffix = ""
     );
@@ -29,4 +32,3 @@ enum class LaborType(
             }
     }
 }
-

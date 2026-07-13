@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -35,16 +36,22 @@ import com.yetzira.ContractorCashFlowAndroid.ui.labor.LaborRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.projects.ProjectRoutes
 import com.yetzira.ContractorCashFlowAndroid.ui.settings.SettingsRoutes
 
+sealed class PendingDeepLink {
+    data class Invoice(val invoiceId: String) : PendingDeepLink()
+    data class Project(val projectId: String) : PendingDeepLink()
+}
+
 @Composable
 fun KablanProNavigationShell(
     selectedTab: MutableState<TabDestination>,
+    pendingDeepLink: PendingDeepLink? = null,
+    onDeepLinkConsumed: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val showBottomBar = currentRoute !in routesWithOwnTopBar
-    var showMoreSheet by remember { mutableStateOf(false) }
 
     fun navigate(tab: TabDestination) {
         if (tab == selectedTab.value) {
@@ -59,19 +66,38 @@ fun KablanProNavigationShell(
         }
     }
 
+    LaunchedEffect(pendingDeepLink) {
+        val link = pendingDeepLink ?: return@LaunchedEffect
+        when (link) {
+            is PendingDeepLink.Invoice -> {
+                selectedTab.value = TabDestination.INVOICES
+                navController.navigate(InvoiceRoutes.GRAPH) {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+                navController.navigate(InvoiceRoutes.detail(link.invoiceId))
+            }
+            is PendingDeepLink.Project -> {
+                selectedTab.value = TabDestination.PROJECTS
+                navController.navigate(ProjectRoutes.GRAPH) {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+                navController.navigate(ProjectRoutes.detail(link.projectId))
+            }
+        }
+        onDeepLinkConsumed()
+    }
+
     Scaffold(
         contentWindowInsets = KablanProLayoutDefaults.ScaffoldContentInsets,
         bottomBar = {
             if (showBottomBar) {
                 KablanProNavigationBar(
                     selectedTab = selectedTab.value,
-                    onTabSelected = { tab ->
-                        if (tab == TabDestination.MORE) {
-                            showMoreSheet = true
-                        } else {
-                            navigate(tab)
-                        }
-                    }
+                    onTabSelected = { tab -> navigate(tab) }
                 )
             }
         }
@@ -79,14 +105,6 @@ fun KablanProNavigationShell(
         KablanProNavigationContent(
             navController = navController,
             modifier = modifier.padding(innerPadding)
-        )
-    }
-
-    if (showMoreSheet) {
-        MoreBottomSheet(
-            selectedTab = selectedTab.value,
-            onTabSelected = { tab -> navigate(tab) },
-            onDismiss = { showMoreSheet = false }
         )
     }
 }
@@ -291,6 +309,7 @@ private fun titleResForRoute(route: String?): Int {
         route == LaborRoutes.LIST || route == LaborRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_labor
         route == LaborRoutes.ADD -> com.yetzira.ContractorCashFlowAndroid.R.string.labor_screen_add_title
         route == LaborRoutes.EDIT -> com.yetzira.ContractorCashFlowAndroid.R.string.labor_screen_edit_title
+        route == LaborRoutes.WORKER_EXPENSES -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_expenses
 
         route == ClientRoutes.LIST || route == ClientRoutes.GRAPH -> com.yetzira.ContractorCashFlowAndroid.R.string.tab_clients
         route == ClientRoutes.NEW -> com.yetzira.ContractorCashFlowAndroid.R.string.clients_new
@@ -320,6 +339,7 @@ private val routesWithOwnTopBar = setOf(
     InvoiceRoutes.EDIT,
     LaborRoutes.ADD,
     LaborRoutes.EDIT,
+    LaborRoutes.WORKER_EXPENSES,
     ClientRoutes.NEW,
     ClientRoutes.DETAIL,
     ClientRoutes.EDIT,
@@ -345,7 +365,6 @@ private fun getGraphRoute(tab: TabDestination): String = when (tab) {
     TabDestination.CLIENTS -> ClientRoutes.GRAPH
     TabDestination.ANALYTICS -> "analytics_graph"
     TabDestination.SETTINGS -> SettingsRoutes.GRAPH
-    TabDestination.MORE -> ProjectRoutes.GRAPH
 }
 
 private fun getTabRootRoute(tab: TabDestination): String = when (tab) {

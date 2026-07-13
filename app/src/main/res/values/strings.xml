@@ -18,8 +18,29 @@
     <string name="tab_clients_description">Clients tab</string>
     <string name="tab_analytics_description">Analytics tab</string>
     <string name="tab_settings_description">Settings tab</string>
-    <string name="tab_more">More</string>
-    <string name="tab_more_description">More options</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_track_projects_title">Track Projects</string>
+    <string name="onboarding_track_projects_description">Create and manage your construction projects. Set budgets, assign clients, and keep everything organized in one place.</string>
+    <string name="onboarding_log_expenses_title">Log Expenses</string>
+    <string name="onboarding_log_expenses_description">Record every expense by category and date. Monitor budget utilization in real time so you never overspend.</string>
+    <string name="onboarding_create_invoices_title">Create Invoices</string>
+    <string name="onboarding_create_invoices_description">Generate professional invoices, send them to clients, and track payment status. Mark invoices as paid with a single tap.</string>
+    <string name="onboarding_manage_workers_title">Manage Workers</string>
+    <string name="onboarding_manage_workers_description">Add your team members, track their rates and hours, and assign workers to projects. Your entire workforce, organized in one place.</string>
+    <string name="onboarding_financial_analytics_title">Financial Analytics</string>
+    <string name="onboarding_financial_analytics_description">Visualize your cash flow with interactive charts. See expenses by category, income trends, and project profitability at a glance.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_page_indicator">Page %1$d of %2$d</string>
+
+    <!-- In-app review -->
+    <string name="review_title">Enjoying the App?</string>
+    <string name="review_message">Your feedback helps us improve. Would you like to rate us on the Play Store?</string>
+    <string name="review_yes">Rate Now</string>
+    <string name="review_not_now">Not Now</string>
 
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>
@@ -371,6 +392,15 @@
     <string name="labor_type_hourly">Hourly</string>
     <string name="labor_type_daily">Daily</string>
     <string name="labor_type_subcontractor">Subcontractor</string>
+    <string name="labor_worker_not_found">Worker not found</string>
+    <string name="labor_worker_statistics">Worker Statistics</string>
+    <string name="labor_total_earned">Total earned</string>
+    <string name="labor_units_worked">Hours / Units</string>
+    <string name="labor_days_worked">Days worked</string>
+    <string name="labor_projects_label">Projects</string>
+    <string name="labor_view_expenses">View expenses</string>
+    <string name="labor_linked_expenses_count">%1$d linked expense(s)</string>
+    <string name="labor_worker_expenses_title">%1$s — Expenses</string>
     <string name="labor_filters_sheet_title">Worker Filters</string>
     <string name="labor_filters_title">Worker type</string>
     <string name="labor_filters_type_label">Type</string>

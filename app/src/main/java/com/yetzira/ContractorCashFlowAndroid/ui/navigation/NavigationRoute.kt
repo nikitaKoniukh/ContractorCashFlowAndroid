@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AttachMoney
@@ -14,7 +13,6 @@ import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -86,23 +84,15 @@ enum class TabDestination(
         icon = Icons.Filled.Settings,
         inactiveIcon = Icons.Outlined.Settings,
         description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_settings_description
-    ),
-    MORE(
-        route = "more",
-        label = com.yetzira.ContractorCashFlowAndroid.R.string.tab_more,
-        icon = Icons.Filled.MoreHoriz,
-        inactiveIcon = Icons.Outlined.MoreHoriz,
-        description = com.yetzira.ContractorCashFlowAndroid.R.string.tab_more_description
     );
 
     companion object {
         fun fromRoute(route: String?): TabDestination? =
             entries.find { it.route == route }
 
-        /** The 5 items shown in the bottom tab bar. */
-        val bottomBarTabs = listOf(PROJECTS, EXPENSES, INVOICES, LABOR, MORE)
-
-        /** Destinations accessible from the "More" bottom sheet. */
-        val moreTabs = listOf(CLIENTS, ANALYTICS, SETTINGS)
+        /** All 7 tabs shown in the bottom bar (matches iOS). */
+        val bottomBarTabs = listOf(
+            PROJECTS, EXPENSES, INVOICES, LABOR, CLIENTS, ANALYTICS, SETTINGS
+        )
     }
 }
