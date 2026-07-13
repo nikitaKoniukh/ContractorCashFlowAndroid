@@ -411,6 +411,7 @@
     <string name="labor_empty_filtered_body">Нет сотрудников, соответствующих текущим фильтрам.</string>
     <string name="labor_form_section_basic">Рабочий</string>
     <string name="labor_form_section_rates">Ставки</string>
+    <string name="labor_form_default_rate_hint">Ставка, используемая при создании новых записей для этого работника</string>
     <string name="labor_form_section_notes">Заметки</string>
     <string name="labor_show_all_expenses">Показать все (%1$d)</string>
     <string name="labor_created_date">Дата создания</string>
@@ -467,7 +468,12 @@
     <string name="scan_receipt_attached">Чек прикреплён</string>
     <string name="scan_receipt_hint">Извлечённые данные — проверьте и отредактируйте перед сохранением</string>
     <string name="scan_notes_label">Заметки</string>
+    <string name="scan_default_description">Отсканированный расход</string>
     <string name="expenses_form_notes_label">Заметки (необязательно)</string>
+    <string name="expenses_form_select_days">Выберите один или несколько дней</string>
+    <string name="expenses_form_day_selected">Выбран 1 день</string>
+    <string name="expenses_form_days_selected">Выбрано дней: %d</string>
+    <string name="expenses_form_suggested_amount">Рекомендуется: %s</string>
     <string name="common_cancel">Отмена</string>
     <string name="projects_notes">Заметки</string>
     <string name="projects_notes_placeholder">Добавить заметки…</string>

@@ -59,7 +59,9 @@ data class ExpenseFormUiState(
     val workers: List<WorkerOptionUi> = emptyList(),
     val isAmountReadOnly: Boolean = false,
     val canSave: Boolean = false,
-    val selectedDates: List<Long> = emptyList()
+    val selectedDates: List<Long> = emptyList(),
+    /** Rate × units/days suggestion; shown when it differs from the entered amount. */
+    val calculatedAmount: Double? = null
 ) {
     val useMultiDatePicker: Boolean
         get() = category == ExpenseCategory.LABOR && laborTypeSnapshot == LaborType.DAILY

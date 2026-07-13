@@ -467,6 +467,7 @@
     <string name="labor_empty_filtered_body">No worker entries match your current filters.</string>
     <string name="labor_form_section_basic">Worker</string>
     <string name="labor_form_section_rates">Rates</string>
+    <string name="labor_form_default_rate_hint">Rate used when creating new entries for this worker</string>
     <string name="labor_form_section_notes">Notes</string>
     <string name="labor_show_all_expenses">Show All (%1$d)</string>
     <string name="labor_created_date">Created Date</string>
@@ -486,6 +487,9 @@
     <string name="expenses_form_project_label">Project (optional)</string>
     <string name="expenses_form_no_project">No project</string>
     <string name="expenses_form_select_days">Select one or more days</string>
+    <string name="expenses_form_day_selected">1 day selected</string>
+    <string name="expenses_form_days_selected">%d days selected</string>
+    <string name="expenses_form_suggested_amount">Suggested: %s</string>
     <string name="expenses_form_selected_dates">Selected dates:</string>
     <string name="expenses_form_add_day">Add day</string>
     <string name="expenses_form_notes_label">Notes (optional)</string>
@@ -524,6 +528,7 @@
     <string name="scan_receipt_attached">Receipt attached</string>
     <string name="scan_receipt_hint">Extracted data — review and edit before saving</string>
     <string name="scan_notes_label">Notes</string>
+    <string name="scan_default_description">Scanned expense</string>
     <string name="scan_failed_load_image">Failed to load image</string>
     <string name="scan_failed_load_file">Failed to load file</string>
     <string name="scan_capture_failed">Capture failed: %1$s</string>

@@ -9,20 +9,29 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,18 +49,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.yetzira.ContractorCashFlowAndroid.R
-import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.LaborType
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
+import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.toFormattedCurrency
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
+import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 
 @Composable
 fun ExpenseFormContent(
@@ -64,313 +75,220 @@ fun ExpenseFormContent(
 ) {
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         item {
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.expenses_form_category_label),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    val categoryOptions = ExpenseCategory.entries.map { category ->
-                        category to expenseCategoryLabel(category)
+            ExpenseFormSection(title = stringResource(R.string.expenses_section_details)) {
+                ExpenseDropdownRow(
+                    label = stringResource(R.string.expenses_form_category_label),
+                    options = ExpenseCategory.entries.map { it to expenseCategoryLabel(it) },
+                    selectedLabel = expenseCategoryLabel(state.category),
+                    onSelected = { selected ->
+                        onStateChange(
+                            state.copy(
+                                category = selected,
+                                workerId = null,
+                                unitsWorked = "",
+                                laborTypeSnapshot = null,
+                                notes = "",
+                                selectedDates = emptyList(),
+                                calculatedAmount = null
+                            )
+                        )
                     }
-                    ModernDropdown(
-                        label = stringResource(R.string.expenses_form_category_label),
-                        options = categoryOptions.map { it.second },
-                        selected = categoryOptions.first { it.first == state.category }.second,
-                        onSelected = { selectedLabel ->
-                            val selected = categoryOptions
-                                .firstOrNull { it.second == selectedLabel }
-                                ?.first
-                            if (selected != null) {
-                                onStateChange(state.copy(
-                                    category = selected,
-                                    workerId = null,
-                                    unitsWorked = "",
-                                    laborTypeSnapshot = null,
-                                    notes = "",
-                                    selectedDates = emptyList()
-                                ))
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                )
 
-                    if (state.category == ExpenseCategory.LABOR && state.workers.isNotEmpty()) {
-                        ModernDropdown(
-                            label = stringResource(R.string.expenses_form_worker_label),
-                            options = state.workers.map { it.worker.workerName },
-                            selected = state.workers.firstOrNull { it.worker.id == state.workerId }?.worker?.workerName.orEmpty(),
-                            onSelected = { workerName ->
-                                val worker = state.workers.find { it.worker.workerName == workerName }
-                                if (worker != null) {
-                                    onStateChange(state.copy(
+                if (state.category == ExpenseCategory.LABOR && state.workers.isNotEmpty()) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                    ExpenseStringDropdownRow(
+                        placeholder = stringResource(R.string.expenses_form_worker_label),
+                        options = state.workers.map { it.worker.workerName },
+                        selected = state.workers.firstOrNull { it.worker.id == state.workerId }
+                            ?.worker?.workerName.orEmpty(),
+                        onSelected = { workerName ->
+                            val worker = state.workers.find { it.worker.workerName == workerName }
+                            if (worker != null) {
+                                onStateChange(
+                                    state.copy(
                                         workerId = worker.worker.id,
                                         laborTypeSnapshot = null,
                                         unitsWorked = "",
-                                        selectedDates = emptyList()
-                                    ))
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        val worker = state.workers.firstOrNull { it.worker.id == state.workerId }
-                        if (worker != null) {
-                            val hasHourly = worker.hourlyRate != null
-                            val hasDaily = worker.dailyRate != null
-                            val hasSubcontractor = worker.contractPrice != null
-                            val selectedLaborMode = state.laborTypeSnapshot
-
-                            // Build list of available labor types for this worker
-                            val availableLaborTypes = mutableListOf<LaborType>()
-                            if (hasHourly) availableLaborTypes.add(LaborType.HOURLY)
-                            if (hasDaily) availableLaborTypes.add(LaborType.DAILY)
-                            if (hasSubcontractor) availableLaborTypes.add(LaborType.SUBCONTRACTOR)
-
-                            // Always show labor type selector if multiple options available or to allow override
-                            if (availableLaborTypes.size > 1 || availableLaborTypes.size == 1) {
-                                val hourlyLabel = stringResource(R.string.expenses_form_labor_mode_hourly)
-                                val dailyLabel = stringResource(R.string.expenses_form_labor_mode_daily)
-                                val subcontractorLabel = stringResource(R.string.labor_type_subcontractor)
-
-                                val typeOptions = availableLaborTypes.map { type ->
-                                    when (type) {
-                                        LaborType.HOURLY -> hourlyLabel
-                                        LaborType.DAILY -> dailyLabel
-                                        LaborType.SUBCONTRACTOR -> subcontractorLabel
-                                    }
-                                }
-
-                                val labelToTypeMap = mapOf(
-                                    hourlyLabel to LaborType.HOURLY,
-                                    dailyLabel to LaborType.DAILY,
-                                    subcontractorLabel to LaborType.SUBCONTRACTOR
+                                        selectedDates = emptyList(),
+                                        calculatedAmount = null
+                                    )
                                 )
+                            }
+                        }
+                    )
 
-                                val selectedModeLabel = when (selectedLaborMode) {
-                                    LaborType.HOURLY -> hourlyLabel
-                                    LaborType.DAILY -> dailyLabel
-                                    LaborType.SUBCONTRACTOR -> subcontractorLabel
-                                    else -> if (availableLaborTypes.isNotEmpty()) {
-                                        when (availableLaborTypes.first()) {
-                                            LaborType.HOURLY -> hourlyLabel
-                                            LaborType.DAILY -> dailyLabel
-                                            LaborType.SUBCONTRACTOR -> subcontractorLabel
-                                        }
-                                    } else ""
-                                }
+                    val worker = state.workers.firstOrNull { it.worker.id == state.workerId }
+                    if (worker != null) {
+                        val availableLaborTypes = buildList {
+                            if (worker.hourlyRate != null) add(LaborType.HOURLY)
+                            if (worker.dailyRate != null) add(LaborType.DAILY)
+                            if (worker.contractPrice != null) add(LaborType.SUBCONTRACTOR)
+                        }
+                        val selectedLaborMode = state.laborTypeSnapshot
+                        val effectiveLaborType = selectedLaborMode ?: availableLaborTypes.firstOrNull()
 
-                                ModernDropdown(
-                                    label = stringResource(R.string.expenses_form_labor_mode_label),
-                                    options = typeOptions,
-                                    selected = selectedModeLabel,
-                                    onSelected = { modeLabel ->
-                                        val selectedMode = labelToTypeMap[modeLabel] ?: availableLaborTypes.firstOrNull()
-                                        onStateChange(state.copy(
+                        if (availableLaborTypes.isNotEmpty()) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                            val typeOptions = availableLaborTypes.map { type ->
+                                type to laborTypeLabel(type)
+                            }
+                            ExpenseDropdownRow(
+                                label = stringResource(R.string.expenses_form_labor_mode_label),
+                                options = typeOptions,
+                                selectedLabel = laborTypeLabel(
+                                    effectiveLaborType ?: availableLaborTypes.first()
+                                ),
+                                onSelected = { selectedMode ->
+                                    onStateChange(
+                                        state.copy(
                                             laborTypeSnapshot = selectedMode,
                                             unitsWorked = "",
-                                            selectedDates = emptyList()
-                                        ))
-                                    },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
-                            val effectiveLaborType = selectedLaborMode ?: availableLaborTypes.firstOrNull()
-                            val effectiveRate = when (effectiveLaborType) {
-                                LaborType.HOURLY -> worker.hourlyRate
-                                LaborType.DAILY -> worker.dailyRate
-                                LaborType.SUBCONTRACTOR -> worker.contractPrice
-                                null -> null
-                            }
-
-                            Text(
-                                text = "${worker.worker.workerName} • ${effectiveRate ?: 0.0}${effectiveLaborType?.rateSuffix.orEmpty()}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            selectedDates = emptyList(),
+                                            calculatedAmount = null
+                                        )
+                                    )
+                                }
                             )
-
-                            if (effectiveLaborType == LaborType.HOURLY) {
-                                ModernTextField(
-                                    value = state.unitsWorked,
-                                    onValueChange = onUnitsWorkedChanged,
-                                    label = stringResource(R.string.expenses_form_hours_worked_label),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                    singleLine = true
-                                )
-                            }
-                        }
-                    }
-
-                    // For labor: show notes field; for others: show description
-                    if (state.category == ExpenseCategory.LABOR) {
-                        ModernTextField(
-                            value = state.notes,
-                            onValueChange = { onStateChange(state.copy(notes = it)) },
-                            label = stringResource(R.string.expenses_form_notes_label),
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = false,
-                            minLines = 2
-                        )
-                    } else {
-                        ModernTextField(
-                            value = state.description,
-                            onValueChange = { onStateChange(state.copy(description = it)) },
-                            label = stringResource(R.string.expenses_form_description_label),
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                    }
-
-                    if (state.useMultiDatePicker) {
-                        // Multi-date picker UI
-                        Card(
-                            shape = RoundedCornerShape(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.expenses_form_amount_label),
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                    Text(
-                                        text = (parseAmountInput(state.amount) ?: 0.0).toFormattedCurrency(currency),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = if (state.amount.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = if (state.selectedDates.isEmpty()) Icons.Default.CalendarToday else Icons.Default.CalendarToday,
-                                        contentDescription = null,
-                                        tint = if (state.selectedDates.isEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Text(
-                                        text = if (state.selectedDates.isEmpty()) {
-                                            stringResource(R.string.expenses_form_select_days)
-                                        } else {
-                                            "${state.selectedDayCount} day${if (state.selectedDayCount == 1) "" else "s"} selected"
-                                        },
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = if (state.selectedDates.isEmpty()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
                         }
 
-                        EmbeddedMultiDatePicker(
-                            selectedDates = state.selectedDates,
-                            initialMonthMillis = state.selectedDates.firstOrNull() ?: state.date,
-                            onToggleDate = { dateMillis, isSelected ->
-                                if (isSelected) {
-                                    onDateRemoved(dateMillis)
-                                } else {
-                                    onDateAdded(dateMillis)
-                                }
-                            }
+                        val effectiveRate = when (effectiveLaborType) {
+                            LaborType.HOURLY -> worker.hourlyRate
+                            LaborType.DAILY -> worker.dailyRate
+                            LaborType.SUBCONTRACTOR -> worker.contractPrice
+                            null -> null
+                        }
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        Text(
+                            text = "${worker.worker.workerName} • ${effectiveRate ?: 0.0}${effectiveLaborType?.rateSuffix.orEmpty()}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                         )
 
-                        // Date selection is handled directly in the embedded calendar picker.
-                    } else {
-                        // Single date/amount picker mode
-                        ModernTextField(
-                            value = state.amount,
-                            onValueChange = {
-                                if (!state.isAmountReadOnly) {
-                                    onStateChange(state.copy(amount = formatAmountInput(it)))
-                                }
-                            },
-                            label = stringResource(R.string.expenses_form_amount_label),
-                            modifier = Modifier.fillMaxWidth(),
-                            suffix = { Text(currency.symbol) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            singleLine = true,
-                            readOnly = state.isAmountReadOnly
-                        )
-
-                        DatePickerField(
-                            date = state.date,
-                            onDateSelected = { onStateChange(state.copy(date = it)) }
-                        )
+                        if (effectiveLaborType == LaborType.HOURLY) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                            ExpenseIosTextField(
+                                value = state.unitsWorked,
+                                onValueChange = onUnitsWorkedChanged,
+                                placeholder = stringResource(R.string.expenses_form_hours_worked_label),
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                            )
+                        }
                     }
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(start = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
+                if (state.category == ExpenseCategory.LABOR) {
+                    ExpenseIosTextField(
+                        value = state.notes,
+                        onValueChange = { onStateChange(state.copy(notes = it)) },
+                        placeholder = stringResource(R.string.expenses_form_notes_label),
+                        singleLine = false,
+                        minLines = 2
+                    )
+                } else {
+                    ExpenseIosTextField(
+                        value = state.description,
+                        onValueChange = { onStateChange(state.copy(description = it)) },
+                        placeholder = stringResource(R.string.expenses_form_description_label),
+                        singleLine = true
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(start = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
+
+                if (state.useMultiDatePicker) {
+                    ExpenseIosTextField(
+                        value = state.amount,
+                        onValueChange = {
+                            if (!state.isAmountReadOnly) {
+                                onStateChange(state.copy(amount = formatAmountInput(it)))
+                            }
+                        },
+                        placeholder = stringResource(R.string.expenses_form_amount_label),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        prefix = currency.symbol,
+                        readOnly = state.isAmountReadOnly
+                    )
+                    SuggestedAmountHint(state = state, currency = currency)
+                    MultiDayStatusRow(selectedDayCount = state.selectedDayCount)
+                    EmbeddedMultiDatePicker(
+                        selectedDates = state.selectedDates,
+                        initialMonthMillis = state.selectedDates.firstOrNull() ?: state.date,
+                        onToggleDate = { dateMillis, isSelected ->
+                            if (isSelected) {
+                                onDateRemoved(dateMillis)
+                            } else {
+                                onDateAdded(dateMillis)
+                            }
+                        },
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+                    )
+                } else {
+                    ExpenseIosTextField(
+                        value = state.amount,
+                        onValueChange = {
+                            if (!state.isAmountReadOnly) {
+                                onStateChange(state.copy(amount = formatAmountInput(it)))
+                            }
+                        },
+                        placeholder = stringResource(R.string.expenses_form_amount_label),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        prefix = currency.symbol,
+                        readOnly = state.isAmountReadOnly
+                    )
+                    SuggestedAmountHint(state = state, currency = currency)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                    DatePickerField(
+                        date = state.date,
+                        onDateSelected = { onStateChange(state.copy(date = it)) }
+                    )
                 }
             }
         }
 
         item {
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.expenses_form_project_label),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    ModernDropdown(
-                        label = stringResource(R.string.expenses_form_project_label),
-                        options = listOf(stringResource(R.string.expenses_form_no_project)) + state.projects.map { it.name },
-                        selected = state.projects.firstOrNull { it.id == state.projectId }?.name ?: stringResource(R.string.expenses_form_no_project),
-                        onSelected = { projectName ->
-                            val selectedProject = state.projects.find { it.name == projectName }
-                            onStateChange(state.copy(projectId = selectedProject?.id))
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+            ExpenseFormSection(title = stringResource(R.string.expenses_form_project_label)) {
+                ExpenseProjectDropdown(
+                    projects = state.projects,
+                    projectId = state.projectId,
+                    onSelected = { onStateChange(state.copy(projectId = it)) }
+                )
             }
         }
 
-        // Receipt image thumbnail (if present)
         if (state.receiptImageUri != null) {
             item {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                ExpenseFormSection(title = stringResource(R.string.scan_receipt_attached)) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -387,7 +305,7 @@ fun ExpenseFormContent(
                             contentScale = ContentScale.Crop
                         )
                         Text(
-                            text = stringResource(R.string.scan_receipt_attached),
+                            text = stringResource(R.string.scan_receipt_hint),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -396,6 +314,292 @@ fun ExpenseFormContent(
             }
         }
     }
+}
+
+@Composable
+private fun SuggestedAmountHint(
+    state: ExpenseFormUiState,
+    currency: CurrencyOption
+) {
+    if (state.category != ExpenseCategory.LABOR || state.isAmountReadOnly) return
+    val calculated = state.calculatedAmount ?: return
+    val entered = parseAmountInput(state.amount) ?: 0.0
+    if (abs(calculated - entered) < 0.005) return
+
+    Row(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = null,
+            tint = KablanProColors.BudgetBlue,
+            modifier = Modifier.size(16.dp)
+        )
+        Text(
+            text = stringResource(
+                R.string.expenses_form_suggested_amount,
+                calculated.toFormattedCurrency(currency)
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun MultiDayStatusRow(selectedDayCount: Int) {
+    val isEmpty = selectedDayCount == 0
+    val statusColor = if (isEmpty) KablanProColors.PendingOrange else KablanProColors.IncomeGreen
+    Row(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = if (isEmpty) Icons.Default.Info else Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = statusColor,
+            modifier = Modifier.size(16.dp)
+        )
+        Text(
+            text = if (isEmpty) {
+                stringResource(R.string.expenses_form_select_days)
+            } else if (selectedDayCount == 1) {
+                stringResource(R.string.expenses_form_day_selected)
+            } else {
+                stringResource(R.string.expenses_form_days_selected, selectedDayCount)
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = statusColor
+        )
+    }
+}
+
+@Composable
+private fun ExpenseFormSection(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title.uppercase(Locale.getDefault()),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+private fun <T> ExpenseDropdownRow(
+    label: String,
+    options: List<Pair<T, String>>,
+    selectedLabel: String,
+    onSelected: (T) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = selectedLabel,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { (value, optionLabel) ->
+                DropdownMenuItem(
+                    text = { Text(optionLabel) },
+                    onClick = {
+                        onSelected(value)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExpenseStringDropdownRow(
+    placeholder: String,
+    options: List<String>,
+    selected: String,
+    onSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selected.ifBlank { placeholder },
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (selected.isBlank()) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExpenseProjectDropdown(
+    projects: List<ProjectEntity>,
+    projectId: String?,
+    onSelected: (String?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val noProject = stringResource(R.string.expenses_form_no_project)
+    val selectedName = projects.firstOrNull { it.id == projectId }?.name ?: noProject
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selectedName,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(noProject) },
+                onClick = {
+                    onSelected(null)
+                    expanded = false
+                }
+            )
+            projects.forEach { project ->
+                DropdownMenuItem(
+                    text = { Text(project.name) },
+                    onClick = {
+                        onSelected(project.id)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExpenseIosTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    prefix: String? = null,
+    readOnly: Boolean = false
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            color = MaterialTheme.colorScheme.onSurface
+        ),
+        placeholder = {
+            Text(
+                text = placeholder,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        prefix = if (prefix != null) {
+            {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = prefix,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.width(4.dp))
+                }
+            }
+        } else {
+            null
+        },
+        singleLine = singleLine,
+        minLines = minLines,
+        maxLines = if (singleLine) 1 else Int.MAX_VALUE,
+        keyboardOptions = keyboardOptions,
+        readOnly = readOnly,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        )
+    )
 }
 
 @Composable
@@ -432,76 +636,72 @@ private fun EmbeddedMultiDatePicker(
         buildMonthCells(displayedMonthStart, firstDayOfWeek)
     }
 
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = modifier.fillMaxWidth()
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(onClick = {
-                    val cal = Calendar.getInstance().apply { timeInMillis = displayedMonthStart }
-                    cal.add(Calendar.MONTH, -1)
-                    displayedMonthStart = startOfMonth(cal.timeInMillis)
-                }) {
-                    Text("<")
-                }
-                Text(text = monthLabel, style = MaterialTheme.typography.titleSmall)
-                TextButton(onClick = {
-                    val cal = Calendar.getInstance().apply { timeInMillis = displayedMonthStart }
-                    cal.add(Calendar.MONTH, 1)
-                    displayedMonthStart = startOfMonth(cal.timeInMillis)
-                }) {
-                    Text(">")
+            TextButton(onClick = {
+                val cal = Calendar.getInstance().apply { timeInMillis = displayedMonthStart }
+                cal.add(Calendar.MONTH, -1)
+                displayedMonthStart = startOfMonth(cal.timeInMillis)
+            }) {
+                Text("<")
+            }
+            Text(text = monthLabel, style = MaterialTheme.typography.titleSmall)
+            TextButton(onClick = {
+                val cal = Calendar.getInstance().apply { timeInMillis = displayedMonthStart }
+                cal.add(Calendar.MONTH, 1)
+                displayedMonthStart = startOfMonth(cal.timeInMillis)
+            }) {
+                Text(">")
+            }
+        }
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            dayHeaders.forEach { header ->
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    Text(text = header, style = MaterialTheme.typography.labelSmall)
                 }
             }
+        }
 
+        cells.chunked(7).forEach { week ->
             Row(modifier = Modifier.fillMaxWidth()) {
-                dayHeaders.forEach { header ->
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text(text = header, style = MaterialTheme.typography.labelSmall)
+                week.forEach { dateMillis ->
+                    val selected = dateMillis != null && selectedDates.contains(dateMillis)
+                    val backgroundColor = if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
                     }
-                }
-            }
-
-            cells.chunked(7).forEach { week ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    week.forEach { dateMillis ->
-                        val selected = dateMillis != null && selectedDates.contains(dateMillis)
-                        val backgroundColor = if (selected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant
-                        }
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(2.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(backgroundColor)
-                                .clickable(enabled = dateMillis != null) {
-                                    if (dateMillis != null) {
-                                        onToggleDate(dateMillis, selected)
-                                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(2.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(backgroundColor)
+                            .clickable(enabled = dateMillis != null) {
+                                if (dateMillis != null) {
+                                    onToggleDate(dateMillis, selected)
                                 }
-                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = if (dateMillis == null) "" else dayOfMonth(dateMillis).toString(),
-                                color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                            }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (dateMillis == null) "" else dayOfMonth(dateMillis).toString(),
+                            color = if (selected) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
@@ -557,10 +757,19 @@ private fun expenseCategoryLabel(category: ExpenseCategory): String = when (cate
 }
 
 @Composable
+private fun laborTypeLabel(type: LaborType): String = when (type) {
+    LaborType.HOURLY -> stringResource(R.string.expenses_form_labor_mode_hourly)
+    LaborType.DAILY -> stringResource(R.string.expenses_form_labor_mode_daily)
+    LaborType.SUBCONTRACTOR -> stringResource(R.string.labor_type_subcontractor)
+}
+
+@Composable
 private fun DatePickerField(date: Long, onDateSelected: (Long) -> Unit) {
     val context = LocalContext.current
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -206,7 +206,7 @@ class ExpenseViewModel(
 
     fun saveExpense(state: ExpenseFormUiState) {
         viewModelScope.launch {
-            val parsedAmount = parseAmountInput(state.amount) ?: 0.0
+            val parsedAmount = parseAmountInput(state.amount) ?: state.calculatedAmount ?: 0.0
             if (state.description.isBlank() || parsedAmount <= 0.0) return@launch
 
             // Multi-date save for daily labor
@@ -337,6 +337,7 @@ class ExpenseViewModel(
             return input.copy(
                 isAmountReadOnly = false,
                 laborTypeSnapshot = null,
+                calculatedAmount = null,
                 canSave = input.description.isNotBlank() && (parseAmountInput(input.amount) ?: 0.0) > 0.0,
                 selectedDates = emptyList()
             )
@@ -347,6 +348,7 @@ class ExpenseViewModel(
             return input.copy(
                 isAmountReadOnly = false,
                 laborTypeSnapshot = null,
+                calculatedAmount = null,
                 canSave = false,
                 selectedDates = emptyList()
             )
@@ -356,78 +358,81 @@ class ExpenseViewModel(
         var description = input.description
         var readOnly = false
         var selectedLaborType: LaborType? = input.laborTypeSnapshot
+        var calculated: Double? = null
 
         if (description.isBlank()) {
             description = workerOption.worker.workerName
         }
 
-        // Determine available labor types for this worker
         val hasHourly = workerOption.hourlyRate != null
         val hasDaily = workerOption.dailyRate != null
         val hasSubcontractor = workerOption.contractPrice != null
 
-        // Build available types list
         val availableTypes = mutableListOf<LaborType>()
         if (hasHourly) availableTypes.add(LaborType.HOURLY)
         if (hasDaily) availableTypes.add(LaborType.DAILY)
         if (hasSubcontractor) availableTypes.add(LaborType.SUBCONTRACTOR)
 
-        // Determine effective labor type
         selectedLaborType = when {
-            // User explicitly selected a type that's available
             input.laborTypeSnapshot != null && input.laborTypeSnapshot in availableTypes -> input.laborTypeSnapshot
-            // Auto-select single available type
             availableTypes.size == 1 -> availableTypes.first()
-            // Multiple available, need user selection
             availableTypes.size > 1 && input.laborTypeSnapshot == null -> null
-            // Fallback
             else -> availableTypes.firstOrNull()
         }
 
-        // Calculate amount and set read-only based on selected type
         if (selectedLaborType == LaborType.SUBCONTRACTOR) {
-            // Subcontractor: fixed price, read-only
             val contractRate = workerOption.contractPrice ?: 0.0
+            calculated = contractRate
             amount = formatExpenseAmountForInput(contractRate)
             readOnly = true
         } else {
-            // Hourly or Daily: calculate from rate and units/days
             val rate = when (selectedLaborType) {
                 LaborType.HOURLY -> workerOption.hourlyRate
                 LaborType.DAILY -> workerOption.dailyRate
                 else -> null
             }
 
-            if (selectedLaborType == LaborType.DAILY && input.selectedDates.isNotEmpty()) {
-                // Multi-day: total = rate * dayCount
-                if (rate != null && rate > 0.0) {
-                    val totalAmount = rate * input.selectedDates.size
-                    amount = formatExpenseAmountForInput(totalAmount)
+            calculated = when {
+                selectedLaborType == LaborType.DAILY && input.selectedDates.isNotEmpty() &&
+                    rate != null && rate > 0.0 -> rate * input.selectedDates.size
+                selectedLaborType == LaborType.HOURLY -> {
+                    val units = input.unitsWorked.toDoubleOrNull() ?: 0.0
+                    if (rate != null && units > 0.0) rate * units else null
                 }
-            } else {
-                // Single day or hourly: standard calculation
-                val units = input.unitsWorked.toDoubleOrNull() ?: 0.0
-                if (rate != null && units > 0.0) {
-                    amount = formatExpenseAmountForInput(rate * units)
+                else -> null
+            }
+
+            // Match iOS: keep a manual override; auto-fill when empty or still matching prior suggestion.
+            if (calculated != null) {
+                val entered = parseAmountInput(input.amount)
+                val matchesPreviousCalculated = input.calculatedAmount != null &&
+                    entered != null &&
+                    kotlin.math.abs(entered - input.calculatedAmount) < 0.005
+                if (input.amount.isBlank() || entered == null || matchesPreviousCalculated) {
+                    amount = formatExpenseAmountForInput(calculated)
                 }
             }
         }
 
-        // Validation checks
         val requiresLaborTypeSelection = selectedLaborType == null && availableTypes.size > 1
-        val multiDateValid = if (selectedLaborType == LaborType.DAILY && input.useMultiDatePicker) {
+        val dailySelectionValid = if (selectedLaborType == LaborType.DAILY) {
             input.selectedDates.isNotEmpty()
         } else {
             true
         }
 
-        val canSave = !requiresLaborTypeSelection && description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0 && multiDateValid
+        val effectiveAmount = parseAmountInput(amount) ?: calculated ?: 0.0
+        val canSave = !requiresLaborTypeSelection &&
+            description.isNotBlank() &&
+            effectiveAmount > 0.0 &&
+            dailySelectionValid
 
         return input.copy(
             amount = amount,
             description = description,
             isAmountReadOnly = readOnly,
             laborTypeSnapshot = selectedLaborType,
+            calculatedAmount = calculated,
             canSave = canSave
         )
     }

@@ -411,6 +411,7 @@
     <string name="labor_empty_filtered_body">אין עובדים שתואמים למסננים הנוכחיים.</string>
     <string name="labor_form_section_basic">עובד</string>
     <string name="labor_form_section_rates">תעריפים</string>
+    <string name="labor_form_default_rate_hint">תעריף שישמש ביצירת רשומות חדשות לעובד זה</string>
     <string name="labor_form_section_notes">הערות</string>
     <string name="labor_show_all_expenses">הצג הכל (%1$d)</string>
     <string name="labor_created_date">תאריך יצירה</string>
@@ -467,7 +468,12 @@
     <string name="scan_receipt_attached">קבלה מצורפת</string>
     <string name="scan_receipt_hint">נתונים שחולצו — בדוק וערוך לפני שמירה</string>
     <string name="scan_notes_label">הערות</string>
+    <string name="scan_default_description">הוצאה מסריקה</string>
     <string name="expenses_form_notes_label">הערות (אופציונלי)</string>
+    <string name="expenses_form_select_days">בחר יום אחד או יותר</string>
+    <string name="expenses_form_day_selected">נבחר יום אחד</string>
+    <string name="expenses_form_days_selected">נבחרו %d ימים</string>
+    <string name="expenses_form_suggested_amount">מוצע: %s</string>
     <string name="common_cancel">ביטול</string>
     <string name="projects_notes">הערות</string>
     <string name="projects_notes_placeholder">הוסף הערות…</string>

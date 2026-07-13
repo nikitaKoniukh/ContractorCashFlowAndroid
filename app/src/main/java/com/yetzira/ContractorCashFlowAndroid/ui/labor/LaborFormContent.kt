@@ -112,6 +112,12 @@ fun LaborFormContent(
                 }
             }
         }
+        Text(
+            text = stringResource(R.string.labor_form_default_rate_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
 
         FormSection(title = stringResource(R.string.labor_form_section_notes)) {
             LaborIosTextField(

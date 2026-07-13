@@ -4,8 +4,19 @@ import android.app.DatePickerDialog
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -13,12 +24,32 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -27,19 +58,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.yetzira.ContractorCashFlowAndroid.R
-import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseEntity
 import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ProjectEntity
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
 import com.yetzira.ContractorCashFlowAndroid.services.OcrService
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernDropdown
-import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernTextField
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatAmountInput
 import com.yetzira.ContractorCashFlowAndroid.ui.components.parseAmountInput
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
+import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProTopBar
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +85,7 @@ fun ScannedExpenseReviewScreen(
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
+    val defaultDescription = stringResource(R.string.scan_default_description)
 
     var amount by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -63,7 +96,6 @@ fun ScannedExpenseReviewScreen(
     var isProcessing by remember { mutableStateOf(true) }
     var ocrFailed by remember { mutableStateOf(false) }
 
-    // Run OCR on launch
     LaunchedEffect(imageUri) {
         isProcessing = true
         ocrFailed = false
@@ -74,7 +106,6 @@ fun ScannedExpenseReviewScreen(
             if (result.description.isNotBlank()) {
                 description = result.description
             }
-            // Auto-suggest category
             val suggestedCategory = OcrService.suggestCategory(result.description)
             category = ExpenseCategory.fromString(suggestedCategory) ?: ExpenseCategory.MISC
         } catch (_: Exception) {
@@ -88,38 +119,43 @@ fun ScannedExpenseReviewScreen(
         isProcessing = false
     }
 
-    val canSave = description.isNotBlank() && (parseAmountInput(amount) ?: 0.0) > 0.0
+    // Match iOS: amount > 0 is enough; description defaults on save if blank.
+    val canSave = (parseAmountInput(amount) ?: 0.0) > 0.0
+
+    fun saveExpense() {
+        val parsedAmount = parseAmountInput(amount) ?: 0.0
+        if (parsedAmount <= 0.0) return
+        val entity = ExpenseEntity(
+            category = category.name,
+            amount = parsedAmount,
+            descriptionText = description.trim().ifBlank { defaultDescription },
+            date = date,
+            projectId = projectId,
+            notes = notes.ifBlank { null },
+            receiptImageUri = imageUri.toString()
+        )
+        onSave(entity)
+    }
 
     Scaffold(
-    contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             KablanProTopBar(
                 title = stringResource(R.string.scan_review_title),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.common_back)
+                        )
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            val parsedAmount = parseAmountInput(amount) ?: 0.0
-                            if (parsedAmount > 0.0 && description.isNotBlank()) {
-                                val entity = ExpenseEntity(
-                                    category = category.name,
-                                    amount = parsedAmount,
-                                    descriptionText = description,
-                                    date = date,
-                                    projectId = projectId,
-                                    notes = notes.ifBlank { null },
-                                    receiptImageUri = imageUri.toString()
-                                )
-                                onSave(entity)
-                            }
-                        },
+                    TextButton(
+                        onClick = { saveExpense() },
                         enabled = canSave && !isProcessing
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.common_save))
+                        Text(stringResource(R.string.common_save))
                     }
                 }
             )
@@ -149,8 +185,9 @@ fun ScannedExpenseReviewScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    .padding(top = KablanProLayoutDefaults.TopSectionSpacing),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 if (ocrFailed) {
                     Text(
@@ -159,12 +196,8 @@ fun ScannedExpenseReviewScreen(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-                // Receipt image thumbnail
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+
+                ScanFormSection(title = stringResource(R.string.scan_receipt_attached)) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -181,174 +214,246 @@ fun ScannedExpenseReviewScreen(
                                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
                             contentScale = ContentScale.Crop
                         )
-                        Column {
-                            Text(
-                                text = stringResource(R.string.scan_receipt_attached),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                text = stringResource(R.string.scan_receipt_hint),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-
-                // Category
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        val categoryOptions = ExpenseCategory.entries
-                        val categoryLabels = categoryOptions.map { stringResource(it.labelResId) }
-                        ModernDropdown(
-                            label = stringResource(R.string.expenses_form_category_label),
-                            options = categoryLabels,
-                            selected = stringResource(category.labelResId),
-                            onSelected = { label ->
-                                val index = categoryLabels.indexOf(label)
-                                if (index >= 0) category = categoryOptions[index]
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                        Text(
+                            text = stringResource(R.string.scan_receipt_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
 
-                // Amount, Description, Date
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        ModernTextField(
-                            value = amount,
-                            onValueChange = { amount = formatAmountInput(it) },
-                            label = stringResource(R.string.expenses_form_amount_label),
-                            modifier = Modifier.fillMaxWidth(),
-                            suffix = { Text(currency.symbol) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            singleLine = true
-                        )
-
-                        ModernTextField(
-                            value = description,
-                            onValueChange = { description = it },
-                            label = stringResource(R.string.expenses_form_description_label),
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-
-                        DatePickerFieldReview(
-                            date = date,
-                            onDateSelected = { date = it }
-                        )
-                    }
-                }
-
-                // Notes
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ModernTextField(
-                            value = notes,
-                            onValueChange = { notes = it },
-                            label = stringResource(R.string.scan_notes_label),
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = false,
-                            minLines = 3
-                        )
-                    }
-                }
-
-                // Project picker
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ModernDropdown(
-                            label = stringResource(R.string.expenses_form_project_label),
-                            options = listOf(stringResource(R.string.expenses_form_no_project)) + activeProjects.map { it.name },
-                            selected = activeProjects.firstOrNull { it.id == projectId }?.name
-                                ?: stringResource(R.string.expenses_form_no_project),
-                            onSelected = { name ->
-                                val selected = activeProjects.find { it.name == name }
-                                projectId = selected?.id
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-
-                // Save button
-                Button(
-                    onClick = {
-                        val parsedAmount = parseAmountInput(amount) ?: 0.0
-                        if (parsedAmount > 0.0 && description.isNotBlank()) {
-                            val entity = ExpenseEntity(
-                                category = category.name,
-                                amount = parsedAmount,
-                                descriptionText = description,
-                                date = date,
-                                projectId = projectId,
-                                notes = notes.ifBlank { null },
-                                receiptImageUri = imageUri.toString()
-                            )
-                            onSave(entity)
-                        }
-                    },
-                    enabled = canSave,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text(
-                        stringResource(R.string.common_save),
-                        fontWeight = FontWeight.SemiBold
+                ScanFormSection(title = stringResource(R.string.expenses_section_details)) {
+                    ScanDropdownRow(
+                        label = stringResource(R.string.expenses_form_category_label),
+                        options = ExpenseCategory.entries.map { it to stringResource(it.labelResId) },
+                        selectedLabel = stringResource(category.labelResId),
+                        onSelected = { category = it }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                    ScanIosTextField(
+                        value = amount,
+                        onValueChange = { amount = formatAmountInput(it) },
+                        placeholder = stringResource(R.string.expenses_form_amount_label),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        prefix = currency.symbol
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                    ScanIosTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        placeholder = stringResource(R.string.expenses_form_description_label),
+                        singleLine = true
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 16.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                    DatePickerFieldReview(
+                        date = date,
+                        onDateSelected = { date = it }
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                ScanFormSection(title = stringResource(R.string.scan_notes_label)) {
+                    ScanIosTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        placeholder = stringResource(R.string.scan_notes_label),
+                        singleLine = false,
+                        minLines = 3
+                    )
+                }
+
+                ScanFormSection(title = stringResource(R.string.expenses_form_project_label)) {
+                    var expanded by remember { mutableStateOf(false) }
+                    val noProject = stringResource(R.string.expenses_form_no_project)
+                    val selectedName = activeProjects.firstOrNull { it.id == projectId }?.name ?: noProject
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { expanded = true }
+                                .padding(horizontal = 16.dp, vertical = 18.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = selectedName,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text(noProject) },
+                                onClick = {
+                                    projectId = null
+                                    expanded = false
+                                }
+                            )
+                            activeProjects.forEach { project ->
+                                DropdownMenuItem(
+                                    text = { Text(project.name) },
+                                    onClick = {
+                                        projectId = project.id
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
+private fun ScanFormSection(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title.uppercase(Locale.getDefault()),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+private fun <T> ScanDropdownRow(
+    label: String,
+    options: List<Pair<T, String>>,
+    selectedLabel: String,
+    onSelected: (T) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = selectedLabel,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { (value, optionLabel) ->
+                DropdownMenuItem(
+                    text = { Text(optionLabel) },
+                    onClick = {
+                        onSelected(value)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScanIosTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    prefix: String? = null
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            color = MaterialTheme.colorScheme.onSurface
+        ),
+        placeholder = {
+            Text(
+                text = placeholder,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        prefix = if (prefix != null) {
+            {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = prefix,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.width(4.dp))
+                }
+            }
+        } else {
+            null
+        },
+        singleLine = singleLine,
+        minLines = minLines,
+        maxLines = if (singleLine) 1 else Int.MAX_VALUE,
+        keyboardOptions = keyboardOptions,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        )
+    )
+}
+
+@Composable
 private fun DatePickerFieldReview(date: Long, onDateSelected: (Long) -> Unit) {
     val context = LocalContext.current
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
