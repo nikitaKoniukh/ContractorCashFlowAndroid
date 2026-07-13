@@ -137,9 +137,12 @@
     <string name="expenses_category_materials">Materials</string>
     <string name="expenses_category_labor">Labor</string>
     <string name="expenses_category_equipment">Equipment</string>
-    <string name="expenses_category_misc">Other</string>
+    <string name="expenses_category_misc">Miscellaneous</string>
     <string name="expenses_empty_title">No expenses yet</string>
     <string name="expenses_empty_body">Add your first expense to start tracking costs.</string>
+    <string name="expenses_not_found">Expense not found</string>
+    <string name="expenses_receipt_title">Receipt</string>
+    <string name="expenses_receipt_tap_fullscreen">Tap to view full screen</string>
     <string name="expenses_description">Description</string>
     <string name="expenses_amount">Amount</string>
     <string name="expenses_date">Date</string>

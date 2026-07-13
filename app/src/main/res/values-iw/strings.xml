@@ -120,9 +120,12 @@
     <string name="expenses_category_materials">חומרים</string>
     <string name="expenses_category_labor">עבודה</string>
     <string name="expenses_category_equipment">ציוד</string>
-    <string name="expenses_category_misc">אחר</string>
+    <string name="expenses_category_misc">שונות</string>
     <string name="expenses_empty_title">אין עדיין הוצאות</string>
     <string name="expenses_empty_body">הוסף את ההוצאה הראשונה שלך כדי להתחיל לעקוב אחר עלויות.</string>
+    <string name="expenses_not_found">ההוצאה לא נמצאה</string>
+    <string name="expenses_receipt_title">קבלה</string>
+    <string name="expenses_receipt_tap_fullscreen">הקש לצפייה במסך מלא</string>
     <string name="expenses_description">תיאור</string>
     <string name="expenses_amount">סכום</string>
     <string name="expenses_date">תאריך</string>

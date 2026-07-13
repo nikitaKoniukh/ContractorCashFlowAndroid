@@ -114,9 +114,12 @@
     <string name="expenses_category_materials">Материалы</string>
     <string name="expenses_category_labor">Работа</string>
     <string name="expenses_category_equipment">Оборудование</string>
-    <string name="expenses_category_misc">Другое</string>
+    <string name="expenses_category_misc">Разное</string>
     <string name="expenses_empty_title">Расходов не найдено</string>
     <string name="expenses_empty_body">Добавьте свой первый расход, чтобы начать отслеживать затраты.</string>
+    <string name="expenses_not_found">Расход не найден</string>
+    <string name="expenses_receipt_title">Чек</string>
+    <string name="expenses_receipt_tap_fullscreen">Нажмите для просмотра на весь экран</string>
     <string name="expenses_description">Описание</string>
     <string name="expenses_amount">Сумма</string>
     <string name="expenses_date">Дата</string>

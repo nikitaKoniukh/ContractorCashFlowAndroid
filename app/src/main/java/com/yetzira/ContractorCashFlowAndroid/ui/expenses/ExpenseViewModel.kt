@@ -27,6 +27,7 @@ class ExpenseViewModel(
     private val query = MutableStateFlow("")
     private val filters = MutableStateFlow(ExpenseFilterState())
     private val editingExpenseId = MutableStateFlow<String?>(null)
+    private val detailExpenseId = MutableStateFlow<String?>(null)
     private val saveResult = MutableStateFlow<ExpenseSaveResult>(ExpenseSaveResult.None)
 
     private var recentlyDeletedExpense: ExpenseEntity? = null
@@ -71,6 +72,34 @@ class ExpenseViewModel(
         initialValue = ExpensesListUiState()
     )
 
+    val detailUiState: StateFlow<ExpenseDetailUiState> = detailExpenseId.flatMapLatest { expenseId ->
+        combine(
+            repository.getAllExpenses(),
+            repository.getAllProjects(),
+            repository.getAllWorkers()
+        ) { expenses, projects, workers ->
+            if (expenseId == null) {
+                ExpenseDetailUiState(isLoading = false)
+            } else {
+                val expense = expenses.firstOrNull { it.id == expenseId }
+                ExpenseDetailUiState(
+                    expense = expense,
+                    projectName = expense?.projectId?.let { id ->
+                        projects.firstOrNull { it.id == id }?.name
+                    },
+                    workerName = expense?.workerId?.let { id ->
+                        workers.firstOrNull { it.id == id }?.workerName
+                    },
+                    isLoading = false
+                )
+            }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ExpenseDetailUiState()
+    )
+
     val formUiState: StateFlow<ExpenseFormUiState> = editingExpenseId.flatMapLatest { expenseId ->
         combine(
             repository.getAllProjects(),
@@ -94,7 +123,7 @@ class ExpenseViewModel(
                 ExpenseFormUiState(
                     expenseId = editableExpense.id,
                     category = ExpenseCategory.fromString(editableExpense.category) ?: ExpenseCategory.MATERIALS,
-                    amount = formatAmountInput(editableExpense.amount.toLong().toString()),
+                    amount = formatExpenseAmountForInput(editableExpense.amount),
                     description = editableExpense.descriptionText,
                     date = editableExpense.date,
                     projectId = editableExpense.projectId,
@@ -145,6 +174,10 @@ class ExpenseViewModel(
 
     fun startEdit(expenseId: String) {
         editingExpenseId.value = expenseId
+    }
+
+    fun selectExpense(expenseId: String) {
+        detailExpenseId.value = expenseId
     }
 
     fun deleteExpense(expense: ExpenseEntity) {
@@ -355,7 +388,7 @@ class ExpenseViewModel(
         if (selectedLaborType == LaborType.SUBCONTRACTOR) {
             // Subcontractor: fixed price, read-only
             val contractRate = workerOption.contractPrice ?: 0.0
-            amount = formatAmountInput(contractRate.toLong().toString())
+            amount = formatExpenseAmountForInput(contractRate)
             readOnly = true
         } else {
             // Hourly or Daily: calculate from rate and units/days
@@ -369,13 +402,13 @@ class ExpenseViewModel(
                 // Multi-day: total = rate * dayCount
                 if (rate != null && rate > 0.0) {
                     val totalAmount = rate * input.selectedDates.size
-                    amount = formatAmountInput(totalAmount.toLong().toString())
+                    amount = formatExpenseAmountForInput(totalAmount)
                 }
             } else {
                 // Single day or hourly: standard calculation
                 val units = input.unitsWorked.toDoubleOrNull() ?: 0.0
                 if (rate != null && units > 0.0) {
-                    amount = formatAmountInput((rate * units).toLong().toString())
+                    amount = formatExpenseAmountForInput(rate * units)
                 }
             }
         }

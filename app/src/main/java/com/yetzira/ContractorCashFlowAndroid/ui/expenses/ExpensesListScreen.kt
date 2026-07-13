@@ -5,10 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,21 +21,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DocumentScanner
 import com.yetzira.ContractorCashFlowAndroid.R
+import com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.data.preferences.UserPreferencesRepository
-import com.yetzira.ContractorCashFlowAndroid.ui.components.IosGroupedBackground
 import com.yetzira.ContractorCashFlowAndroid.ui.components.ModernSearchBar
-import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.components.formatCurrencyAmount
+import com.yetzira.ContractorCashFlowAndroid.ui.components.groupedRowShape
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
+import com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -248,12 +250,12 @@ private fun EmptyExpensesState(onCreateExpense: () -> Unit, modifier: Modifier =
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No expenses yet",
+            text = stringResource(R.string.expenses_empty_title),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Add your first expense to start tracking costs.",
+            text = stringResource(R.string.expenses_empty_body),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
@@ -272,6 +274,12 @@ private fun ExpenseRow(item: ExpenseListItemUi, index: Int, lastIndex: Int, onCl
     val context = LocalContext.current
     val preferencesRepository = remember(context) { UserPreferencesRepository(context.applicationContext) }
     val currency by preferencesRepository.selectedCurrencyCode.collectAsState(initial = CurrencyOption.ILS)
+    val category = ExpenseCategory.fromString(item.expense.category)
+    val categoryColor = expenseCategoryColor(category)
+    val categoryLabel = expenseCategoryLabel(category).ifBlank { item.expense.category }
+    val description = displayExpenseDescription(item.expense.descriptionText)
+    val hasReceipt = !item.expense.receiptImageUri.isNullOrBlank()
+
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -279,85 +287,115 @@ private fun ExpenseRow(item: ExpenseListItemUi, index: Int, lastIndex: Int, onCl
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(categoryColor.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = item.expense.descriptionText,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
+                Icon(
+                    imageVector = expenseCategoryIcon(category),
+                    contentDescription = null,
+                    tint = categoryColor,
+                    modifier = Modifier.size(22.dp)
                 )
-                Text(text = formatCurrencyAmount(item.expense.amount, currency), color = Color(0xFFFF3B30), fontWeight = FontWeight.SemiBold)
             }
 
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val categoryColor = com.yetzira.ContractorCashFlowAndroid.data.local.entity.ExpenseCategory
-                    .fromString(item.expense.category)?.let {
-                        Color(it.chartColor)
-                    } ?: MaterialTheme.colorScheme.primary
-                
-                Surface(
-                    color = categoryColor.copy(alpha = 0.15f),
-                    shape = androidx.compose.foundation.shape.CircleShape
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = item.expense.category,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        style = com.yetzira.ContractorCashFlowAndroid.ui.theme.BadgeTextStyle,
-                        color = categoryColor
+                        text = description,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
                     )
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Work,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = item.projectName ?: stringResource(R.string.expenses_form_no_project),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = formatCurrencyAmount(item.expense.amount, currency),
+                        color = Color(0xFFFF3B30),
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.CalendarToday,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = formatDate(item.expense.date),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
                 )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        color = categoryColor.copy(alpha = 0.15f),
+                        shape = CircleShape
+                    ) {
+                        Text(
+                            text = categoryLabel,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            style = BadgeTextStyle,
+                            color = categoryColor
+                        )
+                    }
+
+                    if (hasReceipt) {
+                        Icon(
+                            imageVector = Icons.Default.AttachFile,
+                            contentDescription = stringResource(R.string.scan_receipt_attached),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Work,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = item.projectName ?: stringResource(R.string.expenses_form_no_project),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarToday,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = formatDate(item.expense.date),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
             }
         }
     }

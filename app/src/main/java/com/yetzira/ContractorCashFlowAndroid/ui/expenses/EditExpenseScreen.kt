@@ -114,6 +114,17 @@ fun EditExpenseScreen(
             state = formState,
             currency = currency,
             onStateChange = { updated -> formState = viewModel.updateForm(updated) },
+            onUnitsWorkedChanged = { newUnits ->
+                formState = viewModel.updateForm(formState.copy(unitsWorked = newUnits))
+            },
+            onDateAdded = { dateMillis ->
+                val updatedDates = (formState.selectedDates + dateMillis).distinct().sorted()
+                formState = viewModel.updateForm(formState.copy(selectedDates = updatedDates))
+            },
+            onDateRemoved = { dateMillis ->
+                val updatedDates = formState.selectedDates.filter { it != dateMillis }
+                formState = viewModel.updateForm(formState.copy(selectedDates = updatedDates))
+            },
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)

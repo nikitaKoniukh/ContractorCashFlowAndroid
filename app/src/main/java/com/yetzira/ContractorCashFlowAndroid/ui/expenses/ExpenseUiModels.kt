@@ -28,6 +28,13 @@ data class ExpensesListUiState(
     val expenses: List<ExpenseListItemUi> = emptyList()
 )
 
+data class ExpenseDetailUiState(
+    val expense: ExpenseEntity? = null,
+    val projectName: String? = null,
+    val workerName: String? = null,
+    val isLoading: Boolean = true
+)
+
 data class WorkerOptionUi(
     val worker: LaborDetailsEntity,
     val laborType: LaborType?,
