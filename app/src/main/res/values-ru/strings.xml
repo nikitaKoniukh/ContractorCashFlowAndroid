@@ -244,7 +244,7 @@
     <string name="settings_sync_done">Синхронизация облака завершена</string>
     <string name="settings_sync_failed">Синхронизация не удалась</string>
     <string name="settings_export_data">Экспортировать данные</string>
-    <string name="settings_export_description">Создайте снимок JSON всех локальных данных KablanPro.</string>
+    <string name="settings_export_description">Экспортирует проекты, расходы, счета, клиентов, работников и сохранённые настройки. Изображения чеков не включаются. Экспорт — не полный бэкап: импорта пока нет.</string>
     <string name="settings_export_button">Экспортировать данные</string>
     <string name="settings_about">О программе</string>
 
@@ -274,6 +274,7 @@
     <string name="settings_section_subscription">Подписка</string>
     <string name="settings_subscription_pro_badge">👑</string>
     <string name="settings_subscription_renews">Обновляется %s</string>
+    <string name="settings_subscription_renews_label">Обновляется</string>
     <string name="settings_manage_subscription">Управление подпиской</string>
     <string name="settings_current_plan">Текущий план</string>
     <string name="settings_plan_pro_monthly">Pro Месячный</string>

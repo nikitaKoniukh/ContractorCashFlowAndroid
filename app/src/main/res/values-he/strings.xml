@@ -244,7 +244,7 @@
     <string name="settings_sync_done">סנכרון ענן הושלם</string>
     <string name="settings_sync_failed">סנכרון נכשל</string>
     <string name="settings_export_data">ייצא נתונים</string>
-    <string name="settings_export_description">צור תמונת JSON של כל נתוני KablanPro המקומיים.</string>
+    <string name="settings_export_description">מייצא פרויקטים, הוצאות, חשבוניות, לקוחות, עובדים והעדפות שמורות. תמונות קבלות אינן כלולות. הייצוא אינו גיבוי מלא — אין ייבוא עדיין.</string>
     <string name="settings_export_button">ייצא נתונים</string>
     <string name="settings_about">אודות</string>
 
@@ -274,6 +274,7 @@
     <string name="settings_section_subscription">מנוי</string>
     <string name="settings_subscription_pro_badge">👑</string>
     <string name="settings_subscription_renews">מתחדש ב-%s</string>
+    <string name="settings_subscription_renews_label">מתחדש</string>
     <string name="settings_manage_subscription">נהל מנוי</string>
     <string name="settings_current_plan">תוכנית נוכחית</string>
     <string name="settings_plan_pro_monthly">Pro חודשי</string>

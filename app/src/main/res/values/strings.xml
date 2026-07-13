@@ -275,7 +275,7 @@
     <string name="settings_sync_done">Cloud sync completed</string>
     <string name="settings_sync_failed">Sync failed</string>
     <string name="settings_export_data">Export Data</string>
-    <string name="settings_export_description">Create a JSON snapshot of all local KablanPro data.</string>
+    <string name="settings_export_description">Exports projects, expenses, invoices, clients, workers, and saved preferences. Receipt images are not included. Export is not a full backup — there is no import yet.</string>
     <string name="settings_export_button">Export Data</string>
     <string name="settings_about">About</string>
 
@@ -305,6 +305,7 @@
     <string name="settings_section_subscription">Subscription</string>
     <string name="settings_subscription_pro_badge">👑</string>
     <string name="settings_subscription_renews">Renews %s</string>
+    <string name="settings_subscription_renews_label">Renews</string>
     <string name="settings_manage_subscription">Manage Subscription</string>
     <string name="settings_current_plan">Current Plan</string>
     <string name="settings_plan_pro_monthly">Pro Monthly</string>

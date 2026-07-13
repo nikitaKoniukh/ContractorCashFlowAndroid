@@ -6,6 +6,9 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -23,18 +26,22 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudSync
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -53,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -61,6 +69,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.credentials.CustomCredential
@@ -80,6 +91,7 @@ import com.yetzira.ContractorCashFlowAndroid.data.preferences.CurrencyOption
 import com.yetzira.ContractorCashFlowAndroid.locale.LocaleHelper
 import com.yetzira.ContractorCashFlowAndroid.ui.navigation.KablanProLayoutDefaults
 import com.yetzira.ContractorCashFlowAndroid.ui.paywall.PaywallSheet
+import com.yetzira.ContractorCashFlowAndroid.ui.theme.KablanProColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.DateFormat
@@ -125,6 +137,7 @@ fun SettingsScreen(
     val activePurchase by purchaseViewModel.activePurchase.collectAsState()
     val credentialManager = remember(context) { CredentialManager.create(context) }
     var showPaywall by remember { mutableStateOf(false) }
+    var showAboutSite by remember { mutableStateOf(false) }
     val googleSignInSetupIncompleteMessage = stringResource(R.string.settings_google_sign_in_setup_incomplete)
     val googleSignInSetupMissingClientIdMessage = stringResource(R.string.settings_google_sign_in_setup_missing_client_id)
     val googleSignInUnsupportedCredentialMessage = stringResource(R.string.settings_google_sign_in_unsupported_credential)
@@ -290,19 +303,19 @@ fun SettingsScreen(
                     SettingsValueRow(
                         title = state.userEmail ?: stringResource(R.string.settings_signed_in),
                         value = stringResource(R.string.settings_signed_in),
-                        leadingIcon = Icons.Default.Info
+                        leadingIcon = Icons.Default.AccountCircle
                     )
                     SettingsRowDivider()
                     SettingsActionRow(
                         title = stringResource(R.string.settings_sign_out),
-                        leadingIcon = Icons.Default.Description,
+                        leadingIcon = Icons.AutoMirrored.Filled.Logout,
                         titleColor = MaterialTheme.colorScheme.primary,
                         onClick = viewModel::signOut
                     )
                 } else {
                     SettingsActionRow(
                         title = stringResource(R.string.settings_sign_in_with_google),
-                        leadingIcon = Icons.Default.Info,
+                        leadingIcon = Icons.Default.AccountCircle,
                         titleColor = MaterialTheme.colorScheme.primary,
                         onClick = {
                             val serverClientId = webClientId
@@ -377,10 +390,21 @@ fun SettingsScreen(
                 SettingsValueRow(
                     title = stringResource(R.string.settings_current_plan),
                     value = planLabel,
-                    leadingIcon = Icons.Default.Description
+                    leadingIcon = Icons.Default.EmojiEvents,
+                    iconTint = if (isProUser) SettingsProGold else MaterialTheme.colorScheme.primary,
+                    valueColor = if (isProUser) KablanProColors.IncomeGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                    valueFontWeight = if (isProUser) FontWeight.SemiBold else FontWeight.Normal
                 )
-                SettingsRowDivider()
                 if (isProUser) {
+                    state.subscription.renewalDate?.let { renewalDate ->
+                        SettingsRowDivider()
+                        SettingsValueRow(
+                            title = stringResource(R.string.settings_subscription_renews_label),
+                            value = formatDate(renewalDate),
+                            leadingIcon = Icons.Default.CalendarMonth
+                        )
+                    }
+                    SettingsRowDivider()
                     SettingsActionRow(
                         title = stringResource(R.string.settings_manage_subscription),
                         leadingIcon = Icons.Default.EmojiEvents,
@@ -388,6 +412,7 @@ fun SettingsScreen(
                         onClick = { purchaseViewModel.openManageSubscriptions(context) }
                     )
                 } else {
+                    SettingsRowDivider()
                     SettingsActionRow(
                         title = stringResource(R.string.settings_upgrade_pro),
                         leadingIcon = Icons.Default.EmojiEvents,
@@ -454,7 +479,7 @@ fun SettingsScreen(
                 SettingsRowDivider()
                 SettingsSwitchRow(
                     title = stringResource(R.string.settings_budget_warnings),
-                    leadingIcon = Icons.Default.Description,
+                    leadingIcon = Icons.Default.BarChart,
                     checked = state.budgetWarningsEnabled,
                     onCheckedChange = { wantsEnabled ->
                         if (wantsEnabled) {
@@ -474,16 +499,30 @@ fun SettingsScreen(
 
             SettingsSectionHeader(stringResource(R.string.settings_section_data))
             SettingsGroupCard {
+                val syncEnabled = state.isAuthenticated &&
+                    state.cloudSyncState != CloudSyncState.SYNCING
+                val (syncTitle, syncColor) = when (state.cloudSyncState) {
+                    CloudSyncState.IDLE -> stringResource(R.string.settings_sync_button_idle) to
+                        MaterialTheme.colorScheme.primary
+                    CloudSyncState.SYNCING -> stringResource(R.string.settings_sync_button_syncing) to
+                        MaterialTheme.colorScheme.primary
+                    CloudSyncState.DONE -> stringResource(R.string.settings_sync_button_done) to
+                        KablanProColors.IncomeGreen
+                    CloudSyncState.FAILED -> stringResource(R.string.settings_sync_button_failed) to
+                        KablanProColors.ExpenseRed
+                }
                 SettingsActionRow(
-                    title = stringResource(R.string.settings_sync_button_idle),
+                    title = syncTitle,
                     leadingIcon = Icons.Default.CloudSync,
-                    titleColor = MaterialTheme.colorScheme.primary,
+                    titleColor = if (state.isAuthenticated) syncColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                    iconTint = if (state.isAuthenticated) syncColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                    enabled = syncEnabled,
                     onClick = viewModel::runCloudSync
                 )
                 SettingsRowDivider()
                 SettingsActionRow(
                     title = stringResource(R.string.settings_export_button),
-                    leadingIcon = Icons.Default.Sync,
+                    leadingIcon = Icons.Default.IosShare,
                     titleColor = MaterialTheme.colorScheme.primary,
                     onClick = { exportLauncher.launch(viewModel.suggestedExportFileName()) }
                 )
@@ -500,22 +539,14 @@ fun SettingsScreen(
                 SettingsValueRow(
                     title = stringResource(R.string.settings_about),
                     value = stringResource(R.string.app_name),
-                    leadingIcon = Icons.Default.Info
+                    leadingIcon = Icons.Default.Info,
+                    onClick = { showAboutSite = true }
                 )
                 SettingsRowDivider()
                 val versionLabel = if (devProOverride) "$appVersionValue ⭐" else appVersionValue
                 SettingsVersionRow(
                     value = versionLabel,
                     onLongPress = { purchaseViewModel.toggleDevProOverride() }
-                )
-            }
-
-            state.subscription.renewalDate?.let { renewalDate ->
-                Text(
-                    text = stringResource(R.string.settings_subscription_renews, formatDate(renewalDate)),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 6.dp)
                 )
             }
         }
@@ -525,6 +556,13 @@ fun SettingsScreen(
         PaywallSheet(
             viewModel = purchaseViewModel,
             onDismiss = { showPaywall = false }
+        )
+    }
+
+    if (showAboutSite) {
+        SettingsAboutWebDialog(
+            url = SETTINGS_ABOUT_URL,
+            onDismiss = { showAboutSite = false }
         )
     }
 }
@@ -565,12 +603,14 @@ private fun SettingsActionRow(
     leadingIcon: ImageVector,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
     iconTint: Color = MaterialTheme.colorScheme.primary,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .alpha(if (enabled) 1f else 0.45f)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -594,18 +634,29 @@ private fun SettingsActionRow(
 private fun SettingsValueRow(
     title: String,
     value: String,
-    leadingIcon: ImageVector
+    leadingIcon: ImageVector,
+    iconTint: Color = MaterialTheme.colorScheme.primary,
+    valueColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    valueFontWeight: FontWeight = FontWeight.Normal,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(onClick = onClick)
+                } else {
+                    Modifier
+                }
+            )
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = leadingIcon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = iconTint,
             modifier = Modifier.width(30.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -614,11 +665,22 @@ private fun SettingsValueRow(
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f)
         )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (value.isNotBlank()) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = valueColor,
+                fontWeight = valueFontWeight
+            )
+        }
+        if (onClick != null) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 6.dp)
+            )
+        }
     }
 }
 
@@ -746,7 +808,66 @@ private fun SettingsSwitchRow(
     }
 }
 
-private val SettingsProGold = Color(0xFFE6C229)
+private val SettingsProGold = KablanProColors.ProGold
+
+private const val SETTINGS_ABOUT_URL = "https://nikitakoniukh.github.io/KablanProAndroid"
+
+@Composable
+private fun SettingsAboutWebDialog(
+    url: String,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.action_done)
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.settings_about),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    factory = { context ->
+                        WebView(context).apply {
+                            webViewClient = object : WebViewClient() {
+                                override fun shouldOverrideUrlLoading(
+                                    view: WebView,
+                                    request: WebResourceRequest
+                                ): Boolean = false
+                            }
+                            loadUrl(url)
+                        }
+                    },
+                    update = { webView ->
+                        if (webView.url != url) webView.loadUrl(url)
+                    }
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun SettingsVersionRow(
@@ -776,7 +897,7 @@ private fun SettingsVersionRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = Icons.Default.Description,
+            imageVector = Icons.Default.Info,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.width(30.dp)
