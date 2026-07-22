@@ -154,7 +154,6 @@ dependencies {
 
     // Google Play Billing
     implementation(libs.google.play.billing)
-    implementation(libs.google.play.billing.ktx)
     implementation(libs.google.play.services.auth)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)

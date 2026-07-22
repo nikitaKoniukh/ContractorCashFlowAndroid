@@ -129,6 +129,7 @@ class PurchaseManager(
                 .enablePrepaidPlans()
                 .build()
         )
+        .enableAutoServiceReconnection()
         .build()
 
     @Volatile
@@ -273,6 +274,9 @@ class PurchaseManager(
                 _products.value = result.second.sortedBy { details ->
                     if (details.productId == BillingProduct.PRO_MONTHLY) 0 else 1
                 }
+                if (result.second.isEmpty()) {
+                    Log.w(TAG, "loadProducts: OK but no product details returned")
+                }
             } else {
                 _errorMessage.value = appContext.getString(
                     R.string.billing_failed_load_products,
@@ -292,10 +296,18 @@ class PurchaseManager(
                 QueryProductDetailsParams.newBuilder()
                     .setProductList(productParams)
                     .build()
-            ) { billingResult, productDetailsList ->
-                if (continuation.isActive) {
-                    continuation.resume(billingResult to productDetailsList)
+            ) { billingResult, productDetailsResult ->
+                if (!continuation.isActive) return@queryProductDetailsAsync
+
+                productDetailsResult.unfetchedProductList.forEach { unfetched ->
+                    Log.w(
+                        TAG,
+                        "Unfetched product id=${unfetched.productId} status=${unfetched.statusCode}"
+                    )
                 }
+                continuation.resume(
+                    billingResult to productDetailsResult.productDetailsList
+                )
             }
         }
 
