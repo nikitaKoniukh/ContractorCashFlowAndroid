@@ -92,6 +92,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Package native .so symbol tables into the AAB for Play Console crash analysis
+            // (CameraX, ML Kit, etc.). Play extracts them automatically on upload.
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
     compileOptions {
